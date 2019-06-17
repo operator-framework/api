@@ -15,16 +15,18 @@ var verifyCmd = &cobra.Command{
 	Use:   "verify",
 	Short: "Validate YAML against OLM's CSV type.",
 	Long:  `Verifies the yaml file against Operator-Lifecycle-Manager's ClusterServiceVersion type. Reports errors for any mismatched data types. Takes in one argument i.e. path to the yaml file. Version: 1.0`,
-	RunE:  verifyFunc,
+	Run:   verifyFunc,
 }
 
-func verifyFunc(cmd *cobra.Command, args []string) error {
+func verifyFunc(cmd *cobra.Command, args []string) {
 
 	if len(args) != 1 {
-		return fmt.Errorf("command %s requires exactly one argument", cmd.CommandPath())
+		fmt.Printf("command %s requires exactly one argument", cmd.CommandPath())
 	}
 
 	yamlFileName := args[0]
 
-	return validate.Verify(yamlFileName)
+	if err := validate.Verify(yamlFileName); err != nil {
+		fmt.Println(err)
+	}
 }
