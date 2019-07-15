@@ -25,8 +25,9 @@ type missingTypeError struct {
 	isMandatory bool
 }
 
-// Verify takes in name of the yaml file to be validated, reads it, and calls the unmarshal function on rawYaml.
-func Verify(yamlFileName string) error {
+// ValidateCSVManifest takes in name of the yaml file to be validated, reads
+// it, and calls the unmarshal function on rawYaml.
+func ValidateCSVManifest(yamlFileName string) error {
 	rawYaml, err := ioutil.ReadFile(yamlFileName)
 	if err != nil {
 		return fmt.Errorf("Error in reading %s file:   #%s ", yamlFileName, err)
@@ -38,15 +39,13 @@ func Verify(yamlFileName string) error {
 		return fmt.Errorf("Error unmarshalling YAML to OLM's csv type for %s file:  #%s ", yamlFileName, err)
 	}
 
-	// Contains error logs for all missing optional and mandatory fields.
-	errorLog := csvInspect(csv)
-	getErrorsFromManifestResult(errorLog.warnings)
-
-	// There is no mandatory field thats missing if errorLog.errors is nil.
-	if errorLog.errors != nil {
-		fmt.Println()
-		getErrorsFromManifestResult(errorLog.errors)
-		return fmt.Errorf("Populate all the mandatory fields missing from %s file.", yamlFileName)
+	v := &CSVValidator{}
+	if err = v.AddObjects(csv); err != nil {
+		return err
+	}
+	fmt.Println("Running", v.Name())
+	if err = v.Validate(); err != nil {
+		return err
 	}
 	fmt.Printf("%s is verified.", yamlFileName)
 	return nil

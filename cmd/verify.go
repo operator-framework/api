@@ -26,7 +26,7 @@ func verifyFunc(cmd *cobra.Command, args []string) {
 
 	yamlFileName := args[0]
 
-	if err := validate.Verify(yamlFileName); err != nil {
+	if err := validate.ValidateCSVManifest(yamlFileName); err != nil {
 		fmt.Println(err)
 	}
 }
