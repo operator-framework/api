@@ -49,7 +49,7 @@ func ValidateCSVManifest(yamlFileName string) error {
 	return nil
 }
 
-// Iterates over the list of Warnings and Errors.
+// Iterates over the list of warnings and errors.
 func getErrorsFromManifestResult(err []validator.MissingTypeError) {
 	for _, v := range err {
 		assertTypeToGetValue(v)
@@ -111,9 +111,8 @@ func containsStrict(a []string, x string) bool {
 	return false
 }
 
-// Recursive function that traverses a nested struct passed in as reflect value, and reports for Errors/Warnings
+// Recursive function that traverses a nested struct passed in as reflect value, and reports for errors/warnings
 // in case of null struct field values.
-// Returns a log of Errors as slice of strings.
 func checkMissingFields(v reflect.Value, parentStructName string, log validator.ManifestResult) validator.ManifestResult {
 
 	for i := 0; i < v.NumField(); i++ {
