@@ -1,7 +1,7 @@
 package validate
 
 import (
-	"fmt"
+	"github.com/dweepgogia/new-manifest-verification/pkg/validate/validator"
 
 	olm "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1alpha1"
 )
@@ -10,22 +10,18 @@ type CSVValidator struct {
 	csvs []olm.ClusterServiceVersion
 }
 
-var _ Validator = &CSVValidator{}
+var _ validator.Validator = &CSVValidator{}
 
-func (v *CSVValidator) Validate() error {
+func (v *CSVValidator) Validate() (results []validator.ManifestResult) {
 	for _, csv := range v.csvs {
 		// Contains error logs for all missing optional and mandatory fields.
-		errorLog := csvInspect(csv)
-		getErrorsFromManifestResult(errorLog.warnings)
-
-		// There is no mandatory field thats missing if errorLog.errors is nil.
-		if errorLog.errors != nil {
-			fmt.Println()
-			getErrorsFromManifestResult(errorLog.errors)
-			return fmt.Errorf("Populate all the mandatory fields missing from CSV %s.", csv.GetName())
+		result := csvInspect(csv)
+		if result.Name == "" {
+			result.Name = csv.GetName()
 		}
+		results = append(results, result)
 	}
-	return nil
+	return results
 }
 
 func (v *CSVValidator) AddObjects(objs ...interface{}) error {
