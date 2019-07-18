@@ -24,7 +24,7 @@ func (v *CSVValidator) Validate() (results []validator.ManifestResult) {
 	return results
 }
 
-func (v *CSVValidator) AddObjects(objs ...interface{}) error {
+func (v *CSVValidator) AddObjects(objs ...interface{}) validator.Error {
 	for _, o := range objs {
 		switch t := o.(type) {
 		case olm.ClusterServiceVersion:
@@ -33,7 +33,7 @@ func (v *CSVValidator) AddObjects(objs ...interface{}) error {
 			v.csvs = append(v.csvs, *t)
 		}
 	}
-	return nil
+	return validator.Error{}
 }
 
 func (v CSVValidator) Name() string {

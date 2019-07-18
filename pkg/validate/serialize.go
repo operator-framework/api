@@ -16,21 +16,21 @@ import (
 
 // ValidateCSVManifest takes in name of the yaml file to be validated, reads
 // it, and calls the unmarshal function on rawYaml.
-func ValidateCSVManifest(yamlFileName string) error {
+func ValidateCSVManifest(yamlFileName string) validator.Error {
 	rawYaml, err := ioutil.ReadFile(yamlFileName)
 	if err != nil {
-		return fmt.Errorf("Error in reading %s file:   #%s ", yamlFileName, err)
+		return validator.IOError(fmt.Sprintf("Error in reading %s file:   #%s ", yamlFileName, err), yamlFileName)
 	}
 
 	// Value returned is a marshaled go type (CSV Struct).
 	csv, err := unmarshal(rawYaml)
 	if err != nil {
-		return fmt.Errorf("Error unmarshalling YAML to OLM's csv type for %s file:  #%s ", yamlFileName, err)
+		return validator.InvalidParse(fmt.Sprintf("Error unmarshalling YAML to OLM's csv type for %s file:  #%s ", yamlFileName, err), yamlFileName)
 	}
 
 	v := &CSVValidator{}
-	if err = v.AddObjects(csv); err != nil {
-		return err
+	if err := v.AddObjects(csv); err != (validator.Error{}) {
+		return err // TODO: update when 'AddObjects' returns an actual error.
 	}
 	fmt.Println("Running", v.Name())
 	for _, errorLog := range v.Validate() {
@@ -42,15 +42,16 @@ func ValidateCSVManifest(yamlFileName string) error {
 		if errorLog.Errors != nil {
 			fmt.Println()
 			getErrorsFromManifestResult(errorLog.Errors)
-			return fmt.Errorf("Populate all the mandatory fields missing from CSV %s.", csv.GetName())
+			fmt.Printf("Populate all the mandatory fields missing from CSV %s.", csv.GetName())
+			return validator.Error{}
 		}
 	}
 	fmt.Printf("%s is verified.\n", yamlFileName)
-	return nil
+	return validator.Error{}
 }
 
 // Iterates over the list of warnings and errors.
-func getErrorsFromManifestResult(err []validator.MissingTypeError) {
+func getErrorsFromManifestResult(err []validator.Error) {
 	for _, v := range err {
 		assertTypeToGetValue(v)
 	}
@@ -58,8 +59,8 @@ func getErrorsFromManifestResult(err []validator.MissingTypeError) {
 
 // Asserts type to get the underlying field value.
 func assertTypeToGetValue(v interface{}) {
-	if v, ok := v.(validator.MissingTypeError); ok {
-		fmt.Println(v)
+	if v, ok := v.(validator.Error); ok {
+		fmt.Println(v.String())
 	}
 }
 
@@ -75,10 +76,10 @@ func unmarshal(rawYAML []byte) (olm.ClusterServiceVersion, error) {
 	rawJson, err := yaml.YAMLToJSON(rawYAML)
 	if err != nil {
 		fmt.Printf("error parsing raw YAML to Json: %s", err)
-		return csv, err
+		return olm.ClusterServiceVersion{}, err
 	}
 	if err := json.Unmarshal(rawJson, &csv); err != nil {
-		return csv, fmt.Errorf("error parsing CSV list (JSON) : %s", err)
+		return olm.ClusterServiceVersion{}, fmt.Errorf("error parsing CSV list (JSON) : %s", err)
 	}
 
 	return csv, nil
@@ -93,9 +94,10 @@ func csvInspect(val interface{}) validator.ManifestResult {
 	case reflect.Struct:
 		return checkMissingFields(fieldValue, "", validator.ManifestResult{})
 	default:
-		errs := []validator.MissingTypeError{
-			{Err: errors.New("Error: input file is not a valid CSV.")},
+		errs := []validator.Error{
+			validator.InvalidCSV("Error: input file is not a valid CSV."),
 		}
+
 		return validator.ManifestResult{Errors: errs, Warnings: nil}
 	}
 }
@@ -154,12 +156,14 @@ func checkMissingFields(v reflect.Value, parentStructName string, log validator.
 func updateLog(log validator.ManifestResult, typeName string, newParentStructName string, emptyVal bool, isOptionalField bool) validator.ManifestResult {
 
 	if emptyVal && isOptionalField {
-		err := errors.Errorf("Warning: Optional %s Missing.", typeName)
-		log.Warnings = append(log.Warnings, validator.MissingTypeError{err, typeName, newParentStructName, false})
+		err := errors.Errorf("Warning: Optional %s Missing", typeName)
+		// TODO: update the value field (typeName).
+		log.Warnings = append(log.Warnings, validator.OptionalFieldMissing(newParentStructName, typeName, err.Error()))
 	} else if emptyVal && !isOptionalField {
 		if newParentStructName != "Status" {
-			err := errors.Errorf("Error: Mandatory %s Missing.", typeName)
-			log.Errors = append(log.Errors, validator.MissingTypeError{err, typeName, newParentStructName, true})
+			err := errors.Errorf("Error: Mandatory %s Missing", typeName)
+			// TODO: update the value field (typeName).
+			log.Errors = append(log.Errors, validator.MandatoryFieldMissing(newParentStructName, typeName, err.Error()))
 		}
 	}
 	return log

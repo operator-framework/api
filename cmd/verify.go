@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/dweepgogia/new-manifest-verification/pkg/validate"
+	"github.com/dweepgogia/new-manifest-verification/pkg/validate/validator"
+
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +28,8 @@ func verifyFunc(cmd *cobra.Command, args []string) {
 
 	yamlFileName := args[0]
 
-	if err := validate.ValidateCSVManifest(yamlFileName); err != nil {
+	// TODO: return a pointer instead
+	if err := validate.ValidateCSVManifest(yamlFileName); err != (validator.Error{}) {
 		fmt.Println(err)
 	}
 }
