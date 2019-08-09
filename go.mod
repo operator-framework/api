@@ -22,3 +22,9 @@ replace (
 )
 
 replace github.com/operator-framework/operator-sdk => github.com/operator-framework/operator-sdk v0.10.0
+
+require (
+	github.com/operator-framework/operator-sdk v0.0.0-00010101000000-000000000000
+	k8s.io/apimachinery v0.0.0-20190612125636-6a5db36e93ad
+	sigs.k8s.io/controller-runtime v0.1.10
+)
