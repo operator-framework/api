@@ -13,6 +13,10 @@ type Validator interface {
 	AddObjects(...interface{}) Error
 	// Name should return a succinct name for this validator.
 	Name() string
+	// FileName returns the file name of the object to be validated.
+	FileName() string
+	// Unmarshal returns the unmarshalled object of caller's underlying type.
+	Unmarshal([]byte) (interface{}, error)
 }
 
 // ValidatorSet contains a set of Validators to be executed sequentially.
