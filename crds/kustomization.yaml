@@ -1,0 +1,2 @@
+resources:
+- operator.crd.yaml

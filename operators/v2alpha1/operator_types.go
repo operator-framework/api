@@ -24,12 +24,12 @@ type OperatorSpec struct{}
 // OperatorStatus describes the observed state of an operator and its components.
 type OperatorStatus struct {
 	// Components describes resources that compose the operator.
-	Components Components `json:"components,omitempty"`
+	Components *Components `json:"components,omitempty"`
 }
 
-// Components describes the
+// Components tracks the resources that compose an operator.
 type Components struct {
-	// LabelSelector is the label selector used to select the operator's component resources.
+	// labelSelector is a label query over a set of resources used to select the operator's components
 	LabelSelector *metav1.LabelSelector `json:"labelSelector,omitempty"`
 	// Refs are a set of references to the operator's component resources, selected with LabelSelector.
 	Refs []Ref `json:"refs,omitempty"`
