@@ -24,7 +24,7 @@ type OperatorSpec struct{}
 // OperatorStatus describes the observed state of an operator and its components.
 type OperatorStatus struct {
 	// Components describes resources that compose the operator.
-	Components Components `json:"components,omitempty"`
+	Components *Components `json:"components,omitempty"`
 }
 
 // Components describes the
