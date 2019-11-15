@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	"github.com/operator-framework/api/pkg/validation/errors"
+	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 
 	"github.com/operator-framework/operator-registry/pkg/registry"
 )
 
-type PackageManifestValidator struct{}
+var PackageManifestValidator interfaces.Validator = interfaces.ValidatorFunc(validatePackageManifests)
 
-func (f PackageManifestValidator) Validate(objs ...interface{}) (results []errors.ManifestResult) {
+func validatePackageManifests(objs ...interface{}) (results []errors.ManifestResult) {
 	for _, obj := range objs {
 		switch v := obj.(type) {
 		case *registry.PackageManifest:

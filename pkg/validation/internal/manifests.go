@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/operator-framework/api/pkg/validation/errors"
+	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 
 	"github.com/blang/semver"
 	"github.com/operator-framework/operator-registry/pkg/registry"
@@ -11,9 +12,9 @@ import (
 
 const skipPackageAnnotationKey = "olm.skipRange"
 
-type ManifestsValidator struct{}
+var PackageUpdateGraphValidator interfaces.Validator = interfaces.ValidatorFunc(validatePackageUpdateGraphs)
 
-func (f ManifestsValidator) Validate(objs ...interface{}) (results []errors.ManifestResult) {
+func validatePackageUpdateGraphs(objs ...interface{}) (results []errors.ManifestResult) {
 	var pkg *registry.PackageManifest
 	bundles := []*registry.Bundle{}
 	for _, obj := range objs {
@@ -27,12 +28,12 @@ func (f ManifestsValidator) Validate(objs ...interface{}) (results []errors.Mani
 		}
 	}
 	if pkg != nil && len(bundles) > 0 {
-		results = append(results, validateManifests(pkg, bundles))
+		results = append(results, validatePackageUpdateGraph(pkg, bundles))
 	}
 	return results
 }
 
-func validateManifests(pkg *registry.PackageManifest, bundles []*registry.Bundle) (result errors.ManifestResult) {
+func validatePackageUpdateGraph(pkg *registry.PackageManifest, bundles []*registry.Bundle) (result errors.ManifestResult) {
 	// Collect all CSV names and ensure no duplicates. We will use these names
 	// to check whether a spec.replaces references an existing CSV in bundles.
 	csvNameMap := map[string]struct{}{}

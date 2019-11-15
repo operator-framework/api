@@ -7,19 +7,20 @@ import (
 	"strings"
 
 	"github.com/operator-framework/api/pkg/validation/errors"
-	"github.com/operator-framework/operator-registry/pkg/registry"
+	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 
 	"github.com/blang/semver"
 	"github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1alpha1"
+	"github.com/operator-framework/operator-registry/pkg/registry"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8svalidation "k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
-type CSVValidator struct{}
+var CSVValidator interfaces.Validator = interfaces.ValidatorFunc(validateCSVs)
 
-func (f CSVValidator) Validate(objs ...interface{}) (results []errors.ManifestResult) {
+func validateCSVs(objs ...interface{}) (results []errors.ManifestResult) {
 	for _, obj := range objs {
 		switch v := obj.(type) {
 		case *v1alpha1.ClusterServiceVersion:

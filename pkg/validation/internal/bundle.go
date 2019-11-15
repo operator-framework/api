@@ -5,14 +5,15 @@ import (
 	"fmt"
 
 	"github.com/operator-framework/api/pkg/validation/errors"
+	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 
 	operatorsv1alpha1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1alpha1"
 	"github.com/operator-framework/operator-registry/pkg/registry"
 )
 
-type BundleValidator struct{}
+var BundleValidator interfaces.Validator = interfaces.ValidatorFunc(validateBundles)
 
-func (f BundleValidator) Validate(objs ...interface{}) (results []errors.ManifestResult) {
+func validateBundles(objs ...interface{}) (results []errors.ManifestResult) {
 	for _, obj := range objs {
 		switch v := obj.(type) {
 		case *registry.Bundle:

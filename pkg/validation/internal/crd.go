@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/operator-framework/api/pkg/validation/errors"
+	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/install"
@@ -19,9 +20,9 @@ func init() {
 	install.Install(Scheme)
 }
 
-type CRDValidator struct{}
+var CRDValidator interfaces.Validator = interfaces.ValidatorFunc(validateCRDs)
 
-func (f CRDValidator) Validate(objs ...interface{}) (results []errors.ManifestResult) {
+func validateCRDs(objs ...interface{}) (results []errors.ManifestResult) {
 	for _, obj := range objs {
 		switch v := obj.(type) {
 		case *v1beta1.CustomResourceDefinition:
