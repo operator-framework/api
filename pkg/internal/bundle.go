@@ -3,15 +3,14 @@ package manifests
 import (
 	"encoding/json"
 
+	manifests "github.com/operator-framework/api/pkg/registry/manifests"
+
 	"github.com/blang/semver"
 	operatorsv1alpha1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1alpha1"
 	"github.com/operator-framework/operator-registry/pkg/registry"
 	"github.com/operator-framework/operator-registry/pkg/sqlite"
 	"github.com/pkg/errors"
 )
-
-// TODO: use internal version of registry.Bundle/registry.PackageManifest so
-// operator-registry can use validation library.
 
 // manifestsLoad loads a manifests directory from disk.
 type manifestsLoad struct {
@@ -70,34 +69,34 @@ func (l *manifestsLoad) ClearNonDefaultBundles(packageName string) error {
 	return nil
 }
 
-// ManifestsStore knows how to query for an operator's package manifest and
+// ManifestsStorer knows how to query for an operator's package manifest and
 // related bundles.
-type ManifestsStore interface {
-	// GetPackageManifest returns the ManifestsStore's registry.PackageManifest.
+type ManifestsStorer interface {
+	// GetPackageManifest returns the ManifestsStorer's registry.PackageManifest.
 	// The returned object is assumed to be valid.
-	GetPackageManifest() registry.PackageManifest
-	// GetBundles returns the ManifestsStore's set of registry.Bundle. These
-	// bundles are unique by CSV version, since only one operator type should
-	// exist in one manifests dir.
+	GetPackageManifest() manifests.PackageManifest
+	// GetBundles returns the ManifestsStorer's set of Bundles. These bundles
+	// are unique by CSV version, since only one operator type should exist
+	// in one manifests dir.
 	// The returned objects are assumed to be valid.
-	GetBundles() []*registry.Bundle
-	// GetBundleForVersion returns the ManifestsStore's registry.Bundle for a
-	// given version string. An error should be returned if the passed version
+	GetBundles() []*manifests.Bundle
+	// GetBundleForVersion returns the ManifestsStorer's Bundle for a given
+	// version string. An error should be returned if the passed version
 	// does not exist in the store.
 	// The returned object is assumed to be valid.
-	GetBundleForVersion(string) (*registry.Bundle, error)
+	GetBundleForVersion(string) (*manifests.Bundle, error)
 }
 
-// manifests implements ManifestsStore
-type manifests struct {
-	pkg     registry.PackageManifest
-	bundles map[string]*registry.Bundle
+// manifestsStore implements ManifestsStorer
+type manifestsStore struct {
+	pkg     manifests.PackageManifest
+	bundles map[string]*manifests.Bundle
 }
 
-// ManifestsStoreForDir populates a ManifestsStore from the metadata in dir.
+// ManifestsStoreForDir populates a ManifestsStorer from the metadata in dir.
 // Each bundle and the package manifest are statically validated, and will
 // return an error if any are not valid.
-func ManifestsStoreForDir(dir string) (ManifestsStore, error) {
+func ManifestsStoreForDir(dir string) (ManifestsStorer, error) {
 	load := &manifestsLoad{
 		dir:     dir,
 		bundles: map[string]*registry.Bundle{},
@@ -105,28 +104,58 @@ func ManifestsStoreForDir(dir string) (ManifestsStore, error) {
 	if err := load.populate(); err != nil {
 		return nil, err
 	}
-	return &manifests{
-		pkg:     load.pkg,
-		bundles: load.bundles,
+	// TODO(estroz): remove when operator-registry migrates to api types.
+	pkg, bundles := convertRegistryToAPITypes(load.pkg, load.bundles)
+	return &manifestsStore{
+		pkg:     pkg,
+		bundles: bundles,
 	}, nil
 }
 
-func (l manifests) GetPackageManifest() registry.PackageManifest {
-	return l.pkg
+// TODO(estroz): remove when operator-registry migrates to api types.
+func convertRegistryToAPITypes(pkgR registry.PackageManifest, bundlesR map[string]*registry.Bundle) (manifests.PackageManifest, map[string]*manifests.Bundle) {
+	pkgA := manifests.PackageManifest{
+		PackageName:        pkgR.PackageName,
+		DefaultChannelName: pkgR.DefaultChannelName,
+	}
+	for _, channel := range pkgR.Channels {
+		pkgA.Channels = append(pkgA.Channels, manifests.PackageChannel{
+			Name:           channel.Name,
+			CurrentCSVName: channel.CurrentCSVName,
+		})
+	}
+	bundlesA := map[string]*manifests.Bundle{}
+	for key, bundle := range bundlesR {
+		b := manifests.Bundle{
+			Name:        bundle.Name,
+			Package:     bundle.Package,
+			Channel:     bundle.Channel,
+			BundleImage: bundle.BundleImage,
+		}
+		for _, obj := range bundle.Objects {
+			b.Add(obj.DeepCopy())
+		}
+		bundlesA[key] = &b
+	}
+	return pkgA, bundlesA
 }
 
-func (l manifests) GetBundles() (bundles []*registry.Bundle) {
-	for _, bundle := range l.bundles {
+func (s manifestsStore) GetPackageManifest() manifests.PackageManifest {
+	return s.pkg
+}
+
+func (s manifestsStore) GetBundles() (bundles []*manifests.Bundle) {
+	for _, bundle := range s.bundles {
 		bundles = append(bundles, bundle)
 	}
 	return bundles
 }
 
-func (l manifests) GetBundleForVersion(version string) (*registry.Bundle, error) {
+func (s manifestsStore) GetBundleForVersion(version string) (*manifests.Bundle, error) {
 	if _, err := semver.Parse(version); err != nil {
 		return nil, errors.Wrapf(err, "error getting bundle for version %q", version)
 	}
-	bundle, ok := l.bundles[version]
+	bundle, ok := s.bundles[version]
 	if !ok {
 		return nil, errors.Errorf("bundle for version %q does not exist", version)
 	}
