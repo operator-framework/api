@@ -11,6 +11,8 @@ import (
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation"
 	"k8s.io/apimachinery/pkg/conversion"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/scheme"
 )
 
@@ -32,20 +34,21 @@ func validateCRDs(objs ...interface{}) (results []errors.ManifestResult) {
 	return results
 }
 
-func validateCRD(crd interface{}) (result errors.ManifestResult) {
+func validateCRD(crd runtime.Object) (result errors.ManifestResult) {
 	unversionedCRD := apiextensions.CustomResourceDefinition{}
 	err := Scheme.Converter().Convert(&crd, &unversionedCRD, conversion.SourceToDest, nil)
 	if err != nil {
 		result.Add(errors.ErrInvalidParse("error converting versioned crd to unversioned crd", err))
 		return result
 	}
-	result = validateCRDUnversioned(&unversionedCRD)
+	gv := crd.GetObjectKind().GroupVersionKind().GroupVersion()
+	result = validateCRDUnversioned(&unversionedCRD, gv)
 	result.Name = unversionedCRD.GetName()
 	return result
 }
 
-func validateCRDUnversioned(crd *apiextensions.CustomResourceDefinition) (result errors.ManifestResult) {
-	errList := validation.ValidateCustomResourceDefinition(crd)
+func validateCRDUnversioned(crd *apiextensions.CustomResourceDefinition, gv schema.GroupVersion) (result errors.ManifestResult) {
+	errList := validation.ValidateCustomResourceDefinition(crd, gv)
 	for _, err := range errList {
 		if !strings.Contains(err.Field, "openAPIV3Schema") && !strings.Contains(err.Field, "status") {
 			result.Add(errors.NewError(errors.ErrorType(err.Type), err.Error(), err.Field, err.BadValue))
