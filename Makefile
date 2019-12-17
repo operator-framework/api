@@ -46,3 +46,17 @@ tidy: ## Update dependencies
 clean: ## Clean up the build artifacts
 	$(Q)rm -rf build
 
+##############################
+# Tests                      #
+##############################
+
+##@ Tests
+
+# Static tests.
+.PHONY: test test-unit
+
+test: test-unit ## Run the tests
+
+TEST_PKGS:=$(shell go list ./...)
+test-unit: ## Run the unit tests
+	$(Q)go test -short ${TEST_PKGS}
