@@ -30,7 +30,7 @@ replace (
 require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/ghodss/yaml v1.0.0
-	github.com/operator-framework/operator-registry v1.5.10
+	github.com/operator-framework/operator-registry v1.5.3
 	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
