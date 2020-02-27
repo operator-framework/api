@@ -1,0 +1,10 @@
+language: go
+
+go:
+- 1.13
+
+notifications:
+  email: false
+
+script:
+- go test -v ./...
