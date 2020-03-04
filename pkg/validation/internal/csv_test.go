@@ -8,7 +8,7 @@ import (
 	"github.com/operator-framework/api/pkg/validation/errors"
 
 	"github.com/ghodss/yaml"
-	"github.com/operator-framework/operator-registry/pkg/registry"
+	"github.com/operator-framework/api/pkg/registry"
 )
 
 func TestValidateCSV(t *testing.T) {

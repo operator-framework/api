@@ -30,13 +30,20 @@ replace (
 require (
 	github.com/blang/semver v3.5.0+incompatible
 	github.com/ghodss/yaml v1.0.0
-	github.com/operator-framework/operator-registry v1.5.3
-	github.com/pkg/errors v0.8.1
+	github.com/golang-migrate/migrate/v4 v4.9.1
+	github.com/golang/mock v1.4.1
+	github.com/golang/protobuf v1.3.4
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/otiai10/copy v1.0.2
+	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.4.2
-	github.com/spf13/cobra v0.0.5
-	github.com/stretchr/testify v1.4.0
-	k8s.io/api v0.0.0
-	k8s.io/apiextensions-apiserver v0.0.0
-	k8s.io/apimachinery v0.0.0
-	k8s.io/client-go v8.0.0+incompatible
+	github.com/spf13/cobra v0.0.6
+	github.com/stretchr/testify v1.5.1
+	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
+	google.golang.org/grpc v1.27.1
+	gopkg.in/yaml.v2 v2.2.8
+	k8s.io/api v0.0.0-20191016110408-35e52d86657a
+	k8s.io/apiextensions-apiserver v0.0.0-00010101000000-000000000000
+	k8s.io/apimachinery v0.0.0-20191004115801-a2eda9f80ab8
+	k8s.io/client-go v0.0.0-20191016111102-bec269661e48
 )

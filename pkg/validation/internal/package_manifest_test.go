@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/operator-framework/api/pkg/validation/errors"
-	"github.com/operator-framework/operator-registry/pkg/registry"
+	"github.com/operator-framework/api/pkg/registry"
 )
 
 func TestValidatePackageManifest(t *testing.T) {
