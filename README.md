@@ -8,3 +8,13 @@ Contains the API definitions used by [Operator Lifecycle Manager][olm] (OLM) and
 
 [olm]:https://github.com/operator-framework/operator-lifecycle-manager
 [marketplace]:https://github.com/operator-framework/operator-marketplace
+
+## Usage
+
+You can install the `operator-verify` tool from source using:
+
+`$ make install`
+
+To verify your ClusterServiceVersion yaml,
+
+`$ operator-verify verify /path/to/filename.yaml`
