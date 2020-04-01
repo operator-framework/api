@@ -77,31 +77,31 @@ func (d *StrategyDetailsDeployment) GetStrategyName() string {
 // StatusDescriptor describes a field in a status block of a CRD so that OLM can consume it
 // +k8s:openapi-gen=true
 type StatusDescriptor struct {
-	Path         string           `json:"path"`
-	DisplayName  string           `json:"displayName,omitempty"`
-	Description  string           `json:"description,omitempty"`
-	XDescriptors []string         `json:"x-descriptors,omitempty"`
-	Value        *json.RawMessage `json:"value,omitempty"`
+	Path         string          `json:"path"`
+	DisplayName  string          `json:"displayName,omitempty"`
+	Description  string          `json:"description,omitempty"`
+	XDescriptors []string        `json:"x-descriptors,omitempty"`
+	Value        json.RawMessage `json:"value,omitempty"`
 }
 
 // SpecDescriptor describes a field in a spec block of a CRD so that OLM can consume it
 // +k8s:openapi-gen=true
 type SpecDescriptor struct {
-	Path         string           `json:"path"`
-	DisplayName  string           `json:"displayName,omitempty"`
-	Description  string           `json:"description,omitempty"`
-	XDescriptors []string         `json:"x-descriptors,omitempty"`
-	Value        *json.RawMessage `json:"value,omitempty"`
+	Path         string          `json:"path"`
+	DisplayName  string          `json:"displayName,omitempty"`
+	Description  string          `json:"description,omitempty"`
+	XDescriptors []string        `json:"x-descriptors,omitempty"`
+	Value        json.RawMessage `json:"value,omitempty"`
 }
 
 // ActionDescriptor describes a declarative action that can be performed on a custom resource instance
 // +k8s:openapi-gen=true
 type ActionDescriptor struct {
-	Path         string           `json:"path"`
-	DisplayName  string           `json:"displayName,omitempty"`
-	Description  string           `json:"description,omitempty"`
-	XDescriptors []string         `json:"x-descriptors,omitempty"`
-	Value        *json.RawMessage `json:"value,omitempty"`
+	Path         string          `json:"path"`
+	DisplayName  string          `json:"displayName,omitempty"`
+	Description  string          `json:"description,omitempty"`
+	XDescriptors []string        `json:"x-descriptors,omitempty"`
+	Value        json.RawMessage `json:"value,omitempty"`
 }
 
 // CRDDescription provides details to OLM about the CRDs
