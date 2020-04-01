@@ -8,6 +8,13 @@ ifeq ($(BUILD_VERBOSE),1)
 else
   Q = @
 endif
+ 
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
 
 REPO = github.com/operator-framework/api
 BUILD_PATH = $(REPO)/cmd/operator-verify
@@ -23,7 +30,7 @@ help: ## Show this help screen
 
 .PHONY: install
 
-install: ## Build & install the operator-verify
+install: ## Build & install operator-verify
 	
 	$(Q)go install \
 		-gcflags "all=-trimpath=${GOPATH}" \
@@ -35,7 +42,7 @@ install: ## Build & install the operator-verify
 		$(BUILD_PATH)
 
 # Code management.
-.PHONY: format tidy clean
+.PHONY: format tidy clean vendor generate
 
 format: ## Format the source code
 	$(Q)go fmt $(PKGS)
@@ -43,14 +50,14 @@ format: ## Format the source code
 tidy: ## Update dependencies
 	$(Q)go mod tidy -v
 
+vendor: tidy ## Update vendor directory
+	$(Q)go mod vendor 
+
 clean: ## Clean up the build artifacts
 	$(Q)rm -rf build
 
-##############################
-# Tests                      #
-##############################
-
-##@ Tests
+generate: controller-gen  ## Generate code
+	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
 # Static tests.
 .PHONY: test test-unit
@@ -59,4 +66,11 @@ test: test-unit ## Run the tests
 
 TEST_PKGS:=$(shell go list ./...)
 test-unit: ## Run the unit tests
-	$(Q)go test -short ${TEST_PKGS}
+	$(Q)go test -count=1 -short ${TEST_PKGS}
+
+# Utilities.
+.PHONY: controller-gen
+
+controller-gen: vendor ## Find or download controller-gen 
+CONTROLLER_GEN=$(Q)go run -mod=vendor ./vendor/sigs.k8s.io/controller-tools/cmd/controller-gen
+
