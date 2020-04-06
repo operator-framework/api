@@ -19,6 +19,7 @@ endif
 REPO = github.com/operator-framework/api
 BUILD_PATH = $(REPO)/cmd/operator-verify
 PKGS = $(shell go list ./... | grep -v /vendor/)
+YQ_INTERNAL := $(Q) go run $(MOD_FLAGS) ./vendor/github.com/mikefarah/yq/v2/
 
 .PHONY: help
 help: ## Show this help screen
@@ -57,7 +58,78 @@ clean: ## Clean up the build artifacts
 	$(Q)rm -rf build
 
 generate: controller-gen  ## Generate code
-	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
+	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths=./...
+
+manifests: controller-gen ## Generate manifests e.g. CRD, RBAC etc
+	@# Handle >v1 APIs
+	$(CONTROLLER_GEN) crd paths=./pkg/operators/v2alpha1... output:crd:dir=./crds
+
+	@# Handle <=v1 APIs
+	$(CONTROLLER_GEN) schemapatch:manifests=./crds output:dir=./crds paths=./pkg/operators/...
+
+	@# Preserve unknown fields on the CSV spec (prevents install strategy from being pruned)
+	$(YQ_INTERNAL) w --inplace ./crds/operators.coreos.com_clusterserviceversions.yaml spec.validation.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.metadata.x-kubernetes-preserve-unknown-fields true
+
+# Generate deepcopy, conversion, clients, listers, and informers
+codegen:
+	# Deepcopy
+	$(CONTROLLER_GEN) object:headerFile=./boilerplate.go.txt paths=./pkg/api/apis/operators/...i
+	# Conversion, clients, listers, and informers
+	$(CODEGEN)
+
+# Generate mock types.
+mockgen:
+	$(MOCKGEN)
+
+# Generates everything.
+gen-all: codegen mockgen manifests
+
+diff:
+	git diff --exit-code
+
+verify-codegen: codegen diff
+verify-mockgen: mockgen diff
+verify-manifests: manifests diff
+verify: verify-codegen verify-mockgen verify-manifests
+
+
+# before running release, bump the version in OLM_VERSION and push to master,
+# then tag those builds in quay with the version in OLM_VERSION
+release: ver=$(shell cat OLM_VERSION)
+release:
+	docker pull quay.io/operator-framework/olm:$(ver)
+	$(MAKE) target=upstream ver=$(ver) quickstart=true package
+	$(MAKE) target=ocp ver=$(ver) package
+	rm -rf manifests
+	mkdir manifests
+	cp -R deploy/ocp/manifests/$(ver)/. manifests
+	# requires gnu sed if on mac
+	find ./manifests -type f -exec sed -i "/^#/d" {} \;
+	find ./manifests -type f -exec sed -i "1{/---/d}" {} \;
+
+verify-release: release diff
+
+package: olmref=$(shell docker inspect --format='{{index .RepoDigests 0}}' quay.io/operator-framework/olm:$(ver))
+package:
+ifndef target
+	$(error target is undefined)
+endif
+ifndef ver
+	$(error ver is undefined)
+endif
+	$(YQ_INTERNAL) w -i deploy/$(target)/values.yaml olm.image.ref $(olmref)
+	$(YQ_INTERNAL) w -i deploy/$(target)/values.yaml catalog.image.ref $(olmref)
+	$(YQ_INTERNAL) w -i deploy/$(target)/values.yaml package.image.ref $(olmref)
+	./scripts/package_release.sh $(ver) deploy/$(target)/manifests/$(ver) deploy/$(target)/values.yaml
+	ln -sfFn ./$(ver) deploy/$(target)/manifests/latest
+ifeq ($(quickstart), true)
+	./scripts/package_quickstart.sh deploy/$(target)/manifests/$(ver) deploy/$(target)/quickstart/olm.yaml deploy/$(target)/quickstart/crds.yaml deploy/$(target)/quickstart/install.sh
+endif
+
+.PHONY: run-console-local
+run-console-local:
+	@echo Running script to run the OLM console locally:
+	. ./scripts/run_console_local.sh
 
 # Static tests.
 .PHONY: test test-unit
