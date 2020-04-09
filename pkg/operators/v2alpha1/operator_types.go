@@ -72,6 +72,8 @@ type RichReference struct {
 	Conditions []Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
+// +genclient
+// +genclient:nonNamespaced
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:storageversion
@@ -85,6 +87,7 @@ type Operator struct {
 	Status OperatorStatus `json:"status,omitempty"`
 }
 
+// +genclient:nonNamespaced
 // +kubebuilder:object:root=true
 
 // OperatorList contains a list of Operators.

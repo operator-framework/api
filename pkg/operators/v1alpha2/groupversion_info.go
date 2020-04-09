@@ -12,10 +12,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package v2alpha1 contains API Schema definitions for the discovery v2alpha1 API group.
+// Package v1alpha2 contains API Schema definitions for the discovery v1alpha2 API group.
 // +kubebuilder:object:generate=true
 // +groupName=operators.coreos.com
-package v2alpha1
+package v1alpha2
 
 import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -24,7 +24,7 @@ import (
 
 var (
 	// GroupVersion is group version used to register these objects.
-	GroupVersion = schema.GroupVersion{Group: "operators.coreos.com", Version: "v2alpha1"}
+	GroupVersion = schema.GroupVersion{Group: "operators.coreos.com", Version: "v1alpha2"}
 
 	// SchemeGroupVersion is required for compatibility with client generation.
 	SchemeGroupVersion = GroupVersion
