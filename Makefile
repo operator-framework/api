@@ -54,14 +54,18 @@ generate: controller-gen  ## Generate code
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths=./...
 
 manifests: controller-gen ## Generate manifests e.g. CRD, RBAC etc
-	@# Handle >v1 APIs
-	$(CONTROLLER_GEN) crd paths=./pkg/operators/v2alpha1... output:crd:dir=./crds
+	@# Create CRDs for new APIs
+	$(CONTROLLER_GEN) crd:crdVersions=v1 output:crd:dir=./crds paths=./pkg/operators/...
 
-	@# Handle <=v1 APIs
+	@# Update existing CRDs from type changes
 	$(CONTROLLER_GEN) schemapatch:manifests=./crds output:dir=./crds paths=./pkg/operators/...
 
-	@# Preserve unknown fields on the CSV spec (prevents install strategy from being pruned)
-	$(YQ_INTERNAL) w --inplace ./crds/operators.coreos.com_clusterserviceversions.yaml spec.validation.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.metadata.x-kubernetes-preserve-unknown-fields true
+	@# Add missing defaults in embedded core API schemas
+	$(YQ_INTERNAL) w --inplace ./crds/operators.coreos.com_clusterserviceversions.yaml spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.spec.properties.containers.items.properties.ports.items.properties.protocol.default TCP
+	$(YQ_INTERNAL) w --inplace ./crds/operators.coreos.com_clusterserviceversions.yaml spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.spec.properties.initContainers.items.properties.ports.items.properties.protocol.default TCP
+
+	@# Preserve fields for embedded metadata fields
+	$(YQ_INTERNAL) w --inplace ./crds/operators.coreos.com_clusterserviceversions.yaml spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.metadata.x-kubernetes-preserve-unknown-fields true
 
 	@# Update embedded CRD files.
 	@go generate ./crds/...
