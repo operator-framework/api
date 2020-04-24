@@ -7,6 +7,9 @@ import (
 	"github.com/operator-framework/api/pkg/validation/errors"
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+
 	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/operator-registry/pkg/registry"
 )
@@ -88,7 +91,12 @@ func getBundleCRDNames(bundle *registry.Bundle) (map[string]struct{}, errors.Err
 	}
 	crdNames := map[string]struct{}{}
 	for _, crd := range crds {
-		crdNames[crd.GetName()] = struct{}{}
+		switch crd.(type) {
+		case *apiextensionsv1.CustomResourceDefinition:
+			crdNames[crd.GetName()] = struct{}{}
+		case *apiextensionsv1beta1.CustomResourceDefinition:
+			crdNames[crd.GetName()] = struct{}{}
+		}
 	}
 	return crdNames, errors.Error{}
 }
