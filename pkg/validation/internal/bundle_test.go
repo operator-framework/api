@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/operator-framework/api/pkg/validation/errors"
 	"github.com/operator-framework/operator-registry/pkg/registry"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -41,7 +40,6 @@ func TestValidateBundle(t *testing.T) {
 	}
 
 	for _, tt := range table {
-		results := []errors.ManifestResult{}
 		unstObjs := []*unstructured.Unstructured{}
 
 		// Read all files in manifests directory
@@ -62,8 +60,8 @@ func TestValidateBundle(t *testing.T) {
 		}
 
 		// Validate the bundle object
-		bundle := registry.NewBundle("test", "", "", unstObjs...)
-		results = BundleValidator.Validate(bundle)
+		bundle := registry.NewBundle("test", "", nil, unstObjs...)
+		results := BundleValidator.Validate(bundle)
 
 		if len(results) > 0 {
 			require.Equal(t, results[0].HasError(), tt.hasError)
