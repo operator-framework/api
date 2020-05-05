@@ -26,16 +26,16 @@ func TestValidateBundle(t *testing.T) {
 			hasError:    false,
 		},
 		{
-			description: "registryv1 bundle/valid bundle",
+			description: "registryv1 bundle/invalid bundle",
 			directory:   "./testdata/invalid_bundle",
 			hasError:    true,
-			errString:   `owned CRD "etcdclusters.etcd.database.coreos.com" not found in bundle`,
+			errString:   "owned CRD etcdclusters.etcd.database.coreos.com/v1beta2 not found in bundle",
 		},
 		{
-			description: "registryv1 bundle/valid bundle",
+			description: "registryv1 bundle/invalid bundle 2",
 			directory:   "./testdata/invalid_bundle_2",
 			hasError:    true,
-			errString:   `owned CRD "etcdclusters.etcd.database.coreos.com" is present in bundle "test" but not defined in CSV`,
+			errString:   `CRD etcdclusters.etcd.database.coreos.com/v1beta2 is present in bundle "test" but not defined in CSV`,
 		},
 	}
 
@@ -64,7 +64,7 @@ func TestValidateBundle(t *testing.T) {
 		results := BundleValidator.Validate(bundle)
 
 		if len(results) > 0 {
-			require.Equal(t, results[0].HasError(), tt.hasError)
+			require.Equal(t, tt.hasError, results[0].HasError(), "%s: %s", tt.description, results[0])
 			if results[0].HasError() {
 				require.Contains(t, results[0].Errors[0].Error(), tt.errString)
 			}

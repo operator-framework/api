@@ -1,13 +1,11 @@
 package internal
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/operator-framework/api/pkg/validation/errors"
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 
-	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/operator-registry/pkg/registry"
 )
 
@@ -24,71 +22,82 @@ func validateBundles(objs ...interface{}) (results []errors.ManifestResult) {
 }
 
 func validateBundle(bundle *registry.Bundle) (result errors.ManifestResult) {
-	bcsv, err := bundle.ClusterServiceVersion()
+	csv, err := bundle.ClusterServiceVersion()
 	if err != nil {
 		result.Add(errors.ErrInvalidParse("error getting bundle CSV", err))
 		return result
 	}
-	csv, rerr := bundleCSVToCSV(bcsv)
+
+	result = validateOwnedCRDs(bundle, csv)
+
+	if result.Name, err = csv.GetVersion(); err != nil {
+		result.Add(errors.ErrInvalidParse("error getting bundle CSV version", err))
+		return result
+	}
+	return result
+}
+
+func validateOwnedCRDs(bundle *registry.Bundle, csv *registry.ClusterServiceVersion) (result errors.ManifestResult) {
+	ownedKeys, _, err := csv.GetCustomResourceDefintions()
+	if err != nil {
+		result.Add(errors.ErrInvalidParse("error getting CSV CRDs", err))
+		return result
+	}
+
+	keySet, rerr := getBundleCRDKeys(bundle)
 	if rerr != (errors.Error{}) {
 		result.Add(rerr)
 		return result
 	}
-	result = validateOwnedCRDs(bundle, csv)
-	result.Name = csv.Spec.Version.String()
-	return result
-}
 
-func bundleCSVToCSV(bcsv *registry.ClusterServiceVersion) (*operatorsv1alpha1.ClusterServiceVersion, errors.Error) {
-	spec := operatorsv1alpha1.ClusterServiceVersionSpec{}
-	if err := json.Unmarshal(bcsv.Spec, &spec); err != nil {
-		return nil, errors.ErrInvalidParse(fmt.Sprintf("converting bundle CSV %q", bcsv.GetName()), err)
-	}
-	return &operatorsv1alpha1.ClusterServiceVersion{
-		TypeMeta:   bcsv.TypeMeta,
-		ObjectMeta: bcsv.ObjectMeta,
-		Spec:       spec,
-	}, errors.Error{}
-}
-
-func validateOwnedCRDs(bundle *registry.Bundle, csv *operatorsv1alpha1.ClusterServiceVersion) (result errors.ManifestResult) {
-	ownedCrdNames := getOwnedCustomResourceDefintionNames(csv)
-	crdNames, err := getBundleCRDNames(bundle)
-	if err != (errors.Error{}) {
-		result.Add(err)
-		return result
-	}
-
-	// validating names
-	for _, crdName := range ownedCrdNames {
-		if _, ok := crdNames[crdName]; !ok {
-			result.Add(errors.ErrInvalidBundle(fmt.Sprintf("owned CRD %q not found in bundle %q", crdName, bundle.Name), crdName))
+	// Validate all owned keys, and remove them from the set if seen.
+	for _, ownedKey := range ownedKeys {
+		if _, ok := keySet[*ownedKey]; !ok {
+			result.Add(errors.ErrInvalidBundle(fmt.Sprintf("owned CRD %s not found in bundle %q", keyToString(*ownedKey), bundle.Name), *ownedKey))
 		} else {
-			delete(crdNames, crdName)
+			delete(keySet, *ownedKey)
 		}
 	}
 	// CRDs not defined in the CSV present in the bundle
-	for crdName := range crdNames {
-		result.Add(errors.WarnInvalidBundle(fmt.Sprintf("owned CRD %q is present in bundle %q but not defined in CSV", crdName, bundle.Name), crdName))
+	for key := range keySet {
+		result.Add(errors.WarnInvalidBundle(fmt.Sprintf("CRD %s is present in bundle %q but not defined in CSV", keyToString(key), bundle.Name), key))
 	}
 	return result
 }
 
-func getOwnedCustomResourceDefintionNames(csv *operatorsv1alpha1.ClusterServiceVersion) (names []string) {
-	for _, ownedCrd := range csv.Spec.CustomResourceDefinitions.Owned {
-		names = append(names, ownedCrd.Name)
-	}
-	return names
-}
-
-func getBundleCRDNames(bundle *registry.Bundle) (map[string]struct{}, errors.Error) {
+func getBundleCRDKeys(bundle *registry.Bundle) (map[registry.DefinitionKey]struct{}, errors.Error) {
 	crds, err := bundle.CustomResourceDefinitions()
 	if err != nil {
 		return nil, errors.ErrInvalidParse("error getting bundle CRDs", err)
 	}
-	crdNames := map[string]struct{}{}
+	keySet := map[registry.DefinitionKey]struct{}{}
 	for _, crd := range crds {
-		crdNames[crd.GetName()] = struct{}{}
+		if len(crd.Spec.Versions) == 0 {
+			// Skip group, which CSVs do not support.
+			key := registry.DefinitionKey{
+				Name:    crd.GetName(),
+				Version: crd.Spec.Version,
+				Kind:    crd.Spec.Names.Kind,
+			}
+			keySet[key] = struct{}{}
+		} else {
+			for _, version := range crd.Spec.Versions {
+				// Skip group, which CSVs do not support.
+				key := registry.DefinitionKey{
+					Name:    crd.GetName(),
+					Version: version.Name,
+					Kind:    crd.Spec.Names.Kind,
+				}
+				keySet[key] = struct{}{}
+			}
+		}
 	}
-	return crdNames, errors.Error{}
+	return keySet, errors.Error{}
+}
+
+func keyToString(key registry.DefinitionKey) string {
+	if key.Name == "" {
+		return fmt.Sprintf("%s/%s %s", key.Group, key.Version, key.Kind)
+	}
+	return fmt.Sprintf("%s/%s", key.Name, key.Version)
 }
