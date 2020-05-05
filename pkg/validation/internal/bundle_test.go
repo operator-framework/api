@@ -16,21 +16,27 @@ func TestValidateBundle(t *testing.T) {
 		errString   string
 	}{
 		{
-			description: "registryv1 bundle/valid bundle",
+			description: "registryv1 valid bundle",
 			directory:   "./testdata/valid_bundle",
 			hasError:    false,
 		},
 		{
-			description: "registryv1 bundle/valid bundle",
+			description: "registryv1 invalid bundle without CRD etcdclusters v1beta2 in bundle",
 			directory:   "./testdata/invalid_bundle",
 			hasError:    true,
-			errString:   `owned CRD "etcdclusters.etcd.database.coreos.com" not found in bundle`,
+			errString:   `owned CRD "etcd.database.coreos.com/v1beta2, Kind=EtcdCluster" not found in bundle`,
 		},
 		{
-			description: "registryv1 bundle/valid bundle",
+			description: "registryv1 invalid bundle without CRD etcdclusters v1beta2 in CSV",
 			directory:   "./testdata/invalid_bundle_2",
 			hasError:    true,
-			errString:   `owned CRD "etcdclusters.etcd.database.coreos.com" is present in bundle "etcdoperator.v0.9.4" but not defined in CSV`,
+			errString:   `CRD "etcd.database.coreos.com/v1beta2, Kind=EtcdCluster" is present in bundle "etcdoperator.v0.9.4" but not defined in CSV`,
+		},
+		{
+			description: "registryv1 invalid bundle with duplicate CRD etcdclusters in bundle",
+			directory:   "./testdata/invalid_bundle_3",
+			hasError:    true,
+			errString:   `duplicate CRD "test.example.com/v1alpha1, Kind=Test" in bundle "test-operator.v0.0.1"`,
 		},
 	}
 
