@@ -164,7 +164,7 @@ const (
 // WebhookDescription provides details to OLM about required webhooks
 // +k8s:openapi-gen=true
 type WebhookDescription struct {
-	Name                    string                                          `json:"name"`
+	GenerateName            string                                          `json:"generateName"`
 	Type                    WebhookAdmissionType                            `json:"type"`
 	DeploymentName          string                                          `json:"deploymentName,omitempty"`
 	ContainerPort           int32                                           `json:"containerPort,omitempty"`
@@ -180,9 +180,9 @@ type WebhookDescription struct {
 }
 
 // GetValidatingWebhook returns a ValidatingWebhook generated from the WebhookDescription
-func (w *WebhookDescription) GetValidatingWebhook(namespace string, namespaceSelector *metav1.LabelSelector, caBundle []byte) admissionregistrationv1.ValidatingWebhook {
+func (w *WebhookDescription) GetValidatingWebhook(name, namespace string, namespaceSelector *metav1.LabelSelector, caBundle []byte) admissionregistrationv1.ValidatingWebhook {
 	return admissionregistrationv1.ValidatingWebhook{
-		Name:                    w.Name,
+		Name:                    name,
 		Rules:                   w.Rules,
 		FailurePolicy:           w.FailurePolicy,
 		MatchPolicy:             w.MatchPolicy,
@@ -203,9 +203,9 @@ func (w *WebhookDescription) GetValidatingWebhook(namespace string, namespaceSel
 }
 
 // GetMutatingWebhook returns a MutatingWebhook generated from the WebhookDescription
-func (w *WebhookDescription) GetMutatingWebhook(namespace string, namespaceSelector *metav1.LabelSelector, caBundle []byte) admissionregistrationv1.MutatingWebhook {
+func (w *WebhookDescription) GetMutatingWebhook(name, namespace string, namespaceSelector *metav1.LabelSelector, caBundle []byte) admissionregistrationv1.MutatingWebhook {
 	return admissionregistrationv1.MutatingWebhook{
-		Name:                    w.Name,
+		Name:                    name,
 		Rules:                   w.Rules,
 		FailurePolicy:           w.FailurePolicy,
 		MatchPolicy:             w.MatchPolicy,
