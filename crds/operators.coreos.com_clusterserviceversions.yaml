@@ -8821,6 +8821,9 @@ spec:
                       description: WebhookAdmissionType is the type of admission webhooks
                         supported by OLM
                       type: string
+                      enum:
+                      - ValidatingAdmissionWebhook
+                      - MutatingAdmissionWebhook
                     webhookPath:
                       type: string
           status:
