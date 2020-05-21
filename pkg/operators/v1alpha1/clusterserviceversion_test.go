@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/stretchr/testify/assert"
@@ -356,6 +357,60 @@ func TestSetPhaseWithConditions(t *testing.T) {
 			assert.Equal(t, lastAddedConditionWant, lastAddedConditionGot)
 		})
 	}
+}
+
+func TestWebhookDescGetValidatingConfigurations(t *testing.T) {
+	expectedPort := int32(444)
+	timeout := int32(32)
+	webhookPath := "/test"
+	failurePolicy := admissionregistrationv1.Fail
+	matchPolicy := admissionregistrationv1.Exact
+	sideEffect := admissionregistrationv1.SideEffectClassNone
+	webhookDesc := WebhookDescription{
+		GenerateName:            "foo-webhook",
+		Type:                    ValidatingAdmissionWebhook,
+		DeploymentName:          "foo-deployment",
+		ContainerPort:           expectedPort,
+		AdmissionReviewVersions: []string{"v1beta1", "v1"},
+		SideEffects:             &sideEffect,
+		MatchPolicy:             &matchPolicy,
+		FailurePolicy:           &failurePolicy,
+		ObjectSelector:          &metav1.LabelSelector{MatchLabels: map[string]string{"foo": "bar"}},
+		TimeoutSeconds:          &timeout,
+		WebhookPath:             &webhookPath,
+		Rules: []admissionregistrationv1.RuleWithOperations{
+			admissionregistrationv1.RuleWithOperations{
+				Operations: []admissionregistrationv1.OperationType{},
+				Rule: admissionregistrationv1.Rule{
+					APIGroups:   []string{"*"},
+					APIVersions: []string{"*"},
+					Resources:   []string{"*"},
+				},
+			},
+		},
+	}
+	vWebhookConfig := webhookDesc.GetValidatingWebhook("foo", nil, nil)
+	require.Equal(t, expectedPort, *vWebhookConfig.ClientConfig.Service.Port)
+	require.Equal(t, webhookDesc.Rules, vWebhookConfig.Rules)
+	require.Equal(t, webhookDesc.FailurePolicy, vWebhookConfig.FailurePolicy)
+	require.Equal(t, webhookDesc.MatchPolicy, vWebhookConfig.MatchPolicy)
+	require.Equal(t, webhookDesc.ObjectSelector, vWebhookConfig.ObjectSelector)
+	require.Equal(t, webhookDesc.SideEffects, vWebhookConfig.SideEffects)
+	require.Equal(t, webhookDesc.TimeoutSeconds, vWebhookConfig.TimeoutSeconds)
+	require.Equal(t, webhookDesc.AdmissionReviewVersions, vWebhookConfig.AdmissionReviewVersions)
+	require.Equal(t, webhookDesc.WebhookPath, vWebhookConfig.ClientConfig.Service.Path)
+
+	mWebhookConfig := webhookDesc.GetMutatingWebhook("foo", nil, nil)
+	require.Equal(t, expectedPort, *mWebhookConfig.ClientConfig.Service.Port)
+	require.Equal(t, webhookDesc.Rules, mWebhookConfig.Rules)
+	require.Equal(t, webhookDesc.FailurePolicy, mWebhookConfig.FailurePolicy)
+	require.Equal(t, webhookDesc.MatchPolicy, mWebhookConfig.MatchPolicy)
+	require.Equal(t, webhookDesc.ObjectSelector, mWebhookConfig.ObjectSelector)
+	require.Equal(t, webhookDesc.SideEffects, mWebhookConfig.SideEffects)
+	require.Equal(t, webhookDesc.TimeoutSeconds, mWebhookConfig.TimeoutSeconds)
+	require.Equal(t, webhookDesc.AdmissionReviewVersions, mWebhookConfig.AdmissionReviewVersions)
+	require.Equal(t, webhookDesc.ReinvocationPolicy, mWebhookConfig.ReinvocationPolicy)
+	require.Equal(t, webhookDesc.WebhookPath, mWebhookConfig.ClientConfig.Service.Path)
 }
 
 func helperNewConditions(count int) []ClusterServiceVersionCondition {
