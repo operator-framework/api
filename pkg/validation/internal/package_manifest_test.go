@@ -3,8 +3,8 @@ package internal
 import (
 	"testing"
 
+	"github.com/operator-framework/api/pkg/manifests"
 	"github.com/operator-framework/api/pkg/validation/errors"
-	"github.com/operator-framework/operator-registry/pkg/registry"
 )
 
 func TestValidatePackageManifest(t *testing.T) {
@@ -12,14 +12,14 @@ func TestValidatePackageManifest(t *testing.T) {
 
 	cases := []struct {
 		validatorFuncTest
-		pkg *registry.PackageManifest
+		pkg *manifests.PackageManifest
 	}{
 		{
 			validatorFuncTest{
 				description: "successful validation",
 			},
-			&registry.PackageManifest{
-				Channels: []registry.PackageChannel{
+			&manifests.PackageManifest{
+				Channels: []manifests.PackageChannel{
 					{Name: "foo", CurrentCSVName: "bar"},
 				},
 				DefaultChannelName: "foo",
@@ -30,8 +30,8 @@ func TestValidatePackageManifest(t *testing.T) {
 			validatorFuncTest{
 				description: "successful validation no default channel with only one channel",
 			},
-			&registry.PackageManifest{
-				Channels: []registry.PackageChannel{
+			&manifests.PackageManifest{
+				Channels: []manifests.PackageChannel{
 					{Name: "foo", CurrentCSVName: "bar"},
 				},
 				PackageName: "test-package",
@@ -45,8 +45,8 @@ func TestValidatePackageManifest(t *testing.T) {
 					errors.ErrInvalidPackageManifest("default channel is empty but more than one channel exists", pkgName),
 				},
 			},
-			&registry.PackageManifest{
-				Channels: []registry.PackageChannel{
+			&manifests.PackageManifest{
+				Channels: []manifests.PackageChannel{
 					{Name: "foo", CurrentCSVName: "bar"},
 					{Name: "foo2", CurrentCSVName: "baz"},
 				},
@@ -61,8 +61,8 @@ func TestValidatePackageManifest(t *testing.T) {
 					errors.ErrInvalidPackageManifest(`default channel "baz" not found in the list of declared channels`, pkgName),
 				},
 			},
-			&registry.PackageManifest{
-				Channels: []registry.PackageChannel{
+			&manifests.PackageManifest{
+				Channels: []manifests.PackageChannel{
 					{Name: "foo", CurrentCSVName: "bar"},
 				},
 				DefaultChannelName: "baz",
@@ -77,7 +77,7 @@ func TestValidatePackageManifest(t *testing.T) {
 					errors.ErrInvalidPackageManifest("channels empty", pkgName),
 				},
 			},
-			&registry.PackageManifest{
+			&manifests.PackageManifest{
 				Channels:           nil,
 				DefaultChannelName: "baz",
 				PackageName:        "test-package",
@@ -91,8 +91,8 @@ func TestValidatePackageManifest(t *testing.T) {
 					errors.ErrInvalidPackageManifest(`channel "foo" currentCSV is empty`, pkgName),
 				},
 			},
-			&registry.PackageManifest{
-				Channels:           []registry.PackageChannel{{Name: "foo"}},
+			&manifests.PackageManifest{
+				Channels:           []manifests.PackageChannel{{Name: "foo"}},
 				DefaultChannelName: "foo",
 				PackageName:        "test-package",
 			},
@@ -105,8 +105,8 @@ func TestValidatePackageManifest(t *testing.T) {
 					errors.ErrInvalidPackageManifest(`duplicate package manifest channel name "foo"`, pkgName),
 				},
 			},
-			&registry.PackageManifest{
-				Channels: []registry.PackageChannel{
+			&manifests.PackageManifest{
+				Channels: []manifests.PackageChannel{
 					{Name: "foo", CurrentCSVName: "bar"},
 					{Name: "foo", CurrentCSVName: "baz"},
 				},

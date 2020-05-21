@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/operator-framework/api/pkg/manifests"
+	"github.com/operator-framework/api/pkg/validation"
 	"github.com/operator-framework/api/pkg/validation/errors"
 
 	log "github.com/sirupsen/logrus"
@@ -24,7 +25,11 @@ validation library.`,
 			if len(args) != 1 {
 				log.Fatalf("command %s requires exactly one argument", cmd.CommandPath())
 			}
-			_, _, results := manifests.GetManifestsDir(args[0])
+			bundle, err := manifests.GetBundleFromDir(args[0])
+			if err != nil {
+				log.Fatalf("Error generating bundle from directory %s", err.Error())
+			}
+			results := validation.AllValidators.Validate(bundle)
 			nonEmptyResults := []errors.ManifestResult{}
 			for _, result := range results {
 				if result.HasError() || result.HasWarn() {
