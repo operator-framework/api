@@ -1,0 +1,5 @@
+channels:
+- currentCSV: etcdoperator.v0.9.4
+  name: singlenamespace-alpha
+defaultChannel: singlenamespace-alpha
+packageName: etcd

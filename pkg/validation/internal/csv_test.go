@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
+	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/api/pkg/validation/errors"
 
 	"github.com/ghodss/yaml"
-	"github.com/operator-framework/operator-registry/pkg/registry"
 )
 
 func TestValidateCSV(t *testing.T) {
@@ -24,15 +24,13 @@ func TestValidateCSV(t *testing.T) {
 		},
 		{
 			validatorFuncTest{
-				description: "data type mismatch",
+				description: "invalid install modes",
 				wantErr:     true,
 				errors: []errors.Error{
-					errors.ErrInvalidParse(
-						`converting bundle CSV "etcdoperator.v0.9.0"`,
-						"json: cannot unmarshal string into Go struct field ClusterServiceVersionSpec.maintainers of type []v1alpha1.Maintainer"),
+					errors.ErrInvalidCSV("install modes not found", "etcdoperator.v0.9.0"),
 				},
 			},
-			filepath.Join("testdata", "dataTypeMismatch.csv.yaml"),
+			filepath.Join("testdata", "noInstallMode.csv.yaml"),
 		},
 	}
 	for _, c := range cases {
@@ -40,11 +38,11 @@ func TestValidateCSV(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Error reading CSV path %s: %v", c.csvPath, err)
 		}
-		csv := registry.ClusterServiceVersion{}
+		csv := operatorsv1alpha1.ClusterServiceVersion{}
 		if err = yaml.Unmarshal(b, &csv); err != nil {
 			t.Fatalf("Error unmarshalling CSV at path %s: %v", c.csvPath, err)
 		}
-		result := validateCSVRegistry(&csv)
+		result := validateCSV(&csv)
 		c.check(t, result)
 	}
 }
