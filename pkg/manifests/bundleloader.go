@@ -10,7 +10,6 @@ import (
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apimachinery/pkg/util/yaml"
 
@@ -70,6 +69,7 @@ func (b *bundleLoader) LoadBundleWalkFunc(path string, f os.FileInfo, err error)
 	if err != nil {
 		return fmt.Errorf("unable to load file %s: %s", path, err)
 	}
+	defer fileReader.Close()
 
 	decoder := yaml.NewYAMLOrJSONDecoder(fileReader, 30)
 	csv := unstructured.Unstructured{}
@@ -125,14 +125,22 @@ func loadBundle(csvName string, dir string) (*Bundle, error) {
 			errs = append(errs, fmt.Errorf("unable to load file %s: %s", path, err))
 			continue
 		}
+		defer fileReader.Close()
 
 		decoder := yaml.NewYAMLOrJSONDecoder(fileReader, 30)
 		obj := &unstructured.Unstructured{}
 		if err = decoder.Decode(obj); err != nil {
+			errs = append(errs, fmt.Errorf("unable to decode object: %s", err))
 			continue
 		}
 
 		bundle.Objects = append(bundle.Objects, obj)
+
+		// Reset the reader so we can decode it into a typed object.
+		if err = resetFile(fileReader); err != nil {
+			errs = append(errs, err)
+			continue
+		}
 
 		switch kind := obj.GetKind(); kind {
 		case "ClusterServiceVersion":
@@ -140,9 +148,7 @@ func loadBundle(csvName string, dir string) (*Bundle, error) {
 				return nil, fmt.Errorf("invalid bundle: contains multiple CSVs")
 			}
 			csv := operatorsv1alpha1.ClusterServiceVersion{}
-			err := runtime.DefaultUnstructuredConverter.FromUnstructured(
-				obj.UnstructuredContent(),
-				&csv)
+			err := decoder.Decode(&csv)
 			if err != nil {
 				return nil, fmt.Errorf("unable to parse CSV %s: %s", f.Name(), err.Error())
 			}
@@ -151,18 +157,14 @@ func loadBundle(csvName string, dir string) (*Bundle, error) {
 			version := obj.GetAPIVersion()
 			if version == apiextensionsv1beta1.SchemeGroupVersion.String() {
 				crd := apiextensionsv1beta1.CustomResourceDefinition{}
-				err := runtime.DefaultUnstructuredConverter.FromUnstructured(
-					obj.UnstructuredContent(),
-					&crd)
+				err := decoder.Decode(&crd)
 				if err != nil {
 					return nil, fmt.Errorf("unable to parse CRD %s: %s", f.Name(), err.Error())
 				}
 				bundle.V1beta1CRDs = append(bundle.V1beta1CRDs, &crd)
 			} else if version == apiextensionsv1.SchemeGroupVersion.String() {
 				crd := apiextensionsv1.CustomResourceDefinition{}
-				err := runtime.DefaultUnstructuredConverter.FromUnstructured(
-					obj.UnstructuredContent(),
-					&crd)
+				err := decoder.Decode(&crd)
 				if err != nil {
 					return nil, fmt.Errorf("unable to parse CRD %s: %s", f.Name(), err.Error())
 				}
@@ -174,4 +176,16 @@ func loadBundle(csvName string, dir string) (*Bundle, error) {
 	}
 
 	return bundle, utilerrors.NewAggregate(errs)
+}
+
+// resetFile seeks f to read from 0, assuming it is read-only.
+func resetFile(f *os.File) error {
+	r, err := f.Seek(0, 0)
+	if err != nil {
+		return fmt.Errorf("unable to reset file %s: %v", f.Name(), err)
+	}
+	if r != 0 {
+		return fmt.Errorf("unable to reset file %s: seek is %d not 0", f.Name(), r)
+	}
+	return nil
 }

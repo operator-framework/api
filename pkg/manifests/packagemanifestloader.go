@@ -61,6 +61,7 @@ func (p *packageManifestLoader) LoadPackagesWalkFunc(path string, f os.FileInfo,
 	if err != nil {
 		return fmt.Errorf("unable to load package from file %s: %s", path, err)
 	}
+	defer fileReader.Close()
 
 	decoder := yaml.NewYAMLOrJSONDecoder(fileReader, 30)
 	manifest := PackageManifest{}
@@ -103,6 +104,7 @@ func (p *packageManifestLoader) LoadBundleWalkFunc(path string, f os.FileInfo, e
 	if err != nil {
 		return fmt.Errorf("unable to load file %s: %s", path, err)
 	}
+	defer fileReader.Close()
 
 	decoder := yaml.NewYAMLOrJSONDecoder(fileReader, 30)
 	csv := unstructured.Unstructured{}
