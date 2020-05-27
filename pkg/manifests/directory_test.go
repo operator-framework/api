@@ -29,3 +29,12 @@ func TestGetPackage(t *testing.T) {
 	require.Equal(t, 2, len(bundles[1].V1beta1CRDs))
 	require.Equal(t, 1, len(bundles[1].V1CRDs))
 }
+
+func TestLoadBundle(t *testing.T) {
+	var err error
+
+	_, err = loadBundle("test-operator.v0.0.1", "./testdata/invalid_bundle_with_subdir")
+	require.EqualError(t, err, "bundle manifests dir contains directory: testdata/invalid_bundle_with_subdir/foo")
+	_, err = loadBundle("test-operator.v0.0.1", "./testdata/invalid_bundle_with_hidden")
+	require.EqualError(t, err, "bundle manifests dir has hidden file: testdata/invalid_bundle_with_hidden/.hidden")
+}
