@@ -111,15 +111,18 @@ func loadBundle(csvName string, dir string) (*Bundle, error) {
 		Name: csvName,
 	}
 	for _, f := range files {
+		path := filepath.Join(dir, f.Name())
+
 		if f.IsDir() {
+			errs = append(errs, fmt.Errorf("bundle manifests dir contains directory: %s", path))
 			continue
 		}
 
 		if strings.HasPrefix(f.Name(), ".") {
+			errs = append(errs, fmt.Errorf("bundle manifests dir has hidden file: %s", path))
 			continue
 		}
 
-		path := filepath.Join(dir, f.Name())
 		fileReader, err := os.Open(path)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("unable to load file %s: %s", path, err))
