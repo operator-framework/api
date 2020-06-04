@@ -85,3 +85,6 @@ test-unit: ## Run the unit tests
 controller-gen: vendor ## Find or download controller-gen 
 CONTROLLER_GEN=$(Q)go run -mod=vendor ./vendor/sigs.k8s.io/controller-tools/cmd/controller-gen
 
+license:
+	find ./ -type f -name '*.go' -not -path "./vendor/*" -exec reuse addheader --copyright="The Operator Framework" --license=Apache-2.0 {} \;
+

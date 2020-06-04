@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 The Operator Framework
+//
+// SPDX-License-Identifier: Apache-2.0
+
 // This package defines the valid Operator manifests directory format
 // by exposing a set of Validator's to verify a directory and
 // its constituent manifests. A manifests directory consists of a

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 The Operator Framework
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package manifests
 
 // PackageManifest holds information about a package, which is a reference to one (or more)

@@ -1,0 +1,10 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: The Operator Framework API
+Upstream-Contact: The Operator Framework Authors <agreene@redhat.com>
+Source: https://github.com/operator-framework/api
+
+# Sample paragraph, commented out:
+#
+# Files: src/*
+# Copyright: $YEAR $NAME <$CONTACT>
+# License: ...
