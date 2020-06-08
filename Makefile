@@ -12,7 +12,7 @@ endif
 REPO = github.com/operator-framework/api
 BUILD_PATH = $(REPO)/cmd/operator-verify
 PKGS = $(shell go list ./... | grep -v /vendor/)
-YQ_INTERNAL := $(Q) go run $(MOD_FLAGS) ./vendor/github.com/mikefarah/yq/v2/
+YQ := $(Q) go run $(MOD_FLAGS) ./vendor/github.com/mikefarah/yq/v2/
 
 .PHONY: help
 help: ## Show this help screen
@@ -61,11 +61,11 @@ manifests: controller-gen ## Generate manifests e.g. CRD, RBAC etc
 	$(CONTROLLER_GEN) schemapatch:manifests=./crds output:dir=./crds paths=./pkg/operators/...
 
 	@# Add missing defaults in embedded core API schemas
-	$(YQ_INTERNAL) w --inplace ./crds/operators.coreos.com_clusterserviceversions.yaml spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.spec.properties.containers.items.properties.ports.items.properties.protocol.default TCP
-	$(YQ_INTERNAL) w --inplace ./crds/operators.coreos.com_clusterserviceversions.yaml spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.spec.properties.initContainers.items.properties.ports.items.properties.protocol.default TCP
+	$(YQ) w --inplace ./crds/operators.coreos.com_clusterserviceversions.yaml spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.spec.properties.containers.items.properties.ports.items.properties.protocol.default TCP
+	$(YQ) w --inplace ./crds/operators.coreos.com_clusterserviceversions.yaml spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.spec.properties.initContainers.items.properties.ports.items.properties.protocol.default TCP
 
 	@# Preserve fields for embedded metadata fields
-	$(YQ_INTERNAL) w --inplace ./crds/operators.coreos.com_clusterserviceversions.yaml spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.metadata.x-kubernetes-preserve-unknown-fields true
+	$(YQ) w --inplace ./crds/operators.coreos.com_clusterserviceversions.yaml spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.metadata.x-kubernetes-preserve-unknown-fields true
 
 	@# Update embedded CRD files.
 	@go generate ./crds/...
