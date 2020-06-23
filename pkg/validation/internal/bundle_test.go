@@ -21,6 +21,11 @@ func TestValidateBundle(t *testing.T) {
 			hasError:    false,
 		},
 		{
+			description: "registryv1 valid bundle with multiple versions in CRD",
+			directory:   "./testdata/valid_bundle_2",
+			hasError:    false,
+		},
+		{
 			description: "registryv1 invalid bundle without CRD etcdclusters v1beta2 in bundle",
 			directory:   "./testdata/invalid_bundle",
 			hasError:    true,
