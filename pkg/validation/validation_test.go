@@ -23,7 +23,7 @@ func TestValidate_WithErrors(t *testing.T) {
 	bundle, err := manifests.GetBundleFromDir("./testdata/invalid_bundle")
 	require.NoError(t, err)
 
-	results := AllValidators.Validate(bundle)
+	results := DefaultBundleValidators.Validate(bundle)
 	for _, result := range results {
 		require.Equal(t, true, result.HasError())
 	}

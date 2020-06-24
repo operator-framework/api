@@ -1,9 +1,6 @@
 package manifests
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/operator-framework/api/pkg/manifests"
 	"github.com/operator-framework/api/pkg/validation"
 	"github.com/operator-framework/api/pkg/validation/errors"
@@ -13,33 +10,57 @@ import (
 )
 
 func NewCmd() *cobra.Command {
-	return &cobra.Command{
+	rootCmd := &cobra.Command{
 		Use:   "manifests",
 		Short: "Validates all manifests in a directory",
-		Long: `'operator-verify manifests' validates all manifests in the supplied directory
+		Long: `'operator-verify manifests' validates a bundle in the supplied directory
 and prints errors and warnings corresponding to each manifest found to be
 invalid. Manifests are only validated if a validator for that manifest
 type/kind, ex. CustomResourceDefinition, is implemented in the Operator
 validation library.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) != 1 {
-				log.Fatalf("command %s requires exactly one argument", cmd.CommandPath())
-			}
-			bundle, err := manifests.GetBundleFromDir(args[0])
-			if err != nil {
-				log.Fatalf("Error generating bundle from directory %s", err.Error())
-			}
-			results := validation.AllValidators.Validate(bundle)
-			nonEmptyResults := []errors.ManifestResult{}
-			for _, result := range results {
-				if result.HasError() || result.HasWarn() {
-					nonEmptyResults = append(nonEmptyResults, result)
-				}
-			}
-			if len(nonEmptyResults) != 0 {
-				fmt.Println(nonEmptyResults)
-				os.Exit(1)
-			}
-		},
+		Run: manifestsFunc,
 	}
+
+	rootCmd.Flags().Bool("operatorhub_validate", false, "enable optional UI validation for operatorhub.io")
+
+	return rootCmd
+}
+
+func manifestsFunc(cmd *cobra.Command, args []string) {
+	bundle, err := manifests.GetBundleFromDir(args[0])
+	if err != nil {
+		log.Fatalf("Error generating bundle from directory: %s", err.Error())
+	}
+	if bundle == nil {
+		log.Fatalf("Error generating bundle from directory")
+	}
+
+	operatorHubValidate, err := cmd.Flags().GetBool("operatorhub_validate")
+	if err != nil {
+		log.Fatalf("Unable to parse operatorhub_validate parameter")
+	}
+
+	validators := validation.DefaultBundleValidators
+	if operatorHubValidate {
+		validators = validators.WithValidators(validation.OperatorHubValidator)
+	}
+
+	results := validators.Validate(bundle.ObjectsToValidate()...)
+	nonEmptyResults := []errors.ManifestResult{}
+	for _, result := range results {
+		if result.HasError() || result.HasWarn() {
+			nonEmptyResults = append(nonEmptyResults, result)
+		}
+	}
+
+	for _, result := range nonEmptyResults {
+		for _, err := range result.Errors {
+			log.Errorf(err.Error())
+		}
+		for _, err := range result.Warnings {
+			log.Warnf(err.Error())
+		}
+	}
+
+	return
 }
