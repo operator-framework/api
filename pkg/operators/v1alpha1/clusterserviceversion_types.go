@@ -180,6 +180,7 @@ type WebhookDescription struct {
 	AdmissionReviewVersions []string                                        `json:"admissionReviewVersions"`
 	ReinvocationPolicy      *admissionregistrationv1.ReinvocationPolicyType `json:"reinvocationPolicy,omitempty"`
 	WebhookPath             *string                                         `json:"webhookPath,omitempty"`
+	ConversionCRDs          []string                                        `json:"conversionCRDs,omitempty"`
 }
 
 // GetValidatingWebhook returns a ValidatingWebhook generated from the WebhookDescription
