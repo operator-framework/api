@@ -33,6 +33,7 @@ func TestValidateBundleOperatorHub(t *testing.T) {
 				`Error: Value : (etcdoperator.v0.9.4) csv.Metadata.Annotations.Capabilities Installs and stuff is not a valid capabilities level`,
 				`Error: Value : (etcdoperator.v0.9.4) csv.Spec.Icon should only have one element`,
 				`Error: Value : (etcdoperator.v0.9.4) csv.Metadata.Annotations.Categories Magic is not a valid category`,
+				`Error: Value : (etcdoperator.v0.9.4) csv.Spec.Version is not set`,
 			},
 		},
 	}
