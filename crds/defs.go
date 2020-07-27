@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 The Operator Framework
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package crds
 
 // Generate embedded files from CRDs to avoid file path changes when this package is imported.

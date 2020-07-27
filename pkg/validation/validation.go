@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 The Operator Framework
+//
+// SPDX-License-Identifier: Apache-2.0
+
 // Package validation provides default Validator's that can be run with a list
 // of arbitrary objects. The defaults exposed here consist of all Validator's
 // implemented by this validation library.

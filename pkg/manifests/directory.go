@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 The Operator Framework
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package manifests
 
 // GetManifestsDir parses all bundles and a package manifest from a directory
