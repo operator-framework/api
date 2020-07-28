@@ -32,6 +32,23 @@ func TestValidateCSV(t *testing.T) {
 			},
 			filepath.Join("testdata", "noInstallMode.csv.yaml"),
 		},
+		{
+			validatorFuncTest{
+				description: "valid install modes when dealing with conversionCRDs",
+				wantErr:     false,
+			},
+			filepath.Join("testdata", "correct.csv.with.conversion.webhook.yaml"),
+		},
+		{
+			validatorFuncTest{
+				description: "invalid install modes when dealing with conversionCRDs",
+				wantErr:     true,
+				errors: []errors.Error{
+					errors.ErrInvalidCSV("only AllNamespaces InstallModeType is supported when conversionCRDs is present", "etcdoperator.v0.9.0"),
+				},
+			},
+			filepath.Join("testdata", "incorrect.csv.with.conversion.webhook.yaml"),
+		},
 	}
 	for _, c := range cases {
 		b, err := ioutil.ReadFile(c.csvPath)
