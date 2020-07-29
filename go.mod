@@ -9,6 +9,7 @@ require (
 	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
+	github.com/mattn/go-isatty v0.0.8
 	github.com/mikefarah/yq/v2 v2.4.1
 	github.com/onsi/ginkgo v1.12.0 // indirect
 	github.com/onsi/gomega v1.9.0 // indirect
