@@ -53,7 +53,7 @@ type TestList struct {
 func NewTest() Test {
 	return Test{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: SchemeGroupVersion.String(),
+			APIVersion: GroupVersion.String(),
 			Kind:       "Test",
 		},
 	}
@@ -62,12 +62,8 @@ func NewTest() Test {
 func NewTestList() TestList {
 	return TestList{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: SchemeGroupVersion.String(),
+			APIVersion: GroupVersion.String(),
 			Kind:       "TestList",
 		},
 	}
-}
-
-func init() {
-	SchemeBuilder.Register(&Test{})
 }

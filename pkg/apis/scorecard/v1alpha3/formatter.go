@@ -3,33 +3,11 @@ package v1alpha3
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"strings"
-
-	"github.com/mattn/go-isatty"
-)
-
-const (
-	redColor    = "31"
-	greenColor  = "32"
-	yellowColor = "33"
-	noColor     = "%s\n"
 )
 
 func (s Test) MarshalText() string {
 	var sb strings.Builder
-
-	failColor := "\033[1;" + redColor + "m%s\033[0m"
-	passColor := "\033[1;" + greenColor + "m%s\033[0m"
-	warnColor := "\033[1;" + yellowColor + "m%s\033[0m"
-
-	// turn off colorization if not in a terminal
-	if !isatty.IsTerminal(os.Stdout.Fd()) &&
-		!isatty.IsCygwinTerminal(os.Stdout.Fd()) {
-		passColor = noColor
-		failColor = noColor
-		warnColor = noColor
-	}
 
 	sb.WriteString(fmt.Sprintf("%s\n", strings.Repeat("-", 80)))
 	sb.WriteString(fmt.Sprintf("Image:      %s\n", s.Spec.Image))
@@ -51,26 +29,24 @@ func (s Test) MarshalText() string {
 				sb.WriteString(fmt.Sprintf("\tName: %s\n", result.Name))
 			}
 			sb.WriteString("\tState: ")
-			if result.State == PassState {
-				sb.WriteString(fmt.Sprintf(passColor, PassState))
-			} else if result.State == FailState {
-				sb.WriteString(fmt.Sprintf(failColor, FailState))
-			} else if result.State == ErrorState {
-				sb.WriteString(fmt.Sprintf(failColor, ErrorState))
-			} else {
+			switch result.State {
+			case PassState, FailState, ErrorState:
+				sb.WriteString(string(result.State))
+				sb.WriteString("\n")
+			default:
 				sb.WriteString("unknown")
 			}
 			sb.WriteString("\n")
 
 			if len(result.Suggestions) > 0 {
-				sb.WriteString(fmt.Sprintf(warnColor, "\tSuggestions:\n"))
+				sb.WriteString("\tSuggestions:\n")
 				for _, suggestion := range result.Suggestions {
 					sb.WriteString(fmt.Sprintf("\t\t%s\n", suggestion))
 				}
 			}
 
 			if len(result.Errors) > 0 {
-				sb.WriteString(fmt.Sprintf(failColor, "\tErrors:\n"))
+				sb.WriteString("\tErrors:\n")
 				for _, err := range result.Errors {
 					sb.WriteString(fmt.Sprintf("\t\t%s\n", err))
 				}
