@@ -1,6 +1,6 @@
-// Package v1 contains API Schema definitions for the operator v1 API group.
 // +kubebuilder:object:generate=true
-// +groupName=operators.coreos.com
+
+// Package v1 contains API Schema definitions for the operator v1 API group.
 package v1
 
 import (
@@ -21,3 +21,8 @@ var (
 	// AddToScheme adds the types in this group-version to the given scheme.
 	AddToScheme = SchemeBuilder.AddToScheme
 )
+
+// Resource takes an unqualified resource and returns a Group qualified GroupResource
+func Resource(resource string) schema.GroupResource {
+	return GroupVersion.WithResource(resource).GroupResource()
+}
