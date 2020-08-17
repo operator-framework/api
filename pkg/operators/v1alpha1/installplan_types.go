@@ -56,10 +56,11 @@ const (
 type InstallPlanConditionReason string
 
 const (
-	InstallPlanReasonPlanUnknown        InstallPlanConditionReason = "PlanUnknown"
-	InstallPlanReasonInstallCheckFailed InstallPlanConditionReason = "InstallCheckFailed"
-	InstallPlanReasonDependencyConflict InstallPlanConditionReason = "DependenciesConflict"
-	InstallPlanReasonComponentFailed    InstallPlanConditionReason = "InstallComponentFailed"
+	InstallPlanReasonPlanUnknown         InstallPlanConditionReason = "PlanUnknown"
+	InstallPlanReasonInstallCheckFailed  InstallPlanConditionReason = "InstallCheckFailed"
+	InstallPlanReasonDependencyConflict  InstallPlanConditionReason = "DependenciesConflict"
+	InstallPlanReasonComponentFailed     InstallPlanConditionReason = "InstallComponentFailed"
+	InstallPlanReasonWaitingForDiscovery InstallPlanConditionReason = "WaitingForDiscovery"
 )
 
 // StepStatus is the current status of a particular resource an in
