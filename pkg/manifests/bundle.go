@@ -19,7 +19,7 @@ type Bundle struct {
 	CSV            *operatorsv1alpha1.ClusterServiceVersion
 	V1beta1CRDs    []*apiextensionsv1beta1.CustomResourceDefinition
 	V1CRDs         []*apiextensionsv1.CustomResourceDefinition
-	Dependencies   []*Dependency
+	Dependencies   []*metadata.Dependency
 	// CompressedSize stores the gzip size of the bundle
 	CompressedSize int64
 	// Size stores the size of the bundle

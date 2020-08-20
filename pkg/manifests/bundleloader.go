@@ -14,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 
 	"github.com/operator-framework/api/pkg/encoding"
+	"github.com/operator-framework/api/pkg/metadata"
 	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 )
 
@@ -22,7 +23,7 @@ type bundleLoader struct {
 	dir             string
 	bundle          *Bundle
 	foundCSV        bool
-	annotationsFile AnnotationsFile
+	annotationsFile metadata.AnnotationsFile
 }
 
 func NewBundleLoader(dir string) bundleLoader {
@@ -63,8 +64,8 @@ func (b *bundleLoader) addChannelsFromAnnotationsFile() {
 	if len(channels) > 0 && len(b.bundle.Channels) == 0 {
 		b.bundle.Channels = channels
 	}
-	if len(b.annotationsFile.Annotations.DefaultChannelName) > 0 && len(b.bundle.DefaultChannel) == 0 {
-		b.bundle.DefaultChannel = b.annotationsFile.Annotations.DefaultChannelName
+	if len(b.annotationsFile.Annotations.DefaultChannel) > 0 && len(b.bundle.DefaultChannel) == 0 {
+		b.bundle.DefaultChannel = b.annotationsFile.Annotations.DefaultChannel
 	}
 }
 
@@ -129,7 +130,7 @@ func (b *bundleLoader) LoadBundleWalkFunc(path string, f os.FileInfo, err error)
 		return nil
 	}
 
-	annotationsFile := AnnotationsFile{}
+	annotationsFile := metadata.AnnotationsFile{}
 	if strings.HasPrefix(f.Name(), "annotations") {
 		annFile, err := os.ReadFile(path)
 		if err != nil {

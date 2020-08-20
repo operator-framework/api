@@ -70,7 +70,17 @@ func (af AnnotationsFile) IsEmpty() bool {
 	return reflect.ValueOf(af).IsZero()
 }
 
-// AnnotationsV1 is a list of annotations for a given bundle.
+// Bundle v1 labels.
+const (
+	MediaTypeLabelV1      = "operators.operatorframework.io.bundle.mediatype.v1"
+	ManifestsLabelV1      = "operators.operatorframework.io.bundle.manifests.v1"
+	MetadataLabelV1       = "operators.operatorframework.io.bundle.metadata.v1"
+	PackageLabelV1        = "operators.operatorframework.io.bundle.package.v1"
+	ChannelsLabelV1       = "operators.operatorframework.io.bundle.channels.v1"
+	DefaultChannelLabelV1 = "operators.operatorframework.io.bundle.channel.default.v1"
+)
+
+// AnnotationsV1 is a set of v1 annotations for a given bundle.
 type AnnotationsV1 struct {
 	// MediaType is this bundle's media type. Valid values are:
 	// - "registry+v1": operator-registry manifests.
@@ -92,10 +102,10 @@ type AnnotationsV1 struct {
 	// Channels are a comma separated list of the declared channels for the bundle, ala `stable` or `alpha`.
 	Channels string `json:"operators.operatorframework.io.bundle.channels.v1" yaml:"operators.operatorframework.io.bundle.channels.v1"`
 
-	// DefaultChannelName is, if specified, the name of the default channel for the package. The
+	// DefaultChannel is, if specified, the name of the default channel for the package. The
 	// default channel will be installed if no other channel is explicitly given. If the package
 	// has a single channel, then that channel is implicitly the default.
-	DefaultChannelName string `json:"operators.operatorframework.io.bundle.channel.default.v1" yaml:"operators.operatorframework.io.bundle.channel.default.v1"`
+	DefaultChannel string `json:"operators.operatorframework.io.bundle.channel.default.v1" yaml:"operators.operatorframework.io.bundle.channel.default.v1"`
 
 	// AnnotationsRaw contains all other annotations in an annotations file
 	// that do not have keys that match the above tags.
@@ -104,12 +114,12 @@ type AnnotationsV1 struct {
 
 func (a AnnotationsV1) GetLabels() []string {
 	return []string{
-		"operators.operatorframework.io.bundle.mediatype.v1",
-		"operators.operatorframework.io.bundle.manifests.v1",
-		"operators.operatorframework.io.bundle.metadata.v1",
-		"operators.operatorframework.io.bundle.package.v1",
-		"operators.operatorframework.io.bundle.channels.v1",
-		"operators.operatorframework.io.bundle.channel.default.v1",
+		MediaTypeLabelV1,
+		ManifestsLabelV1,
+		MetadataLabelV1,
+		PackageLabelV1,
+		ChannelsLabelV1,
+		DefaultChannelLabelV1,
 	}
 }
 
