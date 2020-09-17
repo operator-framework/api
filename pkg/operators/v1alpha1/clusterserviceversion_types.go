@@ -162,6 +162,8 @@ const (
 	ValidatingAdmissionWebhook WebhookAdmissionType = "ValidatingAdmissionWebhook"
 	// MutatingAdmissionWebhook is for mutating admission webhooks
 	MutatingAdmissionWebhook WebhookAdmissionType = "MutatingAdmissionWebhook"
+	// ConversionWebhook is for conversion webhooks
+	ConversionWebhook WebhookAdmissionType = "ConversionWebhook"
 )
 
 // WebhookDescription provides details to OLM about required webhooks
