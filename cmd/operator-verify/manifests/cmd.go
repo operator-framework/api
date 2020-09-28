@@ -22,6 +22,7 @@ validation library.`,
 	}
 
 	rootCmd.Flags().Bool("operatorhub_validate", false, "enable optional UI validation for operatorhub.io")
+	rootCmd.Flags().Bool("object_validate", false, "enable optional bundle object validation")
 
 	return rootCmd
 }
@@ -40,9 +41,17 @@ func manifestsFunc(cmd *cobra.Command, args []string) {
 		log.Fatalf("Unable to parse operatorhub_validate parameter")
 	}
 
+	bundleObjectValidate, err := cmd.Flags().GetBool("object_validate")
+	if err != nil {
+		log.Fatalf("Unable to parse object_validate parameter: %w", err)
+	}
+
 	validators := validation.DefaultBundleValidators
 	if operatorHubValidate {
 		validators = validators.WithValidators(validation.OperatorHubValidator)
+	}
+	if bundleObjectValidate {
+		validators = validators.WithValidators(validation.ObjectValidator)
 	}
 
 	results := validators.Validate(bundle.ObjectsToValidate()...)
