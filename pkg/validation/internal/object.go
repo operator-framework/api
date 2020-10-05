@@ -37,17 +37,20 @@ var defaultSCCs = map[string]struct{}{
 
 func validateObjects(objs ...interface{}) (results []errors.ManifestResult) {
 	for _, obj := range objs {
-		switch u := obj.(type) {
-		case *unstructured.Unstructured:
-			switch u.GroupVersionKind().Kind {
-			case PodDisruptionBudgetKind:
-				results = append(results, validatePDB(u))
-			case PriorityClassKind:
-				results = append(results, validatePriorityClass(u))
-			case RoleKind:
-				results = append(results, validateRBAC(u))
-			case ClusterRoleKind:
-				results = append(results, validateRBAC(u))
+		switch obj.(type) {
+		case []*unstructured.Unstructured:
+			objects := obj.([]*unstructured.Unstructured)
+			for _, u := range objects {
+				switch u.GroupVersionKind().Kind {
+				case PodDisruptionBudgetKind:
+					results = append(results, validatePDB(u))
+				case PriorityClassKind:
+					results = append(results, validatePriorityClass(u))
+				case RoleKind:
+					results = append(results, validateRBAC(u))
+				case ClusterRoleKind:
+					results = append(results, validateRBAC(u))
+				}
 			}
 		}
 	}

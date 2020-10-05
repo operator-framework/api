@@ -75,7 +75,8 @@ func TestValidateObject(t *testing.T) {
 			t.Fatalf("unmarshalling object at path %s: %v", tt.path, err)
 		}
 
-		results := ObjectValidator.Validate(&u)
+		obj := []*unstructured.Unstructured{&u}
+		results := ObjectValidator.Validate(obj)
 
 		// check errors
 		if len(results[0].Errors) > 0 && tt.error == false {
