@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"os"
 	"testing"
 
 	"github.com/operator-framework/api/pkg/manifests"
@@ -55,6 +56,76 @@ func TestValidateBundleOperatorHub(t *testing.T) {
 					require.Contains(t, tt.errStrings, errString)
 				}
 			}
+		}
+	}
+}
+
+func TestCustomCategories(t *testing.T) {
+	var table = []struct {
+		description string
+		directory   string
+		hasError    bool
+		errStrings  []string
+		custom      bool
+	}{
+		{
+			description: "valid bundle custom categories",
+			directory:   "./testdata/valid_bundle_custom_categories",
+			hasError:    false,
+			custom:      true,
+		},
+		{
+			description: "valid bundle standard categories",
+			directory:   "./testdata/valid_bundle",
+			hasError:    false,
+			custom:      false,
+		},
+	}
+
+	for _, tt := range table {
+		t.Logf("%s", tt.description)
+		if tt.custom {
+			os.Setenv("OPERATOR_BUNDLE_CATEGORIES", "./testdata/categories.json")
+		} else {
+			os.Setenv("OPERATOR_BUNDLE_CATEGORIES", "")
+		}
+
+		// Validate the bundle object
+		bundle, err := manifests.GetBundleFromDir(tt.directory)
+		require.NoError(t, err)
+
+		results := OperatorHubValidator.Validate(bundle)
+
+		if len(results) > 0 {
+			require.Equal(t, results[0].HasError(), tt.hasError)
+			if results[0].HasError() {
+				require.Equal(t, len(tt.errStrings), len(results[0].Errors))
+				for _, err := range results[0].Errors {
+					errString := err.Error()
+					require.Contains(t, tt.errStrings, errString)
+				}
+			}
+		}
+	}
+}
+
+func TestExtractCategories(t *testing.T) {
+	path := "./testdata/categories.json"
+	categories, err := extractCategories(path)
+	if err != nil {
+		t.Fatalf("extracting categories.json: %s", err)
+	}
+
+	expected := map[string]struct{}{
+		"Cloud Pak":      {},
+		"Registry":       {},
+		"MyCoolThing":    {},
+		"This/Or & That": {},
+	}
+
+	for key := range categories {
+		if _, ok := expected[key]; !ok {
+			t.Fatalf("did not find key %s", key)
 		}
 	}
 }
