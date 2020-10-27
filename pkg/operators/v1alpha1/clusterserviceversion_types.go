@@ -171,8 +171,10 @@ const (
 type WebhookDescription struct {
 	GenerateName string `json:"generateName"`
 	// +kubebuilder:validation:Enum=ValidatingAdmissionWebhook;MutatingAdmissionWebhook;ConversionWebhook
-	Type                    WebhookAdmissionType                            `json:"type"`
-	DeploymentName          string                                          `json:"deploymentName,omitempty"`
+	Type           WebhookAdmissionType `json:"type"`
+	DeploymentName string               `json:"deploymentName,omitempty"`
+	// +kubebuilder:validation:Maximum=65535
+	// +kubebuilder:validation:Minimum=1
 	ContainerPort           int32                                           `json:"containerPort,omitempty"`
 	TargetPort              *intstr.IntOrString                             `json:"targetPort,omitempty"`
 	Rules                   []admissionregistrationv1.RuleWithOperations    `json:"rules,omitempty"`
@@ -189,6 +191,9 @@ type WebhookDescription struct {
 
 // GetValidatingWebhook returns a ValidatingWebhook generated from the WebhookDescription
 func (w *WebhookDescription) GetValidatingWebhook(namespace string, namespaceSelector *metav1.LabelSelector, caBundle []byte) admissionregistrationv1.ValidatingWebhook {
+	if w.ContainerPort == 0 {
+		w.ContainerPort = 443
+	}
 	return admissionregistrationv1.ValidatingWebhook{
 		Name:                    w.GenerateName,
 		Rules:                   w.Rules,
@@ -213,6 +218,9 @@ func (w *WebhookDescription) GetValidatingWebhook(namespace string, namespaceSel
 
 // GetMutatingWebhook returns a MutatingWebhook generated from the WebhookDescription
 func (w *WebhookDescription) GetMutatingWebhook(namespace string, namespaceSelector *metav1.LabelSelector, caBundle []byte) admissionregistrationv1.MutatingWebhook {
+	if w.ContainerPort == 0 {
+		w.ContainerPort = 443
+	}
 	return admissionregistrationv1.MutatingWebhook{
 		Name:                    w.GenerateName,
 		Rules:                   w.Rules,

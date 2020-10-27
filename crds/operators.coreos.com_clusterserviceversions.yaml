@@ -8704,6 +8704,8 @@ spec:
                     containerPort:
                       type: integer
                       format: int32
+                      maximum: 65535
+                      minimum: 1
                     conversionCRDs:
                       type: array
                       items:
