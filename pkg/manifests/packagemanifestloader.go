@@ -2,6 +2,7 @@ package manifests
 
 import (
 	"fmt"
+	"github.com/operator-framework/api/pkg/types"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,7 +17,7 @@ import (
 // bundleLoader loads a bundle directory from disk
 type packageManifestLoader struct {
 	dir     string
-	bundles []*Bundle
+	bundles []*types.Bundle
 	pkg     *PackageManifest
 }
 

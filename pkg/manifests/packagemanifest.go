@@ -16,8 +16,20 @@ type PackageManifest struct {
 }
 
 // IsEmpty returns true if the PackageManifest instance is equal to the zero value
-func (p *PackageManifest) IsEmpty() bool {
+func (p PackageManifest) IsEmpty() bool {
 	return p.PackageName == "" && len(p.Channels) == 0 && p.DefaultChannelName == ""
+}
+
+// GetDefaultChannel gets the default channel or returns the only one if there's only one. returns empty string if it
+// can't determine the default
+func (p PackageManifest) GetDefaultChannel() string {
+	if p.DefaultChannelName != "" {
+		return p.DefaultChannelName
+	}
+	if len(p.Channels) == 1 {
+		return p.Channels[0].Name
+	}
+	return ""
 }
 
 // PackageChannel defines a single channel under a package, pointing to a version of that
@@ -30,3 +42,9 @@ type PackageChannel struct {
 	// for the channel.
 	CurrentCSVName string `json:"currentCSV" yaml:"currentCSV"`
 }
+
+// IsDefaultChannel returns true if the PackageChennel is the default for the PackageManifest
+func (pc PackageChannel) IsDefaultChannel(pm PackageManifest) bool {
+	return pc.Name == pm.DefaultChannelName || len(pm.Channels) == 1
+}
+

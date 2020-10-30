@@ -1,7 +1,9 @@
 package manifests
 
+import "github.com/operator-framework/api/pkg/types"
+
 // GetManifestsDir parses all bundles and a package manifest from a directory
-func GetManifestsDir(dir string) (*PackageManifest, []*Bundle, error) {
+func GetManifestsDir(dir string) (*PackageManifest, []*types.Bundle, error) {
 	loader := NewPackageManifestLoader(dir)
 
 	err := loader.LoadPackage()
@@ -15,7 +17,7 @@ func GetManifestsDir(dir string) (*PackageManifest, []*Bundle, error) {
 // GetBundleFromDir takes a raw directory containg an Operator Bundle and
 // serializes its component files (CSVs, CRDs, other native kube manifests)
 // and returns it as a Bundle
-func GetBundleFromDir(dir string) (*Bundle, error) {
+func GetBundleFromDir(dir string) (*types.Bundle, error) {
 	loader := NewBundleLoader(dir)
 
 	err := loader.LoadBundle()

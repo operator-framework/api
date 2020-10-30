@@ -2,6 +2,7 @@ package manifests
 
 import (
 	"fmt"
+	"github.com/operator-framework/api/pkg/types"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -19,7 +20,7 @@ import (
 // bundleLoader loads a bundle directory from disk
 type bundleLoader struct {
 	dir      string
-	bundle   *Bundle
+	bundle   *types.Bundle
 	foundCSV bool
 }
 
@@ -109,14 +110,14 @@ func (b *bundleLoader) LoadBundleWalkFunc(path string, f os.FileInfo, err error)
 
 // loadBundle takes the directory that a CSV is in and assumes the rest of the objects in that directory
 // are part of the bundle.
-func loadBundle(csvName string, dir string) (*Bundle, error) {
+func loadBundle(csvName string, dir string) (*types.Bundle, error) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
 
 	var errs []error
-	bundle := &Bundle{
+	bundle := &types.Bundle{
 		Name: csvName,
 	}
 	for _, f := range files {
@@ -159,7 +160,7 @@ func loadBundle(csvName string, dir string) (*Bundle, error) {
 			if bundle.CSV != nil {
 				return nil, fmt.Errorf("invalid bundle: contains multiple CSVs")
 			}
-			csv := operatorsv1alpha1.ClusterServiceVersion{}
+			csv := types.ClusterServiceVersion{}
 			err := decoder.Decode(&csv)
 			if err != nil {
 				return nil, fmt.Errorf("unable to parse CSV %s: %s", f.Name(), err.Error())

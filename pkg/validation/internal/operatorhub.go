@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/operator-framework/api/pkg/types"
 	"io/ioutil"
 	"net/mail"
 	"net/url"
@@ -11,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/blang/semver"
-	"github.com/operator-framework/api/pkg/manifests"
 	"github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/api/pkg/validation/errors"
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
@@ -54,14 +54,14 @@ var validCategories = map[string]struct{}{
 func validateOperatorHub(objs ...interface{}) (results []errors.ManifestResult) {
 	for _, obj := range objs {
 		switch v := obj.(type) {
-		case *manifests.Bundle:
+		case *types.Bundle:
 			results = append(results, validateBundleOperatorHub(v))
 		}
 	}
 	return results
 }
 
-func validateBundleOperatorHub(bundle *manifests.Bundle) errors.ManifestResult {
+func validateBundleOperatorHub(bundle *types.Bundle) errors.ManifestResult {
 	result := errors.ManifestResult{Name: bundle.Name}
 
 	if bundle == nil {
@@ -74,7 +74,14 @@ func validateBundleOperatorHub(bundle *manifests.Bundle) errors.ManifestResult {
 		return result
 	}
 
-	errs := validateHubCSVSpec(*bundle.CSV)
+	spec := v1alpha1.ClusterServiceVersionSpec{}
+	data, err := bundle.CSV.Spec.MarshalJSON()
+	if err != nil {
+		result.Add(errors.ErrInvalidCSV(err.Error(), bundle.CSV.GetName()))
+	}
+	err = json.Unmarshal(data, &spec)
+
+	errs := validateHubCSVSpec(spec)
 	for _, err := range errs {
 		result.Add(errors.ErrInvalidCSV(err.Error(), bundle.CSV.GetName()))
 	}
@@ -82,14 +89,14 @@ func validateBundleOperatorHub(bundle *manifests.Bundle) errors.ManifestResult {
 	return result
 }
 
-func validateHubCSVSpec(csv v1alpha1.ClusterServiceVersion) []error {
+func validateHubCSVSpec(Spec v1alpha1.ClusterServiceVersionSpec) []error {
 	var errs []error
 
-	if csv.Spec.Provider.Name == "" {
+	if Spec.Provider.Name == "" {
 		errs = append(errs, fmt.Errorf("csv.Spec.Provider.Name not specified"))
 	}
 
-	for _, maintainer := range csv.Spec.Maintainers {
+	for _, maintainer := range Spec.Maintainers {
 		if maintainer.Name == "" || maintainer.Email == "" {
 			errs = append(errs, fmt.Errorf("csv.Spec.Maintainers elements should contain both name and email"))
 		}
@@ -101,7 +108,7 @@ func validateHubCSVSpec(csv v1alpha1.ClusterServiceVersion) []error {
 		}
 	}
 
-	for _, link := range csv.Spec.Links {
+	for _, link := range Spec.Links {
 		if link.Name == "" || link.URL == "" {
 			errs = append(errs, fmt.Errorf("csv.Spec.Links elements should contain both name and url"))
 		}

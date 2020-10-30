@@ -1,4 +1,9 @@
-package manifests
+package types
+
+import (
+	"sort"
+	"strings"
+)
 
 // AnnotationsFile holds annotation information about a bundle
 type AnnotationsFile struct {
@@ -20,18 +25,33 @@ type Annotations struct {
 	DefaultChannelName string `json:"operators.operatorframework.io.bundle.channel.default.v1" yaml:"operators.operatorframework.io.bundle.channel.default.v1"`
 }
 
-// DependenciesFile holds dependency information about a bundle
-type DependenciesFile struct {
-	// Dependencies is a list of dependencies for a given bundle
-	Dependencies []Dependency `json:"dependencies" yaml:"dependencies"`
+
+// GetName returns the package name of the bundle
+func (a *AnnotationsFile) GetName() string {
+	return a.Annotations.PackageName
 }
 
-// Dependencies is a list of dependencies for a given bundle
-type Dependency struct {
-	// The type of dependency. It can be `olm.package` for operator-version based
-	// dependency or `olm.gvk` for gvk based dependency. This field is required.
-	Type string `json:"type" yaml:"type"`
+// GetChannels returns the channels that this bundle should be added to
+func (a *AnnotationsFile) GetChannels() []string {
+	if a.Annotations.Channels != "" {
+		return strings.Split(a.Annotations.Channels, ",")
+	}
+	return []string{}
+}
 
-	// The value of the dependency (either GVKDependency or PackageDependency)
-	Value string `json:"value" yaml:"value"`
+// GetDefaultChannelName returns the name of the default channel
+func (a *AnnotationsFile) GetDefaultChannelName() string {
+	return a.Annotations.DefaultChannelName
+}
+
+// SelectDefaultChannel returns the first item in channel list that is sorted
+// in lexicographic order.
+func (a *AnnotationsFile) SelectDefaultChannel() string {
+	if a.Annotations.Channels != "" {
+		channels := strings.Split(a.Annotations.Channels, ",")
+		sort.Strings(channels)
+		return channels[0]
+	}
+
+	return ""
 }
