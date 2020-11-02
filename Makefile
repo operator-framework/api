@@ -70,6 +70,9 @@ manifests: controller-gen ## Generate manifests e.g. CRD, RBAC etc
 	@# Remove status subresource from the CRD manifests to ensure server-side apply works
 	$(Q)for f in ./crds/*.yaml ; do $(YQ) d --inplace $$f status; done
 
+	@# Add release annotation
+	$(Q)for f in ./crds/*.yaml ; do $(YQ) w --inplace $$f 'metadata.annotations['include.release.openshift.io/self-managed-high-availability']' true; done
+
 	@# Update embedded CRD files.
 	$(Q)go generate ./crds/...
 
