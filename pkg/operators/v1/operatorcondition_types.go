@@ -36,3 +36,7 @@ type OperatorConditionList struct {
 
 	Items []OperatorCondition `json:"items"`
 }
+
+func init() {
+	SchemeBuilder.Register(&OperatorCondition{}, &OperatorConditionList{})
+}
