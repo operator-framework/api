@@ -16,7 +16,7 @@ metadata:
       ],\n      \"storageType\":\"S3\",\n      \"s3\": {\n        \"path\": \"<full-s3-path>\"\
       ,\n        \"awsSecret\": \"<aws-secret>\"\n      }\n    }\n  }\n]\n"
     capabilities: Full Lifecycle
-    categories: Database
+    categories: Database, Big Data
     containerImage: quay.io/coreos/etcd-operator@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b
     createdAt: 2019-02-28 01:03:00
     description: Create and maintain highly-available etcd clusters on Kubernetes
