@@ -86,10 +86,18 @@ spec:
                   mediatype:
                     type: string
               image:
-                description: Image is an operator-registry container image to instantiate
-                  a registry-server with. Only used when SourceType = SourceTypeGrpc.
+                description: Image is a container image of an index which hosts a
+                  collection of operator bundles. Only used when SourceType = SourceTypeGrpc.
                   If present, the address field is ignored.
                 type: string
+              imageSecret:
+                description: ImageSecret is the secret needed to pull an index image
+                  from a private registry.
+                type: object
+                properties:
+                  secretName:
+                    description: SecretName is the name of the kubernetes Secret object.
+                    type: string
               priority:
                 description: 'Priority field assigns a weight to the catalog source
                   to prioritize them so that it can be consumed by the dependency

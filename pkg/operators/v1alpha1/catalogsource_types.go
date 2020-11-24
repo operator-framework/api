@@ -38,6 +38,10 @@ const (
 	CatalogSourceRegistryServerError ConditionReason = "RegistryServerError"
 )
 
+type IndexImageSecret struct {
+	// SecretName is the name of the kubernetes Secret object.
+	SecretName string `json:"secretName,omitempty"`
+}
 type CatalogSourceSpec struct {
 	// SourceType is the type of source
 	SourceType SourceType `json:"sourceType"`
@@ -63,11 +67,14 @@ type CatalogSourceSpec struct {
 	// +Optional
 	Address string `json:"address,omitempty"`
 
-	// Image is an operator-registry container image to instantiate a registry-server with.
+	// Image is a container image of an index which hosts a collection of operator bundles.
 	// Only used when SourceType = SourceTypeGrpc.
 	// If present, the address field is ignored.
 	// +Optional
 	Image string `json:"image,omitempty"`
+
+	// ImageSecret is the secret needed to pull an index image from a private registry.
+	ImageSecret IndexImageSecret `json:"imageSecret,omitempty"`
 
 	// UpdateStrategy defines how updated catalog source images can be discovered
 	// Consists of an interval that defines polling duration and an embedded strategy type
