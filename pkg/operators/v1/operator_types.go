@@ -5,7 +5,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// OperatorSpec defines the desired state of Operator
+// OperatorSpec defines the desired state of Operator 2
 type OperatorSpec struct{}
 
 // OperatorStatus defines the observed state of an Operator and its components
