@@ -83,7 +83,6 @@ func TestCustomCategories(t *testing.T) {
 	}
 
 	for _, tt := range table {
-		t.Logf("%s", tt.description)
 		if tt.custom {
 			os.Setenv("OPERATOR_BUNDLE_CATEGORIES", "./testdata/categories.json")
 		} else {
