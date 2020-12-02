@@ -64,8 +64,6 @@ func TestValidateObject(t *testing.T) {
 	}
 
 	for _, tt := range table {
-		t.Log(tt.description)
-
 		u := unstructured.Unstructured{}
 		o, err := ioutil.ReadFile(tt.path)
 		if err != nil {
