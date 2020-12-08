@@ -8,5 +8,5 @@ import (
 	// Manipulate YAML.
 	_ "github.com/mikefarah/yq/v2"
 	// Generate embedded files.
-	_ "github.com/go-bindata/go-bindata/v3"
+	_ "github.com/go-bindata/go-bindata/v3/go-bindata"
 )
