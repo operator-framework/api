@@ -43,7 +43,7 @@ func manifestsFunc(cmd *cobra.Command, args []string) {
 
 	bundleObjectValidate, err := cmd.Flags().GetBool("object_validate")
 	if err != nil {
-		log.Fatalf("Unable to parse object_validate parameter: %w", err)
+		log.Fatalf("Unable to parse object_validate parameter: %v", err)
 	}
 
 	validators := validation.DefaultBundleValidators

@@ -30,7 +30,7 @@ func TestValidateBundleOperatorHub(t *testing.T) {
 				`Error: Value : (etcdoperator.v0.9.4) csv.Spec.Maintainers elements should contain both name and email`,
 				`Error: Value : (etcdoperator.v0.9.4) csv.Spec.Maintainers email invalidemail is invalid: mail: missing '@' or angle-addr`,
 				`Error: Value : (etcdoperator.v0.9.4) csv.Spec.Links elements should contain both name and url`,
-				`Error: Value : (etcdoperator.v0.9.4) csv.Spec.Links url https//coreos.com/operators/etcd/docs/latest/ is invalid: parse https//coreos.com/operators/etcd/docs/latest/: invalid URI for request`,
+				`Error: Value : (etcdoperator.v0.9.4) csv.Spec.Links url https//coreos.com/operators/etcd/docs/latest/ is invalid: parse "https//coreos.com/operators/etcd/docs/latest/": invalid URI for request`,
 				`Error: Value : (etcdoperator.v0.9.4) csv.Metadata.Annotations.Capabilities Installs and stuff is not a valid capabilities level`,
 				`Error: Value : (etcdoperator.v0.9.4) csv.Spec.Icon should only have one element`,
 				`Error: Value : (etcdoperator.v0.9.4) csv.Metadata.Annotations.Categories Magic is not a valid category`,
