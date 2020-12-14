@@ -12,7 +12,7 @@ endif
 REPO = github.com/operator-framework/api
 BUILD_PATH = $(REPO)/cmd/operator-verify
 PKGS = $(shell go list ./... | grep -v /vendor/)
-YQ := go run $(MOD_FLAGS) ./vendor/github.com/mikefarah/yq/v2/
+YQ := go run $(MOD_FLAGS) ./vendor/github.com/mikefarah/yq/v3/
 
 .PHONY: help
 help: ## Show this help screen
@@ -66,6 +66,9 @@ manifests: controller-gen ## Generate manifests e.g. CRD, RBAC etc
 
 	@# Preserve fields for embedded metadata fields
 	$(Q)$(YQ) w --inplace ./crds/operators.coreos.com_clusterserviceversions.yaml spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.metadata.x-kubernetes-preserve-unknown-fields true
+
+	@# Remove OperatorCondition.spec.overrides[*].lastTransitionTime requirement
+	$(Q)$(YQ) delete --inplace ./crds/operators.coreos.com_operatorconditions.yaml 'spec.versions[*].schema.openAPIV3Schema.properties.spec.properties.overrides.items.required(.==lastTransitionTime)'
 
 	@# Remove status subresource from the CRD manifests to ensure server-side apply works
 	$(Q)for f in ./crds/*.yaml ; do $(YQ) d --inplace $$f status; done
