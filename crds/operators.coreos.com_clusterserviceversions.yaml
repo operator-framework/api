@@ -2968,9 +2968,7 @@ spec:
                                                   when it might take a long time to
                                                   load data or warm a cache, than
                                                   during steady-state operation. This
-                                                  cannot be updated. This is a beta
-                                                  feature enabled by the StartupProbe
-                                                  feature flag. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
+                                                  cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
                                                 type: object
                                                 properties:
                                                   exec:
@@ -6071,9 +6069,7 @@ spec:
                                                   when it might take a long time to
                                                   load data or warm a cache, than
                                                   during steady-state operation. This
-                                                  cannot be updated. This is a beta
-                                                  feature enabled by the StartupProbe
-                                                  feature flag. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
+                                                  cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
                                                 type: object
                                                 properties:
                                                   exec:
@@ -6523,8 +6519,8 @@ spec:
                                                 It will have no effect on ephemeral
                                                 volume types such as: secret, configmaps
                                                 and emptydir. Valid values are "OnRootMismatch"
-                                                and "Always". If not specified defaults
-                                                to "Always".'
+                                                and "Always". If not specified, "Always"
+                                                is used.'
                                               type: string
                                             runAsGroup:
                                               description: The GID to run the entrypoint
@@ -7597,35 +7593,24 @@ spec:
                                                               can be used to specify
                                                               either: * An existing
                                                               VolumeSnapshot object
-                                                              (snapshot.storage.k8s.io/VolumeSnapshot
-                                                              - Beta) * An existing
-                                                              PVC (PersistentVolumeClaim)
+                                                              (snapshot.storage.k8s.io/VolumeSnapshot)
+                                                              * An existing PVC (PersistentVolumeClaim)
                                                               * An existing custom
-                                                              resource/object that
-                                                              implements data population
-                                                              (Alpha) In order to
-                                                              use VolumeSnapshot object
-                                                              types, the appropriate
+                                                              resource that implements
+                                                              data population (Alpha)
+                                                              In order to use custom
+                                                              resource types that
+                                                              implement data population,
+                                                              the AnyVolumeDataSource
                                                               feature gate must be
-                                                              enabled (VolumeSnapshotDataSource
-                                                              or AnyVolumeDataSource)
-                                                              If the provisioner or
-                                                              an external controller
+                                                              enabled. If the provisioner
+                                                              or an external controller
                                                               can support the specified
                                                               data source, it will
                                                               create a new volume
                                                               based on the contents
                                                               of the specified data
-                                                              source. If the specified
-                                                              data source is not supported,
-                                                              the volume will not
-                                                              be created and the failure
-                                                              will be reported as
-                                                              an event. In the future,
-                                                              we plan to support more
-                                                              data source types and
-                                                              the behavior of the
-                                                              provisioner may change.'
+                                                              source.'
                                                             type: object
                                                             required:
                                                             - kind
@@ -8243,8 +8228,6 @@ spec:
                                                   resources secrets, configmaps, and
                                                   downward API
                                                 type: object
-                                                required:
-                                                - sources
                                                 properties:
                                                   defaultMode:
                                                     description: Mode bits used to

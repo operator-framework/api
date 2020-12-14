@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/blang/semver"
+	semver "github.com/blang/semver/v4"
 	"github.com/stretchr/testify/require"
 )
 
