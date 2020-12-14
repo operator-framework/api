@@ -12,7 +12,7 @@ endif
 REPO = github.com/operator-framework/api
 BUILD_PATH = $(REPO)/cmd/operator-verify
 PKGS = $(shell go list ./... | grep -v /vendor/)
-YQ := go run $(MOD_FLAGS) ./vendor/github.com/mikefarah/yq/v2/
+YQ := go run $(MOD_FLAGS) ./vendor/github.com/mikefarah/yq/v3/
 
 .PHONY: help
 help: ## Show this help screen
