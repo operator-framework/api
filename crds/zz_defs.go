@@ -99,7 +99,7 @@ func operatorsCoreosCom_catalogsourcesYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "operators.coreos.com_catalogsources.yaml", size: 7725, mode: os.FileMode(436), modTime: time.Unix(1607977322, 0)}
+	info := bindataFileInfo{name: "operators.coreos.com_catalogsources.yaml", size: 7725, mode: os.FileMode(420), modTime: time.Unix(1611009248, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -119,7 +119,7 @@ func operatorsCoreosCom_clusterserviceversionsYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "operators.coreos.com_clusterserviceversions.yaml", size: 459349, mode: os.FileMode(436), modTime: time.Unix(1607977323, 0)}
+	info := bindataFileInfo{name: "operators.coreos.com_clusterserviceversions.yaml", size: 459349, mode: os.FileMode(420), modTime: time.Unix(1611009249, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -139,7 +139,7 @@ func operatorsCoreosCom_installplansYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "operators.coreos.com_installplans.yaml", size: 13615, mode: os.FileMode(436), modTime: time.Unix(1607977323, 0)}
+	info := bindataFileInfo{name: "operators.coreos.com_installplans.yaml", size: 13615, mode: os.FileMode(420), modTime: time.Unix(1611009250, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -159,7 +159,7 @@ func operatorsCoreosCom_operatorconditionsYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "operators.coreos.com_operatorconditions.yaml", size: 9522, mode: os.FileMode(436), modTime: time.Unix(1607977324, 0)}
+	info := bindataFileInfo{name: "operators.coreos.com_operatorconditions.yaml", size: 9522, mode: os.FileMode(420), modTime: time.Unix(1611009251, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -179,7 +179,7 @@ func operatorsCoreosCom_operatorgroupsYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "operators.coreos.com_operatorgroups.yaml", size: 14332, mode: os.FileMode(436), modTime: time.Unix(1607977324, 0)}
+	info := bindataFileInfo{name: "operators.coreos.com_operatorgroups.yaml", size: 14332, mode: os.FileMode(420), modTime: time.Unix(1611009252, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -199,7 +199,7 @@ func operatorsCoreosCom_operatorsYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "operators.coreos.com_operators.yaml", size: 8472, mode: os.FileMode(436), modTime: time.Unix(1607977325, 0)}
+	info := bindataFileInfo{name: "operators.coreos.com_operators.yaml", size: 8472, mode: os.FileMode(420), modTime: time.Unix(1611009252, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -219,7 +219,7 @@ func operatorsCoreosCom_subscriptionsYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "operators.coreos.com_subscriptions.yaml", size: 107523, mode: os.FileMode(436), modTime: time.Unix(1607977325, 0)}
+	info := bindataFileInfo{name: "operators.coreos.com_subscriptions.yaml", size: 107523, mode: os.FileMode(420), modTime: time.Unix(1611009253, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
