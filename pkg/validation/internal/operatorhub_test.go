@@ -128,3 +128,47 @@ func TestExtractCategories(t *testing.T) {
 		}
 	}
 }
+
+func TestWarnNoIcon(t *testing.T) {
+	var table = []struct {
+		description string
+		directory   string
+		hasError    bool
+		errStrings  []string
+		warnStrings []string
+	}{
+		{
+			description: "valid bundle no icon",
+			directory:   "./testdata/valid_bundle_no_icon",
+			hasError:    false,
+			errStrings:  []string{},
+			warnStrings: []string{"Warning: Value : (etcdoperator.v0.9.4) csv.Spec.Icon not specified"},
+		},
+	}
+
+	for _, tt := range table {
+		// Validate the bundle object
+		bundle, err := manifests.GetBundleFromDir(tt.directory)
+		require.NoError(t, err)
+
+		results := OperatorHubValidator.Validate(bundle)
+
+		if len(results) > 0 {
+			require.Equal(t, tt.hasError, results[0].HasError())
+			if results[0].HasError() {
+				require.Equal(t, len(tt.errStrings), len(results[0].Errors))
+				for _, err := range results[0].Errors {
+					errString := err.Error()
+					require.Contains(t, tt.errStrings, errString)
+				}
+			}
+			if results[0].HasWarn() {
+				require.Equal(t, len(tt.warnStrings), len(results[0].Warnings))
+				for _, warn := range results[0].Warnings {
+					warnString := warn.Error()
+					require.Contains(t, tt.warnStrings, warnString)
+				}
+			}
+		}
+	}
+}
