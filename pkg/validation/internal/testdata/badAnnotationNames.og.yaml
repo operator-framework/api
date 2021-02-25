@@ -1,0 +1,16 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  annotations:
+    olm.providedapis: NginxIngressController.v1alpha1.k8s.nginx.org
+  creationTimestamp: "2021-02-25T23:47:13Z"
+  generateName: nginx-
+  generation: 1
+  name: nginx-hbvsw
+  namespace: nginx
+  resourceVersion: "58637752"
+  selfLink: /apis/operators.coreos.com/v1/namespaces/nginx/operatorgroups/nginx-hbvsw
+  uid: 81a05c50-aea3-4959-9e86-b1ad8b74e899
+spec:
+  targetNamespaces:
+  - nginx
