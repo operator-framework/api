@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
-
 	appsv1 "k8s.io/api/apps/v1"
 	rbac "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -388,6 +387,7 @@ const (
 	CSVReasonDetectedClusterChange                       ConditionReason = "DetectedClusterChange"
 	CSVReasonInvalidWebhookDescription                   ConditionReason = "InvalidWebhookDescription"
 	CSVReasonOperatorConditionNotUpgradeable             ConditionReason = "OperatorConditionNotUpgradeable"
+	CSVReasonWaitingForCleanupToComplete                 ConditionReason = "WaitingOnCleanup"
 )
 
 // HasCaResources returns true if the CSV has owned APIServices or Webhooks.
@@ -516,46 +516,17 @@ type CleanupStatus struct {
 	PendingDeletion []ResourceList `json:"pendingDeletion,omitempty"`
 }
 
-// ResourceList represents a list of resources which are of the same GVK
+// ResourceList represents a list of resources which are of the same Group/Kind
 type ResourceList struct {
-	Group     string           `json:"group"`
-	Version   string           `json:"version"`
-	Kind      string           `json:"kind"`
-	Instances []NamespacedName `json:"instances"`
+	Group     string             `json:"group"`
+	Kind      string             `json:"kind"`
+	Instances []ResourceInstance `json:"instances"`
 }
 
-// NamespacedName represents the name and namespace of a resource
-type NamespacedName struct {
+type ResourceInstance struct {
 	Name string `json:"name"`
 	// Namespace can be empty for cluster-scoped resources
 	Namespace string `json:"namespace,omitempty"`
-}
-
-// HasFinalizer returns true if the CSV has the specified finalizer string
-func (c *ClusterServiceVersion) HasFinalizer(finalizer string) bool {
-	for _, f := range c.Finalizers {
-		if f == finalizer {
-			return true
-		}
-	}
-	return false
-}
-
-// AppendFinalizer appends the specified finalizer to the CSV
-func (c *ClusterServiceVersion) AppendFinalizer(finalizer string) {
-	c.Finalizers = append(c.Finalizers, finalizer)
-}
-
-// RemoveFinalizer removes the specified finalizer from the CSV if it exists
-func (c *ClusterServiceVersion) RemoveFinalizer(finalizer string) {
-	result := []string{}
-	for _, f := range c.Finalizers {
-		if f == finalizer {
-			continue
-		}
-		result = append(result, f)
-	}
-	c.Finalizers = result
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
