@@ -4698,20 +4698,18 @@ spec:
                       description: PendingDeletion is the list of custom resource objects that are pending deletion and blocked on finalizers. This indicates the progress of cleanup that is blocking CSV deletion or operator uninstall.
                       type: array
                       items:
-                        description: ResourceList represents a list of resources which are of the same GVK
+                        description: ResourceList represents a list of resources which are of the same Group/Kind
                         type: object
                         required:
                           - group
                           - instances
                           - kind
-                          - version
                         properties:
                           group:
                             type: string
                           instances:
                             type: array
                             items:
-                              description: NamespacedName represents the name and namespace of a resource
                               type: object
                               required:
                                 - name
@@ -4722,8 +4720,6 @@ spec:
                                   description: Namespace can be empty for cluster-scoped resources
                                   type: string
                           kind:
-                            type: string
-                          version:
                             type: string
                 conditions:
                   description: List of conditions, a history of state transitions
