@@ -1,0 +1,4 @@
+{
+    "type": "olm.skips",
+    "value" : "etcdoperator.v0.6.1"
+}

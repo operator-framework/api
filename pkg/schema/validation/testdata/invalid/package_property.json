@@ -1,0 +1,6 @@
+{
+    "type": "olm.package",
+    "value": {
+        "version": "0.6.1"
+    }
+}

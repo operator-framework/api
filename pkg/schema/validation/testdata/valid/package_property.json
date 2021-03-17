@@ -1,0 +1,7 @@
+{
+    "type": "olm.package",
+    "value": {
+        "packageName": "etcd",
+        "version": "0.6.1"
+    }
+}
