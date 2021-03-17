@@ -1,0 +1,7 @@
+{
+    "type":"olm.gvk.provided",
+    "value": {
+        "group": "etcd.database.coreos.com",
+        "kind": "EtcdCluster"
+    }
+}
