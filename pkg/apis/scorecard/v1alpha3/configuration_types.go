@@ -1,6 +1,7 @@
 package v1alpha3
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -34,6 +35,9 @@ type StageConfiguration struct {
 type TestConfiguration struct {
 	// Image is the name of the test image.
 	Image string `json:"image" yaml:"image"`
+	// ImagePullSecrets are applied to the Pod running this test so it can pull Image.
+	// See https://pkg.go.dev/k8s.io/api/core/v1#LocalObjectReference for more information.
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty"`
 	// Entrypoint is a list of commands and arguments passed to the test image.
 	Entrypoint []string `json:"entrypoint,omitempty" yaml:"entrypoint,omitempty"`
 	// Labels further describe the test and enable selection.
