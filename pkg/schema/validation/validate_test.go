@@ -127,32 +127,34 @@ func TestValidateConfig(t *testing.T) {
 	}
 
 	for _, tt := range table {
-		logger := logrus.NewEntry(logrus.New())
-		// load schema for config definitions
-		instance := load.Instances([]string{"."}, &load.Config{
-			Dir: schemaPath,
-		})
-		if len(instance) > 1 {
-			t.Fatalf("multiple instance loading currently not supported: %s", schemaPath)
-		}
-		if len(instance) < 1 {
-			t.Fatalf("no instances found: %s", schemaPath)
-		}
+		t.Run(tt.description, func(t *testing.T) {
+			logger := logrus.NewEntry(logrus.New())
+			// load schema for config definitions
+			instance := load.Instances([]string{"."}, &load.Config{
+				Dir: schemaPath,
+			})
+			if len(instance) > 1 {
+				t.Fatalf("multiple instance loading currently not supported: %s", schemaPath)
+			}
+			if len(instance) < 1 {
+				t.Fatalf("no instances found: %s", schemaPath)
+			}
 
-		// Config validator
-		configValidator := NewConfigValidator(instance[0], logger)
-		// Read json file
-		content, err := ioutil.ReadFile(tt.filename)
-		require.NoError(t, err)
-
-		// Validate json against schema
-		err = configValidator.Validate(content, tt.kind)
-
-		if tt.hasError {
-			require.Error(t, err)
-			require.Contains(t, err.Error(), tt.errString)
-		} else {
+			// Config validator
+			configValidator := NewConfigValidator(instance[0], logger)
+			// Read json file
+			content, err := ioutil.ReadFile(tt.filename)
 			require.NoError(t, err)
-		}
+
+			// Validate json against schema
+			err = configValidator.Validate(content, tt.kind)
+
+			if tt.hasError {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tt.errString)
+			} else {
+				require.NoError(t, err)
+			}
+		})
 	}
 }
