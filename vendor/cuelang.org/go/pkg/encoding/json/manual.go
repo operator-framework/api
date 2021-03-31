@@ -119,8 +119,5 @@ func Validate(b []byte, v cue.Value) (bool, error) {
 	if v.Err() != nil {
 		return false, v.Err()
 	}
-	if err := v.Validate(cue.Concrete(true)); err != nil {
-		return false, err
-	}
 	return true, nil
 }
