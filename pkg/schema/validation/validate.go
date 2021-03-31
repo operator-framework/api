@@ -39,9 +39,11 @@ func (c configValidator) Validate(b []byte, key string) error {
 		c.logger.WithError(err).Debugf(key)
 		return err
 	}
-
-	err = json.Validate(b, v)
+	jsonAsCue, err := json.Decode(c.runtime, c.instance.Dir, b)
 	if err != nil {
+		return fmt.Errorf("could not parse json: %v", err)
+	}
+	if err := v.Unify(jsonAsCue.Value()).Validate(cue.Concrete(true)); err != nil {
 		c.logger.WithError(err).Debugf("Validation error")
 		return err
 	}
