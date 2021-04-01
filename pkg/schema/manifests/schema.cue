@@ -12,8 +12,8 @@ package schema
     kind: !=""
 }
 
-#olmgvkprovided: #property & {
-  type: "olm.gvk.provided"
+#olmgvk: #property & {
+  type: "olm.gvk"
   value: #gvk
 }
 
@@ -28,8 +28,13 @@ package schema
   version: !=""
 }
 
-#packageproperty: #property & {
+#olmpackageproperty: #property & {
   type: "olm.package"
+  value: #package
+}
+
+#olmpackagerequired: #property & {
+  type: "olm.package.required"
   value: #package
 }
 
@@ -52,6 +57,15 @@ package schema
 #olmskipRange: #property & {
   type: "olm.skipRange"
   value: !=""
+}
+
+#bundleref: {
+  ref: !=""
+}
+
+#olmbundleobject: #property & {
+  type: "olm.bundle.object"
+  value: #bundleref
 }
 
 // Generic property struct

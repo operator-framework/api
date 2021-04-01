@@ -13,12 +13,14 @@ import (
 const (
 	olmBundle          = "olmbundle"
 	olmPackage         = "olmpackage"
+	olmPackageProperty = "olmpackageproperty"
+	olmPackageRequired = "olmpackagerequired"
 	olmChannel         = "olmchannel"
 	olmSkips           = "olmskips"
 	olmSkipRange       = "olmskipRange"
-	olmGVKProvided     = "olmgvkprovided"
+	olmGVK             = "olmgvk"
 	olmGVKRequired     = "olmgvkrequired"
-	olmPackageProperty = "packageproperty"
+	olmBundleObject    = "olmbundleobject"
 )
 
 type configValidator struct {

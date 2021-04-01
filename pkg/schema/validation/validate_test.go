@@ -41,7 +41,7 @@ func TestValidateConfig(t *testing.T) {
 		{
 			description: "valid gvk property config",
 			filename:    "./testdata/valid/gvk_property.json",
-			kind:        olmGVKProvided,
+			kind:        olmGVK,
 			hasError:    false,
 		},
 		{
@@ -69,6 +69,12 @@ func TestValidateConfig(t *testing.T) {
 			hasError:    false,
 		},
 		{
+			description: "valid bundle object config",
+			filename:    "./testdata/valid/bundle_object.json",
+			kind:        olmBundleObject,
+			hasError:    false,
+		},
+		{
 			description: "invalid bundle config",
 			filename:    "./testdata/invalid/bundle.json",
 			kind:        olmBundle,
@@ -85,16 +91,16 @@ func TestValidateConfig(t *testing.T) {
 		{
 			description: "invalid gvk property config",
 			filename:    "./testdata/invalid/gvk_property.json",
-			kind:        olmGVKProvided,
+			kind:        olmGVKRequired,
 			hasError:    true,
-			errString:   `#olmgvkprovided.value.version: incomplete value !=""`,
+			errString:   `#olmgvkrequired.value.version: incomplete value !=""`,
 		},
 		{
 			description: "invalid package property config",
 			filename:    "./testdata/invalid/package_property.json",
-			kind:        olmPackageProperty,
+			kind:        olmPackageRequired,
 			hasError:    true,
-			errString:   `#packageproperty.value.packageName: incomplete value !=""`,
+			errString:   `#olmpackagerequired.value.packageName: incomplete value !=""`,
 		},
 		{
 			description: "invalid package config",
@@ -123,6 +129,13 @@ func TestValidateConfig(t *testing.T) {
 			kind:        olmPackage,
 			hasError:    true,
 			errString:   `#olmpackage.schema: conflicting values "olm.bundle" and "olm.package"`,
+		},
+		{
+			description: "valid bundle object config",
+			filename:    "./testdata/invalid/bundle_object.json",
+			kind:        olmBundleObject,
+			hasError:    true,
+			errString:   `#olmbundleobject.value.ref: conflicting values !="" and 1 (mismatched types string and int)`,
 		},
 	}
 
