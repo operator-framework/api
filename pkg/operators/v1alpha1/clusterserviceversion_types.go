@@ -304,10 +304,6 @@ type ClusterServiceVersionSpec struct {
 	// +optional
 	Selector *metav1.LabelSelector `json:"selector,omitempty" protobuf:"bytes,2,opt,name=selector"`
 
-	// Cleanup specifies the cleanup behaviour when the CSV gets deleted
-	// +optional
-	Cleanup CleanupSpec `json:"cleanup,omitempty"`
-
 	// The name(s) of one or more CSV(s) that should be skipped in the upgrade graph.
 	// Should match the `metadata.Name` field of the CSV that should be skipped.
 	// This field is only used during catalog creation and plays no part in cluster runtime.
@@ -319,10 +315,6 @@ type ClusterServiceVersionSpec struct {
 	// digest (SHA) and not by tag. This field is only used during catalog creation and plays no part in cluster runtime.
 	// +optional
 	RelatedImages []RelatedImage `json:"relatedImages,omitempty"`
-}
-
-type CleanupSpec struct {
-	Enabled bool `json:"enabled"`
 }
 
 type Maintainer struct {
@@ -521,30 +513,6 @@ type ClusterServiceVersionStatus struct {
 	// Time the owned APIService certs will rotate next
 	// +optional
 	CertsRotateAt *metav1.Time `json:"certsRotateAt,omitempty"`
-	// CleanupStatus represents information about the status of cleanup while a CSV is pending deletion
-	// +optional
-	Cleanup CleanupStatus `json:"cleanup,omitempty"`
-}
-
-// CleanupStatus represents information about the status of cleanup while a CSV is pending deletion
-type CleanupStatus struct {
-	// PendingDeletion is the list of custom resource objects that are pending deletion and blocked on finalizers.
-	// This indicates the progress of cleanup that is blocking CSV deletion or operator uninstall.
-	// +optional
-	PendingDeletion []ResourceList `json:"pendingDeletion,omitempty"`
-}
-
-// ResourceList represents a list of resources which are of the same Group/Kind
-type ResourceList struct {
-	Group     string             `json:"group"`
-	Kind      string             `json:"kind"`
-	Instances []ResourceInstance `json:"instances"`
-}
-
-type ResourceInstance struct {
-	Name string `json:"name"`
-	// Namespace can be empty for cluster-scoped resources
-	Namespace string `json:"namespace,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
