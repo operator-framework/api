@@ -18,6 +18,10 @@ import (
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 )
 
+// k8sVersionKey defines the key which can be used by its consumers
+// to inform what is the K8S version that should be used to do the tests against.
+const k8sVersionKey = "k8s-version"
+
 const minKubeVersionWarnMessage = "csv.Spec.minKubeVersion is not informed. It is recommended you provide this information. " +
 	"Otherwise, it would mean that your operator project can be distributed and installed in any cluster version " +
 	"available, which is not necessarily the case for all projects."
@@ -25,6 +29,12 @@ const minKubeVersionWarnMessage = "csv.Spec.minKubeVersion is not informed. It i
 const crdv1beta1DeprecationMsg = "apiextensions.k8s.io/v1beta1, kind=CustomResourceDefinitions was deprecated in " +
 	"Kubernetes v1.16 and will be removed in v1.22 in favor of v1"
 
+// OperatorHubValidator validates the bundle manifests against the required criteria to publish
+// the projects on OperatorHub.io.
+//
+// Note that this validator allows to receive a List of optional values as key=values. Currently, only the
+// `k8s-version` key is allowed. If informed, it will perform the checks against this specific Kubernetes version where the
+// operator bundle is intend to be distribute for.
 var OperatorHubValidator interfaces.Validator = interfaces.ValidatorFunc(validateOperatorHub)
 
 var validCapabilities = map[string]struct{}{
@@ -66,7 +76,7 @@ func validateOperatorHub(objs ...interface{}) (results []errors.ManifestResult) 
 	for _, obj := range objs {
 		switch obj.(type) {
 		case map[string]string:
-			k8sVersion = obj.(map[string]string)["k8s"]
+			k8sVersion = obj.(map[string]string)[k8sVersionKey]
 			if len(k8sVersion) > 0 {
 				break
 			}
@@ -151,8 +161,8 @@ func validateHubChannels(channels []string) error {
 // the CSV to do the checks. So, the criteria is >=minKubeVersion. By last, if the minKubeVersion is not provided
 // then, we should consider the operator bundle is intend to work well in any Kubernetes version.
 // Then, it means that:
-//--optional-values="k8s=value" flag with a value => 1.16 <= 1.22 the validator will return result as warning.
-//--optional-values="k8s=value" flag with a value => 1.22 the validator will return result as error.
+//--optional-values="k8s-version=value" flag with a value => 1.16 <= 1.22 the validator will return result as warning.
+//--optional-values="k8s-version=value" flag with a value => 1.22 the validator will return result as error.
 //minKubeVersion >= 1.22 return the error result.
 //minKubeVersion empty returns a warning since it would mean the same of allow install in any supported version
 func validateHubDeprecatedAPIS(bundle *manifests.Bundle, versionProvided string) (errs, warns []error) {
