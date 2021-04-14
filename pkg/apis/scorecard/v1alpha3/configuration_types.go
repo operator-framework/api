@@ -34,6 +34,8 @@ type StageConfiguration struct {
 type TestConfiguration struct {
 	// Image is the name of the test image.
 	Image string `json:"image" yaml:"image"`
+	// UniqueID is is an optional unique test identifier of the test image.
+	UniqueID string `json:"uniqueID,omitempty" yaml:"uniqueID,omitempty"`
 	// Entrypoint is a list of commands and arguments passed to the test image.
 	Entrypoint []string `json:"entrypoint,omitempty" yaml:"entrypoint,omitempty"`
 	// Labels further describe the test and enable selection.
