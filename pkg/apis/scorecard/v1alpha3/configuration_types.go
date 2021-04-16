@@ -18,7 +18,8 @@ type Configuration struct {
 	} `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 
 	// Stages is a set of test stages to run. Once a stage is finished, the next stage in the slice will be run.
-	Stages []StageConfiguration `json:"stages" yaml:"stages"`
+	Stages  []StageConfiguration `json:"stages" yaml:"stages"`
+	Storage Storage              `json:"storage,omitempty" yaml:"storage,omitempty"`
 }
 
 // StageConfiguration configures a set of tests to be run.
@@ -39,5 +40,21 @@ type TestConfiguration struct {
 	// Entrypoint is a list of commands and arguments passed to the test image.
 	Entrypoint []string `json:"entrypoint,omitempty" yaml:"entrypoint,omitempty"`
 	// Labels further describe the test and enable selection.
-	Labels map[string]string `json:"labels,omitempty" yaml:"labels,omitempty"`
+	Labels  map[string]string `json:"labels,omitempty" yaml:"labels,omitempty"`
+	Storage Storage           `json:"storage,omitempty" yaml:"storage,omitempty"`
+}
+
+// Storage
+type Storage struct {
+	Spec StorageSpec `yaml:"spec"`
+}
+
+// Spec
+type StorageSpec struct {
+	MountPath MountPath `yaml:"mountPath,omitempty" yaml:"mountPath,omitempty"`
+}
+
+// MountPath
+type MountPath struct {
+	Path string `yaml:"path,omitempty" yaml:"path,omitempty"`
 }
