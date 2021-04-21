@@ -69,6 +69,12 @@ var validCategories = map[string]struct{}{
 	"Streaming & Messaging":  {},
 }
 
+var validInfraFeatures = map[string]struct{}{
+	"Disconnected": {},
+	"Proxy":        {},
+	"FIPS Mode":    {},
+}
+
 func validateOperatorHub(objs ...interface{}) (results []errors.ManifestResult) {
 
 	// Obtain the k8s version if informed via the objects an optional
@@ -338,6 +344,20 @@ func checkAnnotations(checks CSVChecks) CSVChecks {
 			}
 		}
 	}
+
+	if infraFeaturesJson, ok := checks.csv.ObjectMeta.Annotations["operators.openshift.io/infrastructure-features"]; ok {
+		var infraFeatures []string
+		err := json.Unmarshal([]byte(infraFeaturesJson), &infraFeatures)
+		if err != nil {
+			checks.errs = append(checks.errs, fmt.Errorf("error unmarshalling operators.openshift.io/infrastructure-features value: %s", err))
+		}
+		for _, f := range infraFeatures {
+			if _, ok := validInfraFeatures[f]; !ok {
+				checks.errs = append(checks.errs, fmt.Errorf("csv.Metadata.Annotations[\"operators.openshift.io/infrastructure-features\"] value %s is not in the set of default infrastructure features", f))
+			}
+		}
+	}
+
 	return checks
 }
 

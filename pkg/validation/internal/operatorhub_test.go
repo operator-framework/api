@@ -36,6 +36,7 @@ func TestValidateBundleOperatorHub(t *testing.T) {
 				`Error: Value : (etcdoperator.v0.9.4) csv.Spec.Icon should only have one element`,
 				`Error: Value : (etcdoperator.v0.9.4) csv.Metadata.Annotations["categories"] value Magic is not in the set of default categories`,
 				`Error: Value : (etcdoperator.v0.9.4) csv.Spec.Version must be set`,
+				`Error: Value : (etcdoperator.v0.9.4) csv.Metadata.Annotations["operators.openshift.io/infrastructure-features"] value Incorrect is not in the set of default infrastructure features`,
 			},
 		},
 	}
