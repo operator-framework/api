@@ -4587,12 +4587,11 @@ spec:
                     description: WebhookDescription provides details to OLM about required webhooks
                     type: object
                     required:
-                      - admissionReviewVersions
                       - generateName
-                      - sideEffects
                       - type
                     properties:
                       admissionReviewVersions:
+                        description: AdmissionReviewVersions is set to one or more versions of the admission.k8s.io AdmissionReview API. See https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#webhook-request-and-response for available versions. These versions are only valid if Type is ValidatingAdmissionWebhook, MutatingAdmissionWebhook.
                         type: array
                         items:
                           type: string
@@ -4603,6 +4602,11 @@ spec:
                         maximum: 65535
                         minimum: 1
                       conversionCRDs:
+                        type: array
+                        items:
+                          type: string
+                      conversionReviewVersions:
+                        description: ConversionReviewVersions is set to one or more versions of the apiextensions.k8s.io ConversionReview API. See https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definition-versioning/#webhook-request-and-response for available versions. These versions are only valid if Type is ConversionWebhook.
                         type: array
                         items:
                           type: string

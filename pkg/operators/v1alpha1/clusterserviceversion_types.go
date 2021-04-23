@@ -9,6 +9,7 @@ import (
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	rbac "k8s.io/api/rbac/v1"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -176,18 +177,25 @@ type WebhookDescription struct {
 	// +kubebuilder:validation:Maximum=65535
 	// +kubebuilder:validation:Minimum=1
 	// +kubebuilder:default=443
-	ContainerPort           int32                                           `json:"containerPort,omitempty"`
-	TargetPort              *intstr.IntOrString                             `json:"targetPort,omitempty"`
-	Rules                   []admissionregistrationv1.RuleWithOperations    `json:"rules,omitempty"`
-	FailurePolicy           *admissionregistrationv1.FailurePolicyType      `json:"failurePolicy,omitempty"`
-	MatchPolicy             *admissionregistrationv1.MatchPolicyType        `json:"matchPolicy,omitempty"`
-	ObjectSelector          *metav1.LabelSelector                           `json:"objectSelector,omitempty"`
-	SideEffects             *admissionregistrationv1.SideEffectClass        `json:"sideEffects"`
-	TimeoutSeconds          *int32                                          `json:"timeoutSeconds,omitempty"`
-	AdmissionReviewVersions []string                                        `json:"admissionReviewVersions"`
+	ContainerPort  int32                                        `json:"containerPort,omitempty"`
+	TargetPort     *intstr.IntOrString                          `json:"targetPort,omitempty"`
+	Rules          []admissionregistrationv1.RuleWithOperations `json:"rules,omitempty"`
+	FailurePolicy  *admissionregistrationv1.FailurePolicyType   `json:"failurePolicy,omitempty"`
+	MatchPolicy    *admissionregistrationv1.MatchPolicyType     `json:"matchPolicy,omitempty"`
+	ObjectSelector *metav1.LabelSelector                        `json:"objectSelector,omitempty"`
+	SideEffects    *admissionregistrationv1.SideEffectClass     `json:"sideEffects,omitempty"`
+	TimeoutSeconds *int32                                       `json:"timeoutSeconds,omitempty"`
+	// AdmissionReviewVersions is set to one or more versions of the admission.k8s.io AdmissionReview API.
+	// See https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#webhook-request-and-response for available versions.
+	// These versions are only valid if Type is ValidatingAdmissionWebhook, MutatingAdmissionWebhook.
+	AdmissionReviewVersions []string                                        `json:"admissionReviewVersions,omitempty"`
 	ReinvocationPolicy      *admissionregistrationv1.ReinvocationPolicyType `json:"reinvocationPolicy,omitempty"`
 	WebhookPath             *string                                         `json:"webhookPath,omitempty"`
 	ConversionCRDs          []string                                        `json:"conversionCRDs,omitempty"`
+	// ConversionReviewVersions is set to one or more versions of the apiextensions.k8s.io ConversionReview API.
+	// See https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definition-versioning/#webhook-request-and-response for available versions.
+	// These versions are only valid if Type is ConversionWebhook.
+	ConversionReviewVersions []string `json:"conversionReviewVersions,omitempty"`
 }
 
 // GetValidatingWebhook returns a ValidatingWebhook generated from the WebhookDescription
@@ -236,6 +244,23 @@ func (w *WebhookDescription) GetMutatingWebhook(namespace string, namespaceSelec
 			CABundle: caBundle,
 		},
 		ReinvocationPolicy: w.ReinvocationPolicy,
+	}
+}
+
+// GetConversionWebhook returns a ConversionWebhook generated from the WebhookDescription.
+// QUESTION: support URL client config?
+func (w *WebhookDescription) GetConversionWebhook(namespace string, caBundle []byte) *apiextensionsv1.WebhookConversion {
+	return &apiextensionsv1.WebhookConversion{
+		ConversionReviewVersions: w.ConversionReviewVersions,
+		ClientConfig: &apiextensionsv1.WebhookClientConfig{
+			Service: &apiextensionsv1.ServiceReference{
+				Name:      w.DomainName() + "-service",
+				Namespace: namespace,
+				Path:      w.WebhookPath,
+				Port:      &w.ContainerPort,
+			},
+			CABundle: caBundle,
+		},
 	}
 }
 
