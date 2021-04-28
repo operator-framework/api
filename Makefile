@@ -83,7 +83,7 @@ test: test-unit ## Run the tests
 
 TEST_PKGS:=$(shell go list ./...)
 test-unit: ## Run the unit tests
-	$(Q)go test -count=1 -short ${TEST_PKGS}
+	$(Q)go test -count=1 -short ${TEST_PKGS} -v
 
 # Utilities.
 .PHONY: controller-gen

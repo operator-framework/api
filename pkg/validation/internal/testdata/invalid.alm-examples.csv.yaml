@@ -1,0 +1,34 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[{"apiVersion":"local.storage.openshift.io/v1","kind":"LocalVolume","metadata":{"name":"example"},"spec":{"storageClassDevices":[{"devicePaths":["/dev/disk/by-id/ata-crucial",],"fsType": "ext4", "storageClassName": "foobar", "volumeMode": "Filesystem" } ] } }, { "apiVersion": "local.storage.openshift.io/v1alpha1", "kind": "LocalVolumeSet", "metadata": { "name": "example-localvolumeset" }, "spec": { "deviceInclusionSpec": { "deviceMechanicalProperties": [ "Rotational", "NonRotational" ], "deviceTypes": [ "RawDisk" ], "maxSize": "100G", "minSize": "10G" }, "maxDeviceCount": 10, "nodeSelector": { "nodeSelectorTerms": [ { "matchExpressions": [ { "key": "kubernetes.io/hostname", "operator": "In", "values": [ "worker-0", "worker-1" ] } ] } ] }, "storageClassName": "example-storageclass", "volumeMode": "Block" } }, { "apiVersion": "local.storage.openshift.io/v1alpha1", "kind": "LocalVolumeDiscovery", "metadata": { "name": "auto-discover-devices" }, "spec": { "nodeSelector": { "nodeSelectorTerms": [ { "matchExpressions": [ { "key":"kubernetes.io/hostname","operator":"In","values":["worker-0","worker-1"]}]}]}}}]'
+    capabilities: Basic Install
+  name: test-operator.v0.0.1
+  namespace: placeholder
+spec:
+  displayName: test-operator
+  install:
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - test-operator
+  links:
+  - name: Test Operator
+    url: https://test-operator.domain
+  maintainers:
+  - email: your@email.com
+    name: Maintainer Name
+  maturity: alpha
+  provider:
+    name: Provider Name
+    url: https://your.domain
+  version: 0.0.1

@@ -61,6 +61,16 @@ func TestValidateCSV(t *testing.T) {
 			},
 			filepath.Join("testdata", "badAnnotationNames.csv.yaml"),
 		},
+		{
+			validatorFuncTest{
+				description: "invalid alm-examples json for csv",
+				wantErr:     true,
+				errors: []errors.Error{
+					errors.ErrInvalidParse("error decoding example CustomResource", "invalid character ']' looking for beginning of value"),
+				},
+			},
+			filepath.Join("testdata", "invalid.alm-examples.csv.yaml"),
+		},
 	}
 	for _, c := range cases {
 		b, err := ioutil.ReadFile(c.csvPath)
