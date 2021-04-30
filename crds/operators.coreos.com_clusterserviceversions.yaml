@@ -296,6 +296,49 @@ spec:
                   properties:
                     enabled:
                       type: boolean
+                conversionwebhookdefinitions:
+                  description: ConversionWebhookDefinitions holds CRD conversion webhook descriptions. These were previously held in WebhookDefinitions with Type=ConversionWebhookDescription, which is now deprecated.
+                  type: array
+                  items:
+                    description: ConversionWebhookDescription provides details to OLM about required CRD conversion webhooks.
+                    type: object
+                    required:
+                      - conversionCRDs
+                      - conversionReviewVersions
+                      - deploymentName
+                      - generateName
+                    properties:
+                      containerPort:
+                        type: integer
+                        format: int32
+                        default: 443
+                        maximum: 65535
+                        minimum: 1
+                      conversionCRDs:
+                        description: A list of CRD names that are converted by this webhook server.
+                        type: array
+                        minItems: 1
+                        items:
+                          type: string
+                      conversionReviewVersions:
+                        description: 'ConversionReviewVersions is set to one or more versions of the apiextensions.k8s.io ConversionReview API. See the following link for available versions: https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definition-versioning/#webhook-request-and-response'
+                        type: array
+                        minItems: 1
+                        items:
+                          type: string
+                      deploymentName:
+                        type: string
+                      generateName:
+                        type: string
+                      targetPort:
+                        anyOf:
+                          - type: integer
+                          - type: string
+                        x-kubernetes-int-or-string: true
+                      url:
+                        type: string
+                      webhookPath:
+                        type: string
                 customresourcedefinitions:
                   description: "CustomResourceDefinitions declares all of the CRDs managed or required by an operator being ran by ClusterServiceVersion. \n If the CRD is present in the Owned list, it is implicitly required."
                   type: object
@@ -4587,11 +4630,12 @@ spec:
                     description: WebhookDescription provides details to OLM about required webhooks
                     type: object
                     required:
+                      - admissionReviewVersions
                       - generateName
+                      - sideEffects
                       - type
                     properties:
                       admissionReviewVersions:
-                        description: AdmissionReviewVersions is set to one or more versions of the admission.k8s.io AdmissionReview API. See https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#webhook-request-and-response for available versions. These versions are only valid if Type is ValidatingAdmissionWebhook, MutatingAdmissionWebhook.
                         type: array
                         items:
                           type: string
@@ -4602,11 +4646,7 @@ spec:
                         maximum: 65535
                         minimum: 1
                       conversionCRDs:
-                        type: array
-                        items:
-                          type: string
-                      conversionReviewVersions:
-                        description: ConversionReviewVersions is set to one or more versions of the apiextensions.k8s.io ConversionReview API. See https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definition-versioning/#webhook-request-and-response for available versions. These versions are only valid if Type is ConversionWebhook.
+                        description: 'Deprecated: use ConversionWebhookDescription.ConversionCRDs instead.'
                         type: array
                         items:
                           type: string

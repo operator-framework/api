@@ -413,12 +413,35 @@ func TestWebhookDescConfigurations(t *testing.T) {
 	require.Equal(t, webhookDesc.WebhookPath, mWebhookConfig.ClientConfig.Service.Path)
 
 	cWebhookConfig := webhookDesc.GetConversionWebhook("foo", nil)
-	require.Equal(t, expectedPort, *cWebhookConfig.ClientConfig.Service.Port)
 	require.Equal(t, webhookDesc.DeploymentName+"-service", cWebhookConfig.ClientConfig.Service.Name)
 	require.Equal(t, "foo", cWebhookConfig.ClientConfig.Service.Namespace)
 	require.Equal(t, webhookDesc.WebhookPath, cWebhookConfig.ClientConfig.Service.Path)
 	require.NotNil(t, cWebhookConfig.ClientConfig.Service.Port)
 	require.Equal(t, webhookDesc.ContainerPort, *cWebhookConfig.ClientConfig.Service.Port)
+}
+
+func TestConversionWebhookDescConfigurations(t *testing.T) {
+	containerPort := int32(444)
+	webhookPath := "/test"
+	webhookDesc := ConversionWebhookDescription{
+		DeploymentName:           "foo-deployment",
+		ContainerPort:            &containerPort,
+		ConversionReviewVersions: []string{"v1beta1", "v1"},
+		WebhookPath:              &webhookPath,
+	}
+
+	whConversion := webhookDesc.GetWebhookConversion("foo", nil)
+	require.Equal(t, webhookDesc.DeploymentName+"-service", whConversion.ClientConfig.Service.Name)
+	require.Equal(t, "foo", whConversion.ClientConfig.Service.Namespace)
+	require.Equal(t, webhookDesc.WebhookPath, whConversion.ClientConfig.Service.Path)
+	require.NotNil(t, whConversion.ClientConfig.Service.Port)
+	require.Equal(t, *webhookDesc.ContainerPort, *whConversion.ClientConfig.Service.Port)
+
+	u := "https://bar.com/convert-foos"
+	webhookDesc.URL = &u
+	whConversion = webhookDesc.GetWebhookConversion("foo", nil)
+	require.NotNil(t, whConversion.ClientConfig.URL)
+	require.Equal(t, u, *whConversion.ClientConfig.URL)
 }
 
 func helperNewConditions(count int) []ClusterServiceVersionCondition {
