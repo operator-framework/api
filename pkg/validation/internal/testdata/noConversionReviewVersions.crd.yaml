@@ -11,8 +11,6 @@ spec:
           namespace: system
           name: webhook-service
           path: /convert
-      conversionReviewVersions:
-      - v1
   group: etcd.database.coreos.com
   names:
     kind: EtcdCluster

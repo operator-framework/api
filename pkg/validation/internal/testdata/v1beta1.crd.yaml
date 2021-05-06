@@ -3,6 +3,13 @@ kind: CustomResourceDefinition
 metadata:
   name: etcdclusters.etcd.database.coreos.com
 spec:
+  conversion:
+    strategy: Webhook
+    webhookClientConfig:
+      service:
+        namespace: system
+        name: webhook-service
+        path: /convert
   group: etcd.database.coreos.com
   names:
     kind: EtcdCluster
@@ -12,5 +19,6 @@ spec:
     - etcdclus
     - etcd
     singular: etcdcluster
+  preserveUnknownFields: false
   scope: Namespaced
   version: v1beta2
