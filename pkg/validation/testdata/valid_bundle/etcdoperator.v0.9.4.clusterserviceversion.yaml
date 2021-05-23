@@ -22,6 +22,7 @@ metadata:
     description: Create and maintain highly-available etcd clusters on Kubernetes
     repository: https://github.com/coreos/etcd-operator
     tectonic-visibility: ocs
+    olm.properties: '[{"type": "olm.maxOpenShiftVersion", "value": "4.8"}]'
   name: etcdoperator.v0.9.4
   namespace: placeholder
 spec:

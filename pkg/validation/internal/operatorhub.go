@@ -26,9 +26,6 @@ const minKubeVersionWarnMessage = "csv.Spec.minKubeVersion is not informed. It i
 	"Otherwise, it would mean that your operator project can be distributed and installed in any cluster version " +
 	"available, which is not necessarily the case for all projects."
 
-const crdv1beta1DeprecationMsg = "apiextensions.k8s.io/v1beta1, kind=CustomResourceDefinitions was deprecated in " +
-	"Kubernetes v1.16 and will be removed in v1.22 in favor of v1"
-
 // OperatorHubValidator validates the bundle manifests against the required criteria to publish
 // the projects on OperatorHub.io.
 //
@@ -207,21 +204,18 @@ func validateHubDeprecatedAPIS(bundle *manifests.Bundle, versionProvided string)
 	// - if minKubeVersion any version defined it means that we are considering install
 	// in any upper version from that where the check is always applied
 	if !isVersionProvided || semVerVersionProvided.GE(semVerk8sVerV1betav1Deprecated) {
-		if len(bundle.V1beta1CRDs) > 0 {
-			var crdApiNames []string
-			for _, obj := range bundle.V1beta1CRDs {
-				crdApiNames = append(crdApiNames, obj.Name)
-			}
-
+		deprecatedAPIs := getRemovedAPIsOn1_22From(bundle)
+		if len(deprecatedAPIs) > 0 {
+			deprecatedAPIsMessage := generateMessageWithDeprecatedAPIs(deprecatedAPIs)
 			// isUnsupported is true only if the key/value OR minKubeVersion were informed and are >= 1.22
 			isUnsupported := semVerVersionProvided.GE(semVerK8sVerV1betav1Unsupported) ||
 				semverMinKube.GE(semVerK8sVerV1betav1Unsupported)
 			// We only raise an error when the version >= 1.22 was informed via
 			// the k8s key/value option or is specifically defined in the CSV
 			if isUnsupported {
-				errs = append(errs, fmt.Errorf("%s: %+q should be migrated", crdv1beta1DeprecationMsg, crdApiNames))
+				errs = append(errs, fmt.Errorf("this bundle is %s. Migrate the API(s) for %s", k8sApiDeprecatedInfo, deprecatedAPIsMessage))
 			} else {
-				warns = append(warns, fmt.Errorf("%s: %+q should be migrated", crdv1beta1DeprecationMsg, crdApiNames))
+				warns = append(warns, fmt.Errorf("this bundle is %s. Migrate the API(s) for %s", k8sApiDeprecatedInfo, deprecatedAPIsMessage))
 			}
 		}
 	}
