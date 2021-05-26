@@ -9,6 +9,9 @@ const (
 	Upgradeable string = "Upgradeable"
 )
 
+// ConditionType codifies a condition's type.
+type ConditionType string
+
 // OperatorConditionSpec allows an operator to report state to OLM and provides
 // cluster admin with the ability to manually override state reported by the operator.
 type OperatorConditionSpec struct {
