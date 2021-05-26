@@ -13,7 +13,9 @@ func TestValidateSuccess(t *testing.T) {
 	bundle, err := manifests.GetBundleFromDir("./testdata/valid_bundle")
 	require.NoError(t, err)
 
-	results := AllValidators.Validate(bundle)
+	results := AllValidators.Validate(bundle, map[string]string{
+		"index-path": "./testdata/dockerfile/valid_bundle.Dockerfile"})
+
 	for _, result := range results {
 		require.Equal(t, false, result.HasError())
 	}
