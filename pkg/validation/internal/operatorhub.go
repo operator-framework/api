@@ -212,10 +212,11 @@ func validateHubDeprecatedAPIS(bundle *manifests.Bundle, versionProvided string)
 				semverMinKube.GE(semVerK8sVerV1betav1Unsupported)
 			// We only raise an error when the version >= 1.22 was informed via
 			// the k8s key/value option or is specifically defined in the CSV
+			msg := fmt.Errorf("this bundle is using APIs which were deprecated and removed in v1.22. More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. Migrate the API(s) for %s", deprecatedAPIsMessage)
 			if isUnsupported {
-				errs = append(errs, fmt.Errorf("this bundle is %s. Migrate the API(s) for %s", k8sApiDeprecatedInfo, deprecatedAPIsMessage))
+				errs = append(errs, msg)
 			} else {
-				warns = append(warns, fmt.Errorf("this bundle is %s. Migrate the API(s) for %s", k8sApiDeprecatedInfo, deprecatedAPIsMessage))
+				warns = append(warns, msg)
 			}
 		}
 	}

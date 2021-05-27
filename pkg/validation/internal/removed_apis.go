@@ -7,9 +7,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-// k8sApiDeprecatedInfo define the message which will appears by default when is possible to identify that the project has deprecated API(s)
-const k8sApiDeprecatedInfo = "using APIs which were deprecated and removed in v1.22. More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22"
-
 // OCP version where the apis v1beta1 is no longer supported
 const ocpVerV1beta1Unsupported = "4.9"
 
