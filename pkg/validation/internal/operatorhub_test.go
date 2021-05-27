@@ -375,7 +375,10 @@ func TestValidateHubDeprecatedAPIS(t *testing.T) {
 				directory:      "./testdata/valid_bundle_v1beta1",
 			},
 			wantWarning: true,
-			warnStrings: []string{"this bundle is " + k8sApiDeprecatedInfo + ". Migrate the API(s) for CRD: ([\"etcdbackups.etcd.database.coreos.com\" \"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
+			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.22. " +
+				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
+				"Migrate the API(s) for CRD: ([\"etcdbackups.etcd.database.coreos.com\" " +
+				"\"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
 		},
 		{
 			name: "should not return a warning or error when has minKubeVersion but the k8sVersion informed is <= 1.15",
@@ -395,7 +398,10 @@ func TestValidateHubDeprecatedAPIS(t *testing.T) {
 				directory:      "./testdata/valid_bundle_v1beta1",
 			},
 			wantError:   true,
-			errStrings:  []string{"this bundle is " + k8sApiDeprecatedInfo + ". Migrate the API(s) for CRD: ([\"etcdbackups.etcd.database.coreos.com\" \"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
+			errStrings:  []string{"this bundle is using APIs which were deprecated and removed in v1.22. " +
+				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
+				"Migrate the API(s) for CRD: ([\"etcdbackups.etcd.database.coreos.com\"" +
+				" \"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
 			wantWarning: true,
 			warnStrings: []string{"checking APIs against Kubernetes version : 1.22"},
 		},
@@ -417,8 +423,12 @@ func TestValidateHubDeprecatedAPIS(t *testing.T) {
 			},
 			wantError:   true,
 			wantWarning: true,
-			errStrings:  []string{"unable to use csv.Spec.MinKubeVersion to verify the CRD/Webhook apis because it has an invalid value: invalid"},
-			warnStrings: []string{"this bundle is " + k8sApiDeprecatedInfo + ". Migrate the API(s) for CRD: ([\"etcdbackups.etcd.database.coreos.com\" \"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
+			errStrings:  []string{"unable to use csv.Spec.MinKubeVersion to verify the CRD/Webhook apis because it " +
+				"has an invalid value: invalid"},
+			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.22. " +
+				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
+				"Migrate the API(s) for CRD: ([\"etcdbackups.etcd.database.coreos.com\" " +
+				"\"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
 		},
 	}
 	for _, tt := range tests {
