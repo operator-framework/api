@@ -1,0 +1,6 @@
+{
+    "type": "olm.package.required",
+    "value": {
+        "version": "0.6.1"
+    }
+}

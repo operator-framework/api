@@ -1,3 +1,70 @@
+# cuelang.org/go v0.3.0-beta.6
+## explicit
+cuelang.org/go/cue
+cuelang.org/go/cue/ast
+cuelang.org/go/cue/ast/astutil
+cuelang.org/go/cue/build
+cuelang.org/go/cue/errors
+cuelang.org/go/cue/format
+cuelang.org/go/cue/literal
+cuelang.org/go/cue/load
+cuelang.org/go/cue/parser
+cuelang.org/go/cue/scanner
+cuelang.org/go/cue/token
+cuelang.org/go/encoding/gocode/gocodec
+cuelang.org/go/encoding/json
+cuelang.org/go/encoding/jsonschema
+cuelang.org/go/encoding/openapi
+cuelang.org/go/encoding/protobuf
+cuelang.org/go/internal
+cuelang.org/go/internal/cli
+cuelang.org/go/internal/core/adt
+cuelang.org/go/internal/core/compile
+cuelang.org/go/internal/core/convert
+cuelang.org/go/internal/core/debug
+cuelang.org/go/internal/core/eval
+cuelang.org/go/internal/core/export
+cuelang.org/go/internal/core/runtime
+cuelang.org/go/internal/core/subsume
+cuelang.org/go/internal/core/validate
+cuelang.org/go/internal/core/walk
+cuelang.org/go/internal/encoding
+cuelang.org/go/internal/encoding/json
+cuelang.org/go/internal/encoding/yaml
+cuelang.org/go/internal/filetypes
+cuelang.org/go/internal/source
+cuelang.org/go/internal/task
+cuelang.org/go/internal/third_party/yaml
+cuelang.org/go/pkg
+cuelang.org/go/pkg/crypto/md5
+cuelang.org/go/pkg/crypto/sha1
+cuelang.org/go/pkg/crypto/sha256
+cuelang.org/go/pkg/crypto/sha512
+cuelang.org/go/pkg/encoding/base64
+cuelang.org/go/pkg/encoding/csv
+cuelang.org/go/pkg/encoding/hex
+cuelang.org/go/pkg/encoding/json
+cuelang.org/go/pkg/encoding/yaml
+cuelang.org/go/pkg/html
+cuelang.org/go/pkg/internal
+cuelang.org/go/pkg/list
+cuelang.org/go/pkg/math
+cuelang.org/go/pkg/math/bits
+cuelang.org/go/pkg/net
+cuelang.org/go/pkg/path
+cuelang.org/go/pkg/regexp
+cuelang.org/go/pkg/strconv
+cuelang.org/go/pkg/strings
+cuelang.org/go/pkg/struct
+cuelang.org/go/pkg/text/tabwriter
+cuelang.org/go/pkg/text/template
+cuelang.org/go/pkg/time
+cuelang.org/go/pkg/tool
+cuelang.org/go/pkg/tool/cli
+cuelang.org/go/pkg/tool/exec
+cuelang.org/go/pkg/tool/file
+cuelang.org/go/pkg/tool/http
+cuelang.org/go/pkg/tool/os
 # github.com/PuerkitoBio/purell v1.1.1
 github.com/PuerkitoBio/purell
 # github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578
@@ -13,8 +80,12 @@ github.com/blang/semver
 github.com/blang/semver/v4
 # github.com/cespare/xxhash/v2 v2.1.1
 github.com/cespare/xxhash/v2
+# github.com/cockroachdb/apd/v2 v2.0.1
+github.com/cockroachdb/apd/v2
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
+# github.com/emicklei/proto v1.6.15
+github.com/emicklei/proto
 # github.com/fatih/color v1.9.0
 github.com/fatih/color
 # github.com/ghodss/yaml v1.0.0
@@ -97,6 +168,8 @@ github.com/mitchellh/mapstructure
 github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.1
 github.com/modern-go/reflect2
+# github.com/mpvl/unique v0.0.0-20150818121801-cbe035fff7de
+github.com/mpvl/unique
 # github.com/pkg/errors v0.9.1
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
@@ -132,7 +205,7 @@ golang.org/x/crypto/ssh/terminal
 # golang.org/x/lint v0.0.0-20200302205851-738671d3881b
 golang.org/x/lint
 golang.org/x/lint/golint
-# golang.org/x/mod v0.3.0
+# golang.org/x/mod v0.3.1-0.20200828183125-ce943fd02449
 golang.org/x/mod/semver
 # golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
 golang.org/x/net/context
@@ -151,6 +224,12 @@ golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/text v0.3.4
+golang.org/x/text/encoding
+golang.org/x/text/encoding/internal
+golang.org/x/text/encoding/internal/identifier
+golang.org/x/text/encoding/unicode
+golang.org/x/text/internal/utf8internal
+golang.org/x/text/runes
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi

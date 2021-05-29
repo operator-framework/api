@@ -1,0 +1,9 @@
+{
+    "schema": "olm.package",
+    "name": "etcd",
+    "icon": {
+        "base64data":"iVBORw0KGgoAAAANSUhEUgAAA.....",
+        "mediatype":"image/png"
+    },
+    "description": "A message about etcd operator, a description of channels"
+}

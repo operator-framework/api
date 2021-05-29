@@ -1,0 +1,6 @@
+{
+    "type": "olm.bundle.object",
+    "value": {
+        "ref": "objects/etcdoperator.v0.6.1/etcdoperator.v0.6.1_operators.coreos.com_v1alpha1_clusterserviceversion.yaml"
+    }
+}

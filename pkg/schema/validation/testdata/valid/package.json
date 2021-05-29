@@ -1,0 +1,10 @@
+{
+    "schema": "olm.package",
+    "name": "etcd",
+    "defaultChannel": "singlenamespace-alpha",
+    "icon": {
+        "base64data":"iVBORw0KGgoAAAANSUhEUgAAA.....",
+        "mediatype":"image/png"
+    },
+    "description": "A message about etcd operator, a description of channels"
+}
