@@ -3,6 +3,7 @@ module github.com/operator-framework/api
 go 1.15
 
 require (
+	github.com/blang/semver v3.5.1+incompatible
 	github.com/blang/semver/v4 v4.0.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-bindata/go-bindata/v3 v3.1.3
