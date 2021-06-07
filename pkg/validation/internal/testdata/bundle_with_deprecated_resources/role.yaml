@@ -1,0 +1,10 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  creationTimestamp: null
+  name: memcached-role
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get

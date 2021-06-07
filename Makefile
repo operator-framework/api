@@ -36,7 +36,7 @@ install: ## Build & install operator-verify
 		$(BUILD_PATH)
 
 # Code management.
-.PHONY: format tidy clean vendor generate
+.PHONY: format tidy clean vendor generate manifests
 
 format: ## Format the source code
 	$(Q)go fmt $(PKGS)
@@ -77,13 +77,16 @@ manifests: controller-gen ## Generate manifests e.g. CRD, RBAC etc
 	$(Q)go generate ./crds/...
 
 # Static tests.
-.PHONY: test test-unit
+.PHONY: test test-unit verify
 
 test: test-unit ## Run the tests
 
 TEST_PKGS:=$(shell go list ./...)
 test-unit: ## Run the unit tests
 	$(Q)go test -count=1 -short ${TEST_PKGS}
+
+verify: manifests generate
+	git diff --exit-code
 
 # Utilities.
 .PHONY: controller-gen
