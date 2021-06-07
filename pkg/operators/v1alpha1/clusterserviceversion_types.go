@@ -9,6 +9,7 @@ import (
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	rbac "k8s.io/api/rbac/v1"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -163,6 +164,7 @@ const (
 	// MutatingAdmissionWebhook is for mutating admission webhooks
 	MutatingAdmissionWebhook WebhookAdmissionType = "MutatingAdmissionWebhook"
 	// ConversionWebhook is for conversion webhooks
+	// Deprecated: use ConversionWebhookDescription.
 	ConversionWebhook WebhookAdmissionType = "ConversionWebhook"
 )
 
@@ -187,7 +189,37 @@ type WebhookDescription struct {
 	AdmissionReviewVersions []string                                        `json:"admissionReviewVersions"`
 	ReinvocationPolicy      *admissionregistrationv1.ReinvocationPolicyType `json:"reinvocationPolicy,omitempty"`
 	WebhookPath             *string                                         `json:"webhookPath,omitempty"`
-	ConversionCRDs          []string                                        `json:"conversionCRDs,omitempty"`
+	// Deprecated: use ConversionWebhookDescription.ConversionCRDs instead.
+	ConversionCRDs []string `json:"conversionCRDs,omitempty"`
+}
+
+// ConversionWebhookDescription provides details to OLM about required CRD conversion webhooks.
+// +k8s:openapi-gen=true
+type ConversionWebhookDescription struct {
+	//+kubebuilder:validation:Required
+	GenerateName string `json:"generateName"`
+	//+kubebuilder:validation:Required
+	DeploymentName string `json:"deploymentName"`
+
+	//+optional
+	URL *string `json:"url,omitempty"`
+	//+kubebuilder:validation:Maximum=65535
+	//+kubebuilder:validation:Minimum=1
+	//+kubebuilder:default=443
+	//+optional
+	ContainerPort *int32 `json:"containerPort,omitempty"`
+	//+optional
+	TargetPort *intstr.IntOrString `json:"targetPort,omitempty"`
+	//+optional
+	WebhookPath *string `json:"webhookPath,omitempty"`
+	// A list of CRD names that are converted by this webhook server.
+	//+kubebuilder:validation:MinItems=1
+	ConversionCRDs []string `json:"conversionCRDs"`
+	// ConversionReviewVersions is set to one or more versions of the apiextensions.k8s.io ConversionReview API.
+	// See the following link for available versions:
+	// https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definition-versioning/#webhook-request-and-response
+	//+kubebuilder:validation:MinItems=1
+	ConversionReviewVersions []string `json:"conversionReviewVersions"`
 }
 
 // GetValidatingWebhook returns a ValidatingWebhook generated from the WebhookDescription
@@ -239,10 +271,60 @@ func (w *WebhookDescription) GetMutatingWebhook(namespace string, namespaceSelec
 	}
 }
 
+// GetConversionWebhook returns a ConversionWebhook generated from the WebhookDescription.
+// Deprecated: use ConversionWebhookDescription.GetConversionWebhook().
+func (w *WebhookDescription) GetConversionWebhook(namespace string, caBundle []byte) *apiextensionsv1.WebhookConversion {
+	return &apiextensionsv1.WebhookConversion{
+		ConversionReviewVersions: w.AdmissionReviewVersions,
+		ClientConfig: &apiextensionsv1.WebhookClientConfig{
+			Service: &apiextensionsv1.ServiceReference{
+				Name:      w.DomainName() + "-service",
+				Namespace: namespace,
+				Path:      w.WebhookPath,
+				Port:      &w.ContainerPort,
+			},
+			CABundle: caBundle,
+		},
+	}
+}
+
+// GetWebhookConversion returns a ConversionWebhook generated from the WebhookDescription.
+func (w *ConversionWebhookDescription) GetWebhookConversion(namespace string, caBundle []byte) *apiextensionsv1.WebhookConversion {
+	wc := &apiextensionsv1.WebhookConversion{
+		ConversionReviewVersions: w.ConversionReviewVersions,
+		ClientConfig: &apiextensionsv1.WebhookClientConfig{
+			CABundle: caBundle,
+		},
+	}
+
+	if w.URL != nil {
+		wc.ClientConfig.URL = w.URL
+	} else {
+		wc.ClientConfig.Service = &apiextensionsv1.ServiceReference{
+			Name:      w.DomainName() + "-service",
+			Namespace: namespace,
+			Path:      w.WebhookPath,
+			Port:      w.ContainerPort,
+		}
+	}
+
+	return wc
+}
+
 // DomainName returns the result of replacing all periods in the given Webhook name with hyphens
 func (w *WebhookDescription) DomainName() string {
+	return getDomainName(w.DeploymentName)
+}
+
+// DomainName returns the result of replacing all periods in the given conversion webhook's deployment name with hyphens
+func (w *ConversionWebhookDescription) DomainName() string {
+	return getDomainName(w.DeploymentName)
+}
+
+// getDomainName returns deploymentName coerced into a DNS-1035 label.
+func getDomainName(deploymentName string) string {
 	// Replace all '.'s with "-"s to convert to a DNS-1035 label
-	return strings.Replace(w.DeploymentName, ".", "-", -1)
+	return strings.Replace(deploymentName, ".", "-", -1)
 }
 
 // CustomResourceDefinitions declares all of the CRDs managed or required by
@@ -281,6 +363,12 @@ type ClusterServiceVersionSpec struct {
 	Provider                  AppLink                   `json:"provider,omitempty"`
 	Links                     []AppLink                 `json:"links,omitempty"`
 	Icon                      []Icon                    `json:"icon,omitempty"`
+
+	// ConversionWebhookDefinitions holds CRD conversion webhook descriptions.
+	// These were previously held in WebhookDefinitions with Type=ConversionWebhookDescription,
+	// which is now deprecated.
+	//+optional
+	ConversionWebhookDefinitions []ConversionWebhookDescription `json:"conversionwebhookdefinitions,omitempty"`
 
 	// InstallModes specify supported installation types
 	// +optional
