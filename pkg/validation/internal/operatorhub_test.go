@@ -474,7 +474,7 @@ func TestValidateHubChannels(t *testing.T) {
 		{
 			name: "should not return warning when the channel names following the convention",
 			args: args{
-				channels: []string{"fast", "preview"},
+				channels: []string{"fast", "candidate"},
 			},
 			wantWarn: false,
 		},
