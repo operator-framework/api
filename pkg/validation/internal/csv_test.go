@@ -49,6 +49,18 @@ func TestValidateCSV(t *testing.T) {
 			},
 			filepath.Join("testdata", "incorrect.csv.with.conversion.webhook.yaml"),
 		},
+		{
+			validatorFuncTest{
+				description: "invalid annotation name for csv",
+				wantErr:     true,
+				errors: []errors.Error{
+					errors.ErrFailedValidation("provided annotation olm.skiprange uses wrong case and should be olm.skipRange instead", "etcdoperator.v0.9.0"),
+					errors.ErrFailedValidation("provided annotation olm.operatorgroup uses wrong case and should be olm.operatorGroup instead", "etcdoperator.v0.9.0"),
+					errors.ErrFailedValidation("provided annotation olm.operatornamespace uses wrong case and should be olm.operatorNamespace instead", "etcdoperator.v0.9.0"),
+				},
+			},
+			filepath.Join("testdata", "badAnnotationNames.csv.yaml"),
+		},
 	}
 	for _, c := range cases {
 		b, err := ioutil.ReadFile(c.csvPath)
