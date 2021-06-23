@@ -55,6 +55,9 @@ func parseCSVNameFormat(name string) error {
 	if violations := k8svalidation.IsDNS1123Subdomain(name); len(violations) != 0 {
 		return fmt.Errorf("%q is invalid:\n%s", name, violations)
 	}
+	if len(name) > k8svalidation.LabelValueMaxLength {
+		return fmt.Errorf("%q must be %d characters or less", name, k8svalidation.LabelValueMaxLength)
+	}
 	return errors.Error{}
 }
 
