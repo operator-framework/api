@@ -1,0 +1,90 @@
+#! validate-crd: deploy/chart/templates/0000_30_02-clusterserviceversion.crd.yaml
+#! parse-kind: ClusterServiceVersion
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  name: someoperatorwithanextremelylongnamethatmakenosensewhatsoever.v999.999.999
+  namespace: placeholder
+  annotations:
+    capabilities: Full Lifecycle
+    tectonic-visibility: ocs
+    alm-examples: '[{"apiVersion":"etcd.database.coreos.com/v1beta2","kind":"EtcdCluster","metadata":{"name":"example","namespace":"default"},"spec":{"size":3,"version":"3.2.13"}},{"apiVersion":"etcd.database.coreos.com/v1beta2","kind":"EtcdRestore","metadata":{"name":"example-etcd-cluster"},"spec":{"etcdCluster":{"name":"example-etcd-cluster"},"backupStorageType":"S3","s3":{"path":"<full-s3-path>","awsSecret":"<aws-secret>"}}},{"apiVersion":"etcd.database.coreos.com/v1beta2","kind":"EtcdBackup","metadata":{"name":"example-etcd-cluster-backup"},"spec":{"etcdEndpoints":["<etcd-cluster-endpoints>"],"storageType":"S3","s3":{"path":"<full-s3-path>","awsSecret":"<aws-secret>"}}}]'
+    description: etcd is a distributed key value store providing a reliable way to store data across a cluster of machines.
+spec:
+  displayName: etcd
+  description: something
+  keywords: ['etcd', 'key value', 'database', 'coreos', 'open source']
+  version: 0.9.0
+  icon:
+  - base64data: N8AmEL9X4ABACNSKMHAgb34AAAAAElFTkSuQmCC
+    mediatype: image/png
+  installModes:
+  - type: OwnNamespace
+    supported: true
+  - type: SingleNamespace
+    supported: true
+  - type: MultiNamespace
+    supported: false
+  - type: AllNamespaces
+    supported: true
+  install:
+    strategy: deployment
+    spec:
+      permissions:
+      - serviceAccountName: etcd-operator
+        rules:
+        - apiGroups:
+          - etcd.database.coreos.com
+          resources:
+          - etcdclusters
+          - etcdbackups
+          - etcdrestores
+          verbs:
+          - "*"
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - services
+          - endpoints
+          - persistentvolumeclaims
+          - events
+          verbs:
+          - "*"
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          verbs:
+          - "*"
+        - apiGroups:
+          - ""
+          resources:
+          - secrets
+          verbs:
+          - get
+      deployments:
+      - name: etcd-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: etcd-operator-alm-owned
+          template:
+            metadata:
+              name: etcd-operator-alm-owned
+              labels:
+                name: etcd-operator-alm-owned
+            spec:
+              serviceAccountName: etcd-operator
+  customresourcedefinitions:
+    owned:
+    - name: etcdclusters.etcd.database.coreos.com
+      version: v1beta2
+      kind: EtcdCluster
+    - name: etcdbackups.etcd.database.coreos.com
+      version: v1beta2
+      kind: EtcdBackup
+    - name: etcdrestores.etcd.database.coreos.com
+      version: v1beta2
+      kind: EtcdRestore
