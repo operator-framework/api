@@ -18,8 +18,10 @@ type Configuration struct {
 	} `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 
 	// Stages is a set of test stages to run. Once a stage is finished, the next stage in the slice will be run.
-	Stages  []StageConfiguration `json:"stages" yaml:"stages"`
-	Storage Storage              `json:"storage,omitempty" yaml:"storage,omitempty"`
+	Stages []StageConfiguration `json:"stages" yaml:"stages"`
+
+	// Storage is the optional storage configuration
+	Storage Storage `json:"storage,omitempty" yaml:"storage,omitempty"`
 }
 
 // StageConfiguration configures a set of tests to be run.
@@ -40,21 +42,25 @@ type TestConfiguration struct {
 	// Entrypoint is a list of commands and arguments passed to the test image.
 	Entrypoint []string `json:"entrypoint,omitempty" yaml:"entrypoint,omitempty"`
 	// Labels further describe the test and enable selection.
-	Labels  map[string]string `json:"labels,omitempty" yaml:"labels,omitempty"`
-	Storage Storage           `json:"storage,omitempty" yaml:"storage,omitempty"`
+	Labels map[string]string `json:"labels,omitempty" yaml:"labels,omitempty"`
+	// Storage is the optional storage configuration for the test image.
+	Storage Storage `json:"storage,omitempty" yaml:"storage,omitempty"`
 }
 
-// Storage
+// Storage configures custom storage options
 type Storage struct {
-	Spec StorageSpec `yaml:"spec"`
+	// Spec contains the storage configuration options
+	Spec StorageSpec `json:"spec" yaml:"spec"`
 }
 
-// Spec
+// StorageSpec contains storage configuration options
 type StorageSpec struct {
-	MountPath MountPath `yaml:"mountPath,omitempty" yaml:"mountPath,omitempty"`
+	// MountPath configures the path to mount directories in the test pod
+	MountPath MountPath `json:"mountPath,omitempty" yaml:"mountPath,omitempty"`
 }
 
-// MountPath
+// MountPath configures the path to mount directories in the test pod
 type MountPath struct {
-	Path string `yaml:"path,omitempty" yaml:"path,omitempty"`
+	// Path is the fully qualified path that a directory should be mounted in the test pod
+	Path string `json:"path,omitempty" yaml:"path,omitempty"`
 }
