@@ -96,6 +96,8 @@ type RegistryPoll struct {
 	// Interval is used to determine the time interval between checks of the latest catalog source version.
 	// The catalog operator polls to see if a new version of the catalog source is available.
 	// If available, the latest image is pulled and gRPC traffic is directed to the latest catalog source.
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:validation:Format:=date-time
 	Interval *metav1.Duration `json:"interval,omitempty"`
 }
 
