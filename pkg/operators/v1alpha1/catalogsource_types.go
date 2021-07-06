@@ -97,7 +97,7 @@ type RegistryPoll struct {
 	// The catalog operator polls to see if a new version of the catalog source is available.
 	// If available, the latest image is pulled and gRPC traffic is directed to the latest catalog source.
 	// +kubebuilder:validation:Type:=string
-	// +kubebuilder:validation:Format:=date-time
+	// +kubebuilder:validation:Pattern:="^(0|([0-9]+(ns|us|µs|μs|ms|s|m|h))+)$"
 	Interval *metav1.Duration `json:"interval,omitempty"`
 }
 
