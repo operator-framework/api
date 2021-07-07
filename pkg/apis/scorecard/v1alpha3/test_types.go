@@ -40,7 +40,7 @@ type TestStatus struct {
 // Test specifies a single test run.
 type Test struct {
 	metav1.TypeMeta `json:",inline"`
-	Timestamp       string            `"json:"timestamp,omitempty"`
+	Tstamp          string            `json:"tstamp,omitempty"`
 	Spec            TestConfiguration `json:"spec,omitempty"`
 	Status          TestStatus        `json:"status,omitempty"`
 }
