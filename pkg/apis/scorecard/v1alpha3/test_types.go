@@ -28,6 +28,8 @@ type TestResult struct {
 	Errors []string `json:"errors,omitempty"`
 	// Suggestions is a list of suggestions for the user to improve their score (if applicable)
 	Suggestions []string `json:"suggestions,omitempty"`
+	// Timestamp of the result from an invidual test
+	Tstamp metav1.Time `json:"tstamp,omitempty"`
 }
 
 // TestStatus contains collection of testResults.
@@ -40,7 +42,6 @@ type TestStatus struct {
 // Test specifies a single test run.
 type Test struct {
 	metav1.TypeMeta `json:",inline"`
-	Tstamp          string            `json:"tstamp,omitempty"`
 	Spec            TestConfiguration `json:"spec,omitempty"`
 	Status          TestStatus        `json:"status,omitempty"`
 }
