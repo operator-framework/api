@@ -11,10 +11,10 @@ require (
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.1.3
 	github.com/stretchr/testify v1.7.0
-	k8s.io/api v0.21.1
-	k8s.io/apiextensions-apiserver v0.21.1
-	k8s.io/apimachinery v0.21.1
-	k8s.io/client-go v0.21.1
+	k8s.io/api v0.22.0-beta.2
+	k8s.io/apiextensions-apiserver v0.22.0-beta.2
+	k8s.io/apimachinery v0.22.0-beta.2
+	k8s.io/client-go v0.22.0-beta.2
 	sigs.k8s.io/controller-runtime v0.9.0
 	sigs.k8s.io/controller-tools v0.6.0
 )
