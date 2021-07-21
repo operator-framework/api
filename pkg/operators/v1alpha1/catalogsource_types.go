@@ -36,6 +36,16 @@ const (
 	CatalogSourceConfigMapError ConditionReason = "ConfigMapError"
 	// CatalogSourceRegistryServerError denotes when there is an issue querying the specified registry server.
 	CatalogSourceRegistryServerError ConditionReason = "RegistryServerError"
+	// SAFailedError denotes a state where the creation of a service account for the CatalogSource failed.
+	SAFailedError ConditionReason = "SAFailedError"
+	// PodCreationFailedError denotes a state where the creation of a registry pod for the CatalogSource failed.
+	PodCreationFailedError ConditionReason = "PodCreationFailedError"
+	// UpdateNotReadyError denotes a state where the new pod as the aftermath of polling is not ready to be created.
+	UpdateNotReadyError ConditionReason = "UpdateNotReadyError"
+	// PodUpdateFailError denotes a state where the creation of an updated pod as the aftermath of polling has failed.
+	PodUpdateFailError ConditionReason = "PodUpdateFailError"
+	// ServiceFailedError denotes a state where the creation of the Service for the CatalogSource has failed.
+	ServiceFailedError ConditionReason = "ServiceFailedError"
 )
 
 type CatalogSourceSpec struct {
