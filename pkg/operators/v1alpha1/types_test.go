@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"encoding/json"
 	"sort"
 	"testing"
 	"time"
@@ -206,5 +207,67 @@ func TestCatalogSource_Poll(t *testing.T) {
 	}
 	for i, tt := range table {
 		require.Equal(t, tt.result, table[i].catsrc.Poll(), table[i].description)
+	}
+}
+
+func TestUpdateStrategyUnmarshal(t *testing.T) {
+	type TestStruct struct {
+		UpdateStrategy UpdateStrategy `json:"updateStrategy,omitempty"`
+	}
+	validDuration, err := time.ParseDuration("45m")
+	if err != nil {
+		return
+	}
+	defaultDuration, err := time.ParseDuration("15m")
+	if err != nil {
+		return
+	}
+	tests := []struct {
+		name string
+		in   []byte
+		out  TestStruct
+		err  error
+	}{
+		{
+			name: "valid",
+			in:   []byte(`{"UpdateStrategy": {"registryPoll":{"interval":"45m"}}}`),
+			out: TestStruct{
+				UpdateStrategy{
+					&RegistryPoll{
+						Interval: &metav1.Duration{Duration: validDuration},
+					},
+				},
+			},
+		},
+		{
+			name: "invalid",
+			in:   []byte(`{"UpdateStrategy": {"registryPoll":{"interval":"19mError Code"}}}`),
+			out: TestStruct{
+				UpdateStrategy{
+					&RegistryPoll{
+						Interval: &metav1.Duration{Duration: defaultDuration},
+					},
+				},
+			},
+		},
+		{
+			name: "empty",
+			in:   []byte(`{"UpdateStrategy": {"registryPoll":{"interval":""}}}`),
+			out: TestStruct{
+				UpdateStrategy{
+					&RegistryPoll{
+						Interval: &metav1.Duration{Duration: defaultDuration},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := TestStruct{}
+			err := json.Unmarshal(tt.in, &s)
+			require.Equal(t, tt.out.UpdateStrategy.Interval, s.UpdateStrategy.Interval)
+			require.Equal(t, tt.err, err)
+		})
 	}
 }

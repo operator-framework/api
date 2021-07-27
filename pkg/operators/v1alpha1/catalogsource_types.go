@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -10,8 +11,9 @@ import (
 )
 
 const (
-	CatalogSourceCRDAPIVersion = GroupName + "/" + GroupVersion
-	CatalogSourceKind          = "CatalogSource"
+	CatalogSourceCRDAPIVersion  = GroupName + "/" + GroupVersion
+	CatalogSourceKind           = "CatalogSource"
+	DefaultRegistryPollDuration = "15m"
 )
 
 // SourceType indicates the type of backing store for a CatalogSource
@@ -36,6 +38,8 @@ const (
 	CatalogSourceConfigMapError ConditionReason = "ConfigMapError"
 	// CatalogSourceRegistryServerError denotes when there is an issue querying the specified registry server.
 	CatalogSourceRegistryServerError ConditionReason = "RegistryServerError"
+	// CatalogSourceIntervalInvalidError denotes when the registry interval is invalid.
+	CatalogSourceIntervalInvalidError ConditionReason = "IntervalInvalidError"
 )
 
 type CatalogSourceSpec struct {
@@ -97,6 +101,8 @@ type RegistryPoll struct {
 	// The catalog operator polls to see if a new version of the catalog source is available.
 	// If available, the latest image is pulled and gRPC traffic is directed to the latest catalog source.
 	Interval *metav1.Duration `json:"interval,omitempty"`
+	// +optional
+	ParsingError string `json:"parsingError,omitempty"`
 }
 
 type RegistryServiceStatus struct {
@@ -240,6 +246,28 @@ func (c *CatalogSource) Poll() bool {
 		return false
 	}
 	return true
+}
+
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface.
+func (u *UpdateStrategy) UnmarshalJSON(data []byte) (err error) {
+	var updateStrategyMap map[string]map[string]string
+	if err = json.Unmarshal(data, &updateStrategyMap); err != nil {
+		return err
+	}
+	registryPoll := &RegistryPoll{}
+	duration, err := time.ParseDuration(updateStrategyMap["registryPoll"]["interval"])
+	if err != nil {
+		registryPoll.ParsingError = fmt.Sprintf("error parsing spec.updateStrategy.registryPoll.interval. Setting the default value of %v. Error:%v", DefaultRegistryPollDuration, err)
+		defaultTime, parseErr := time.ParseDuration(DefaultRegistryPollDuration)
+		if parseErr != nil {
+			return parseErr
+		}
+		registryPoll.Interval = &metav1.Duration{Duration: defaultTime}
+	} else {
+		registryPoll.Interval = &metav1.Duration{Duration: duration}
+	}
+	u.RegistryPoll = registryPoll
+	return nil
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
