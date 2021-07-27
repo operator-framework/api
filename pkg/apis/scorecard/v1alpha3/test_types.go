@@ -28,8 +28,8 @@ type TestResult struct {
 	Errors []string `json:"errors,omitempty"`
 	// Suggestions is a list of suggestions for the user to improve their score (if applicable)
 	Suggestions []string `json:"suggestions,omitempty"`
-	// Timestamp of the result from an invidual test
-	Tstamp metav1.Time `json:"tstamp,omitempty"`
+	// CreationTimestamp of the result from an invidual test
+	CreationTimestamp metav1.Time `json:"creationTimestamp,omitempty"`
 }
 
 // TestStatus contains collection of testResults.
