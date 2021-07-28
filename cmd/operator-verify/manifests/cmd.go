@@ -11,13 +11,17 @@ import (
 
 func NewCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:   "manifests",
-		Short: "Validates all manifests in a directory",
-		Long: `'operator-verify manifests' validates a bundle in the supplied directory
-and prints errors and warnings corresponding to each manifest found to be
-invalid. Manifests are only validated if a validator for that manifest
-type/kind, ex. CustomResourceDefinition, is implemented in the Operator
-validation library.`,
+		Use:   "manifests <manifestDir>",
+		Short: "Validate all manifests in a directory",
+		Args:  cobra.ExactArgs(1),
+		Long: `Validate the contents of a bundle in the supplied <manifestDir> directory.
+
+For each manifest in the <manifestDir> directory, this command will print any errors
+or warnings produced during the validation process.
+
+Note: certain manifests may be ignored during the validation process if a validator
+for that type/Kind has not been implemented yet in the Operator validation library.
+`,
 		Run: manifestsFunc,
 	}
 
@@ -38,7 +42,7 @@ func manifestsFunc(cmd *cobra.Command, args []string) {
 
 	operatorHubValidate, err := cmd.Flags().GetBool("operatorhub_validate")
 	if err != nil {
-		log.Fatalf("Unable to parse operatorhub_validate parameter")
+		log.Fatalf("Unable to parse operatorhub_validate parameter: %v", err)
 	}
 
 	bundleObjectValidate, err := cmd.Flags().GetBool("object_validate")
