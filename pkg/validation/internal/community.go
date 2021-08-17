@@ -149,9 +149,17 @@ func checkMaxOpenShiftVersion(checks CommunityOperatorChecks, v1beta1MsgForResou
 
 	semVerVersionMaxOcp, err := semver.ParseTolerant(olmMaxOpenShiftVersionValue)
 	if err != nil {
-		checks.errs = append(checks.errs, fmt.Errorf("csv.Annotations.%s has an invalid value."+
+		checks.errs = append(checks.errs, fmt.Errorf("csv.Annotations.%s has an invalid value. "+
 			"Unable to parse (%s) using semver : %s",
 			olmproperties, olmMaxOpenShiftVersionValue, err))
+		return checks
+	}
+
+	truncatedMaxOcp := semver.Version{Major: semVerVersionMaxOcp.Major, Minor: semVerVersionMaxOcp.Minor}
+	if !semVerVersionMaxOcp.EQ(truncatedMaxOcp) {
+		checks.warns = append(checks.warns, fmt.Errorf("csv.Annotations.%s has an invalid value. "+
+			"%s must specify only major.minor versions, %s will be truncated to %s",
+			olmproperties, olmmaxOpenShiftVersion, semVerVersionMaxOcp, truncatedMaxOcp))
 		return checks
 	}
 
@@ -248,12 +256,12 @@ func validateImageFile(checks CommunityOperatorChecks, deprecatedAPImsg string) 
 						}
 
 						if verParsed.GE(semVerOCPV1beta1Unsupported) {
-							checks.errs = append(checks.errs, fmt.Errorf("this bundle is using APIs which were " +
-								"deprecated and removed in v1.22. " +
-								"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
+							checks.errs = append(checks.errs, fmt.Errorf("this bundle is using APIs which were "+
+								"deprecated and removed in v1.22. "+
+								"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. "+
 								"Migrate the API(s) for "+
-								"%s or provide compatible version(s) by using the %s annotation in " +
-								"`metadata/annotations.yaml` to ensure that the index image will be geneared " +
+								"%s or provide compatible version(s) by using the %s annotation in "+
+								"`metadata/annotations.yaml` to ensure that the index image will be geneared "+
 								"with its label. (e.g. LABEL %s='4.6-4.8')",
 								deprecatedAPImsg,
 								ocpLabelindex,
@@ -263,12 +271,12 @@ func validateImageFile(checks CommunityOperatorChecks, deprecatedAPImsg string) 
 					} else {
 						// if not has not the = then the value needs contains - value less < 4.9
 						if !strings.Contains(indexRange, "-") {
-							checks.errs = append(checks.errs, fmt.Errorf("this bundle is using APIs which were " +
-								"deprecated and removed in v1.22. " +
+							checks.errs = append(checks.errs, fmt.Errorf("this bundle is using APIs which were "+
+								"deprecated and removed in v1.22. "+
 								"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22 "+
 								"The %s allows to distribute it on >= %s. Migrate the API(s) for "+
-								"%s or provide compatible version(s) by using the %s annotation in " +
-								"`metadata/annotations.yaml` to ensure that the index image will be generated " +
+								"%s or provide compatible version(s) by using the %s annotation in "+
+								"`metadata/annotations.yaml` to ensure that the index image will be generated "+
 								"with its label. (e.g. LABEL %s='4.6-4.8')",
 								indexRange,
 								ocpVerV1beta1Unsupported,
@@ -287,12 +295,12 @@ func validateImageFile(checks CommunityOperatorChecks, deprecatedAPImsg string) 
 						}
 
 						if verParsed.GE(semVerOCPV1beta1Unsupported) {
-							checks.errs = append(checks.errs, fmt.Errorf("this bundle is using APIs which were " +
-								"deprecated and removed in v1.22. " +
-								"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
+							checks.errs = append(checks.errs, fmt.Errorf("this bundle is using APIs which were "+
+								"deprecated and removed in v1.22. "+
+								"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. "+
 								"Upgrade the APIs from "+
-								"for %s or provide compatible distribution version(s) by using the %s " +
-								"annotation in `metadata/annotations.yaml` to ensure that the index image will " +
+								"for %s or provide compatible distribution version(s) by using the %s "+
+								"annotation in `metadata/annotations.yaml` to ensure that the index image will "+
 								"be generated with its label. (e.g. LABEL %s='4.6-4.8')",
 								deprecatedAPImsg,
 								ocpLabelindex,
@@ -310,8 +318,8 @@ func validateImageFile(checks CommunityOperatorChecks, deprecatedAPImsg string) 
 			}
 		}
 	} else {
-		checks.errs = append(checks.errs, fmt.Errorf("this bundle is using APIs which were deprecated and " +
-			"removed in v1.22. More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
+		checks.errs = append(checks.errs, fmt.Errorf("this bundle is using APIs which were deprecated and "+
+			"removed in v1.22. More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. "+
 			"Migrate the APIs "+
 			"for %s or provide compatible version(s) via the labels. (e.g. LABEL %s='4.6-4.8')",
 			deprecatedAPImsg,
