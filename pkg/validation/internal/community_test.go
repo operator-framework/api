@@ -118,6 +118,17 @@ func Test_communityValidator(t *testing.T) {
 				"Warning: Value : (etcdoperator.v0.9.4) csv.Annotations.olm.properties has an invalid value. olm.maxOpenShiftVersion must specify only major.minor versions, 4.8.1 will be truncated to 4.8.0",
 			},
 		},
+		{
+			name:      "should pass when the maxOpenShiftVersion is semantically equivalent to <major>.<minor>.0",
+			wantError: false,
+			args: args{
+				bundleDir:      "./testdata/valid_bundle_v1beta1",
+				imageIndexPath: "./testdata/dockerfile/valid_bundle.Dockerfile",
+				annotations: map[string]string{
+					"olm.properties": fmt.Sprintf(`[{"type": "olm.maxOpenShiftVersion", "value": "4.8.0+build"}]`),
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {
