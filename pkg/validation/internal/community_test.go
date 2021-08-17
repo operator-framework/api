@@ -104,6 +104,20 @@ func Test_communityValidator(t *testing.T) {
 				"This bundle is using APIs which were deprecated and removed in v1.22. " +
 				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22 "},
 		},
+		{
+			name:        "should warn on patch version in maxOpenShiftVersion",
+			wantWarning: true,
+			args: args{
+				bundleDir:      "./testdata/valid_bundle_v1beta1",
+				imageIndexPath: "./testdata/dockerfile/valid_bundle.Dockerfile",
+				annotations: map[string]string{
+					"olm.properties": fmt.Sprintf(`[{"type": "olm.maxOpenShiftVersion", "value": "4.8.1"}]`),
+				},
+			},
+			warnStrings: []string{
+				"Warning: Value : (etcdoperator.v0.9.4) csv.Annotations.olm.properties has an invalid value. olm.maxOpenShiftVersion must specify only major.minor versions, 4.8.1 will be truncated to 4.8.0",
+			},
+		},
 	}
 
 	for _, tt := range tests {
