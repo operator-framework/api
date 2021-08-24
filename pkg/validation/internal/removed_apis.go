@@ -127,13 +127,12 @@ func validateDeprecatedAPIS(bundle *manifests.Bundle, versionProvided string) (e
 	if !isVersionProvided || semVerVersionProvided.GE(semVerk8sVerV1betav1Deprecated) {
 		deprecatedAPIs := getRemovedAPIsOn1_22From(bundle)
 		if len(deprecatedAPIs) > 0 {
-			deprecatedAPIsMessage := generateMessageWithDeprecatedAPIs(deprecatedAPIs)
 			// isUnsupported is true only if the key/value OR minKubeVersion were informed and are >= 1.22
 			isUnsupported := semVerVersionProvided.GE(semVerK8sVerV1betav1Unsupported) ||
 				semverMinKube.GE(semVerK8sVerV1betav1Unsupported)
 			// We only raise an error when the version >= 1.22 was informed via
 			// the k8s key/value option or is specifically defined in the CSV
-			msg := fmt.Errorf("this bundle is using APIs which were deprecated and removed in v1.22. More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. Migrate the API(s) for %s", deprecatedAPIsMessage)
+			msg := fmt.Errorf("this bundle is using APIs which were deprecated and removed in v1.22. More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. Migrate the API(s) for %s", deprecatedAPIs)
 			if isUnsupported {
 				errs = append(errs, msg)
 			} else {
@@ -165,7 +164,7 @@ func generateMessageWithDeprecatedAPIs(deprecatedAPIs map[string][]string) strin
 
 // getRemovedAPIsOn1_22From return the list of resources which were deprecated
 // and are no longer be supported in 1.22. More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22
-func getRemovedAPIsOn1_22From(bundle *manifests.Bundle) map[string][]string {
+func getRemovedAPIsOn1_22From(bundle *manifests.Bundle) string {
 	deprecatedAPIs := make(map[string][]string)
 	if len(bundle.V1beta1CRDs) > 0 {
 		var crdApiNames []string
@@ -226,5 +225,7 @@ func getRemovedAPIsOn1_22From(bundle *manifests.Bundle) map[string][]string {
 			}
 		}
 	}
-	return deprecatedAPIs
+
+	// Check if has deprecated apis then, check the olm.maxOpenShiftVersion property
+	return generateMessageWithDeprecatedAPIs(deprecatedAPIs)
 }
