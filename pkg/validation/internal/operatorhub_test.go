@@ -397,8 +397,8 @@ func TestValidateHubDeprecatedAPIS(t *testing.T) {
 				minKubeVersion: "",
 				directory:      "./testdata/valid_bundle_v1beta1",
 			},
-			wantError:   true,
-			errStrings:  []string{"this bundle is using APIs which were deprecated and removed in v1.22. " +
+			wantError: true,
+			errStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.22. " +
 				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
 				"Migrate the API(s) for CRD: ([\"etcdbackups.etcd.database.coreos.com\"" +
 				" \"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
@@ -423,7 +423,7 @@ func TestValidateHubDeprecatedAPIS(t *testing.T) {
 			},
 			wantError:   true,
 			wantWarning: true,
-			errStrings:  []string{"unable to use csv.Spec.MinKubeVersion to verify the CRD/Webhook apis because it " +
+			errStrings: []string{"unable to use csv.Spec.MinKubeVersion to verify the CRD/Webhook apis because it " +
 				"has an invalid value: invalid"},
 			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.22. " +
 				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
