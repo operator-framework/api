@@ -7,24 +7,17 @@ import (
 	"testing"
 )
 
-const (
-	PriorityClassKind = "PriorityClass"
-	RoleKind          = "Role"
-	ClusterRoleKind   = "ClusterRole"
-)
+func Test_getDeprecated1_25APIs(t *testing.T) {
 
-func Test_getDeprecatedAPIs(t *testing.T) {
-
-	// Mock the expected result for ./testdata/valid_bundle_v1beta1
+	// Mock the expected result for ../internal/testdata/valid_bundle_v1beta1
 	crdMock := make(map[string][]string)
 	crdMock["CRD"] = []string{"etcdbackups.etcd.database.coreos.com", "etcdclusters.etcd.database.coreos.com", "etcdrestores.etcd.database.coreos.com"}
 
-	// Mock the expected result for ./testdata/valid_bundle_with_v1beta1_clusterrole
+	// Mock the expected result
 	otherKindsMock := make(map[string][]string)
-	otherKindsMock[ClusterRoleKind] = []string{"memcached-operator-metrics-reader"}
-	otherKindsMock[PriorityClassKind] = []string{"super-priority"}
-	otherKindsMock[RoleKind] = []string{"memcached-role"}
-	otherKindsMock["MutatingWebhookConfiguration"] = []string{"mutating-webhook-configuration"}
+	otherKindsMock["PodDisruptionBudget"] = []string{"busybox-pdb"}
+
+	bundleDirPrefix := "../internal/testdata/" // let's reuse the testdata, so we can avoid creating more
 
 	type args struct {
 		bundleDir string
@@ -37,21 +30,14 @@ func Test_getDeprecatedAPIs(t *testing.T) {
 		{
 			name: "should return an empty map when no deprecated apis are found",
 			args: args{
-				bundleDir: "./testdata/valid_bundle_v1",
+				bundleDir: bundleDirPrefix + "valid_bundle_v1",
 			},
 			want: map[string][]string{},
 		},
 		{
-			name: "should return map with CRDs when this kind of resource is deprecated",
-			args: args{
-				bundleDir: "./testdata/valid_bundle_v1beta1",
-			},
-			want: crdMock,
-		},
-		{
 			name: "should return map with others kinds which are deprecated",
 			args: args{
-				bundleDir: "./testdata/bundle_with_deprecated_resources",
+				bundleDir: bundleDirPrefix + "bundle_with_deprecated_resources",
 			},
 			want: otherKindsMock,
 		},
@@ -64,7 +50,7 @@ func Test_getDeprecatedAPIs(t *testing.T) {
 			require.NoError(t, err)
 
 			if got := GetRemovedAPIsOn1_25From(bundle); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("getRemovedAPIsOn1_22From() = %v, want %v", got, tt.want)
+				t.Errorf("getRemovedAPIsOn1_25From() = %v, want %v", got, tt.want)
 			}
 		})
 	}
