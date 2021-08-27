@@ -129,6 +129,18 @@ func Test_communityValidator(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "should pass when the olm annotation and index label are set with a " +
+				"value =v4.8 and has deprecated apis",
+			wantError: false,
+			args: args{
+				bundleDir:      "./testdata/valid_bundle_v1beta1",
+				imageIndexPath: "./testdata/dockerfile/valid_bundle_4_8.Dockerfile",
+				annotations: map[string]string{
+					"olm.properties": fmt.Sprintf(`[{"type": "olm.maxOpenShiftVersion", "value": "4.8"}]`),
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {
