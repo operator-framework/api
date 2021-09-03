@@ -197,7 +197,7 @@ func validateInstallModes(csv *v1alpha1.ClusterServiceVersion) (errs []errors.Er
 	return errs
 }
 
-// validateVersionKind checks presense of GroupVersionKind.Verion and GroupVersionKind.Kind
+// validateVersionKind checks presence of GroupVersionKind.Version and GroupVersionKind.Kind
 func validateVersionKind(csv *v1alpha1.ClusterServiceVersion) (errs []errors.Error) {
 	gvk := csv.GroupVersionKind()
 	if gvk.Version == "" {
