@@ -22,6 +22,9 @@ type Configuration struct {
 
 	// Storage is the optional storage configuration
 	Storage Storage `json:"storage,omitempty" yaml:"storage,omitempty"`
+
+	// ServiceAccount is the optional way to set a non-default SA
+	ServiceAccount string `json:"string,omitempty" yaml:"string,omitempty"`
 }
 
 // StageConfiguration configures a set of tests to be run.
