@@ -9,12 +9,12 @@ require (
 	github.com/go-bindata/go-bindata/v3 v3.1.3
 	github.com/mikefarah/yq/v3 v3.0.0-20201202084205-8846255d1c37
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/cobra v1.1.3
+	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.7.0
-	k8s.io/api v0.22.0
-	k8s.io/apiextensions-apiserver v0.22.0
-	k8s.io/apimachinery v0.22.0
-	k8s.io/client-go v0.22.0
-	sigs.k8s.io/controller-runtime v0.9.0
-	sigs.k8s.io/controller-tools v0.6.0
+	k8s.io/api v0.22.1
+	k8s.io/apiextensions-apiserver v0.22.1
+	k8s.io/apimachinery v0.22.1
+	k8s.io/client-go v0.22.1
+	sigs.k8s.io/controller-runtime v0.10.0
+	sigs.k8s.io/controller-tools v0.6.2
 )
