@@ -43,6 +43,12 @@ func TestValidateBundle(t *testing.T) {
 			hasError:    true,
 			errString:   `duplicate CRD "test.example.com/v1alpha1, Kind=Test" in bundle "test-operator.v0.0.1"`,
 		},
+		{
+			description: "invalid bundle service account can't match sa in csv",
+			directory:   "./testdata/invalid_bundle_sa",
+			hasError:    true,
+			errString:   `Error: Value etcd-operator: invalid service account found in bundle. sa name cannot match service account defined for deployment spec in CSV`,
+		},
 	}
 
 	for _, tt := range table {
