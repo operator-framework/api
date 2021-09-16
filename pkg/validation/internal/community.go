@@ -21,6 +21,9 @@ const IndexImagePathKey = "index-path"
 // where the bundle will be distributed
 const ocpLabelindex = "com.redhat.openshift.versions"
 
+// OCP version where the apis v1beta1 is no longer supported
+const ocpVerV1beta1Unsupported = "4.9"
+
 // CommunityOperatorValidator validates the bundle manifests against the required criteria to publish
 // the projects on the community operators
 //

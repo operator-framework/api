@@ -11,9 +11,6 @@ import (
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 )
 
-// OCP version where the apis v1beta1 is no longer supported
-const ocpVerV1beta1Unsupported = "4.9"
-
 // k8sVersionKey defines the key which can be used by its consumers
 // to inform what is the K8S version that should be used to do the tests against.
 const k8sVersionKey = "k8s-version"
@@ -21,6 +18,11 @@ const k8sVersionKey = "k8s-version"
 const minKubeVersionWarnMessage = "csv.Spec.minKubeVersion is not informed. It is recommended you provide this information. " +
 	"Otherwise, it would mean that your operator project can be distributed and installed in any cluster version " +
 	"available, which is not necessarily the case for all projects."
+
+// K8s version where the apis v1betav1 is no longer supported
+const k8sVerV1betav1Unsupported = "1.22.0"
+// K8s version where the apis v1betav1 was deprecated
+const k8sVerV1betav1Deprecated = "1.16.0"
 
 // AlphaDeprecatedAPIsValidator validates if the bundles is using versions API version which are deprecate or
 // removed in specific Kubernetes versions informed via optional key value `k8s-version`.
@@ -84,10 +86,7 @@ func validateDeprecatedAPIs(bundle *manifests.Bundle, k8sVersion string) errors.
 //minKubeVersion >= 1.22 return the error result.
 //minKubeVersion empty returns a warning since it would mean the same of allow install in any supported version
 func validateDeprecatedAPIS(bundle *manifests.Bundle, versionProvided string) (errs, warns []error) {
-	// K8s version where the apis v1betav1 is no longer supported
-	const k8sVerV1betav1Unsupported = "1.22.0"
-	// K8s version where the apis v1betav1 was deprecated
-	const k8sVerV1betav1Deprecated = "1.16.0"
+
 	// semver of the K8s version where the apis v1betav1 is no longer supported to allow us compare
 	semVerK8sVerV1betav1Unsupported := semver.MustParse(k8sVerV1betav1Unsupported)
 	// semver of the K8s version where the apis v1betav1 is deprecated to allow us compare
