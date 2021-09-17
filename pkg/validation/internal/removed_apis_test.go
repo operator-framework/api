@@ -85,8 +85,6 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 				minKubeVersion: "",
 				directory:      "./testdata/valid_bundle_v1beta1",
 			},
-			wantWarning: true,
-			warnStrings: []string{"checking APIs against Kubernetes version : 1.15"},
 		},
 		{
 			name: "should return a warning when has the CRD v1beta1 and minKubeVersion is informed",
@@ -108,8 +106,6 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 				minKubeVersion: "1.11.3",
 				directory:      "./testdata/valid_bundle_v1beta1",
 			},
-			wantWarning: true,
-			warnStrings: []string{"checking APIs against Kubernetes version : 1.15"},
 		},
 		{
 			name: "should return an error when the k8sVersion is >= 1.22 and has the deprecated API",
@@ -123,8 +119,6 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
 				"Migrate the API(s) for CRD: ([\"etcdbackups.etcd.database.coreos.com\"" +
 				" \"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
-			wantWarning: true,
-			warnStrings: []string{"checking APIs against Kubernetes version : 1.22"},
 		},
 		{
 			name: "should return an error when the k8sVersion informed is invalid",

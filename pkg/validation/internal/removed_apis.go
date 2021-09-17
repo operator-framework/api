@@ -101,10 +101,7 @@ func validateDeprecatedAPIS(bundle *manifests.Bundle, versionProvided string) (e
 		semVerVersionProvided, err = semver.ParseTolerant(versionProvided)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("invalid value informed via the k8s key option : %s", versionProvided))
-		} else {
-			// we might want to return it as info instead of warning in the future.
-			warns = append(warns, fmt.Errorf("checking APIs against Kubernetes version : %s", versionProvided))
-		}
+		} 
 	}
 
 	// Transform the spec minKubeVersion in semver Version to compare
