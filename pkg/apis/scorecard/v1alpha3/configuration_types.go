@@ -23,7 +23,7 @@ type Configuration struct {
 	// Storage is the optional storage configuration
 	Storage Storage `json:"storage,omitempty" yaml:"storage,omitempty"`
 
-	// ServiceAccount is the optional way to set a non-default SA
+	// ServiceAccount is the service account under which scorecard tests are run. This field is optional. If left unset, the `default` service account will be used.
 	ServiceAccount string `json:"string,omitempty" yaml:"string,omitempty"`
 }
 
