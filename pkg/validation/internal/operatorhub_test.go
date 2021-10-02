@@ -255,6 +255,12 @@ func TestCheckBundleName(t *testing.T) {
 			warnStrings: []string{"csv.metadata.Name memcached-operator.v1.3 is not following the " +
 				"versioning convention (MAJOR.MINOR.PATCH e.g 0.0.1): https://semver.org/"},
 		},
+		{
+			name:        "should return a error when the bundle name is > 63",
+			args:        args{bundleName: "memcached-operatoroperatoroperatoroperatoroperatoroperatoroperatoroperatoroperatoroperatoroperatoroperator.v1.3.0"},
+			wantError: true,
+			errStrings: []string{"csv.metadata.Name memcached-operatoroperatoroperatoroperatoroperatoroperatoroperatoroperatoroperatoroperatoroperatoroperator.v1.3.0 has the size 113 which is bigger than 63 caracteres. The bundle name must be 63 characters or less because it will be used as k8s ownerref label which only allows max of 63 characters"},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

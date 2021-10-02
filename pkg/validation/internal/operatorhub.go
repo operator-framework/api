@@ -193,6 +193,12 @@ func checkBundleName(checks CSVChecks) CSVChecks {
 			"naming convention: <operator-name>.v<semver> e.g. memcached-operator.v0.0.1", checks.csv.Name))
 	}
 
+	if len(checks.csv.Name) > 63 {
+		checks.errs = append(checks.errs, fmt.Errorf("csv.metadata.Name %v has the size %d which is bigger than " +
+			"63 caracteres. The bundle name must be 63 characters or less because it will be used as k8s ownerref label " +
+			"which only allows max of 63 characters", checks.csv.Name, len(checks.csv.Name)))
+	}
+
 	return checks
 }
 
