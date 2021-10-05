@@ -8,7 +8,8 @@ post to the [operator-framework group][of-ggroup].
 ## Tags
 
 As per semver, all releases containing new features must map to a major or minor version increase.
-Patch releases must only contain fixes to features released in a prior release.
+
+**Patch releases must only contain bug fixes. Releases containing features must be major or minor releases.**
 
 ## Process
 
@@ -30,6 +31,8 @@ Then create release notes while still on the `master` branch:
 ```sh
 while read -r line; do echo $line | awk '{f = $1; $1 = ""; print "-"$0; }'; done <<< $(git log $PREVIOUS_RELEASE_TAG..$RELEASE_TAG --format=oneline --no-merges)
 ```
+
+**You cannot cut a patch release if any of these release notes start with `feat:` or `feature:`.**
 
 Copy them into the Github release [description form][release-desc-page],
 select `vX.Y.Z` in the `Tag version` form, and click `Publish release`.
