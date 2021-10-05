@@ -46,6 +46,9 @@ func validateServiceAccounts(bundle *manifests.Bundle) []errors.Error {
 	// find any hardcoded service account objects are in the bundle, then check if they match any sa definition in the csv
 	var errs []errors.Error
 	for _, obj := range bundle.Objects {
+		if obj.GroupVersionKind() != v1.SchemeGroupVersion.WithKind("ServiceAccount") {
+			continue
+		}
 		sa := v1.ServiceAccount{}
 		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(obj.Object, &sa); err == nil {
 			if _, ok := saNamesFromCSV[sa.Name]; ok {
