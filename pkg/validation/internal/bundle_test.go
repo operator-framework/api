@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/operator-framework/api/pkg/manifests"
+	"github.com/operator-framework/api/pkg/operators/v1alpha1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/stretchr/testify/require"
 )
@@ -47,22 +49,114 @@ func TestValidateBundle(t *testing.T) {
 			description: "invalid bundle service account can't match sa in csv",
 			directory:   "./testdata/invalid_bundle_sa",
 			hasError:    true,
-			errString:   `Error: Value etcd-operator: invalid service account found in bundle. sa name cannot match service account defined for deployment spec in CSV`,
+			errString:   `invalid service account found in bundle. sa name cannot match service account defined for deployment spec in CSV`,
 		},
 	}
 
 	for _, tt := range table {
-		// Validate the bundle object
-		bundle, err := manifests.GetBundleFromDir(tt.directory)
-		require.NoError(t, err)
+		t.Run(tt.description, func(t *testing.T) {
+			// Validate the bundle object
+			bundle, err := manifests.GetBundleFromDir(tt.directory)
+			require.NoError(t, err)
 
-		results := BundleValidator.Validate(bundle)
+			results := BundleValidator.Validate(bundle)
 
-		if len(results) > 0 {
-			require.Equal(t, results[0].HasError(), tt.hasError)
-			if results[0].HasError() {
+			require.Greater(t, len(results), 0)
+			if tt.hasError {
+				require.True(t, results[0].HasError(), "found no error when an error was expected")
 				require.Contains(t, results[0].Errors[0].Error(), tt.errString)
+			} else {
+				require.False(t, results[0].HasError(), "found error when an error was not expected")
 			}
+		})
+	}
+}
+
+func TestValidateServiceAccount(t *testing.T) {
+	csvWithSAs := func(saNames ...string) *v1alpha1.ClusterServiceVersion {
+		csv := &v1alpha1.ClusterServiceVersion{}
+		depSpecs := make([]v1alpha1.StrategyDeploymentSpec, len(saNames))
+		for i, saName := range saNames {
+			depSpecs[i].Spec.Template.Spec.ServiceAccountName = saName
 		}
+		csv.Spec.InstallStrategy.StrategySpec.DeploymentSpecs = depSpecs
+		return csv
+	}
+
+	var table = []struct {
+		description string
+		bundle      *manifests.Bundle
+		hasError    bool
+		errString   string
+	}{
+		{
+			description: "an object with the same name as the service account",
+			bundle: &manifests.Bundle{
+				CSV: csvWithSAs("foo"),
+				Objects: []*unstructured.Unstructured{
+					{Object: map[string]interface{}{
+						"apiVersion": "apps/v1",
+						"kind":       "Deployment",
+						"metadata": map[string]interface{}{
+							"name": "foo",
+						},
+						"spec": map[string]interface{}{
+							"template": map[string]interface{}{
+								"spec": map[string]interface{}{
+									"serviceAccountName": "foo",
+								},
+							},
+						},
+					}},
+				},
+			},
+			hasError: false,
+		},
+		{
+			description: "service account included in both CSV and bundle",
+			bundle: &manifests.Bundle{
+				CSV: csvWithSAs("foo"),
+				Objects: []*unstructured.Unstructured{
+					{Object: map[string]interface{}{
+						"apiVersion": "apps/v1",
+						"kind":       "Deployment",
+						"metadata": map[string]interface{}{
+							"name": "foo",
+						},
+						"spec": map[string]interface{}{
+							"template": map[string]interface{}{
+								"spec": map[string]interface{}{
+									"serviceAccountName": "foo",
+								},
+							},
+						},
+					}},
+					{Object: map[string]interface{}{
+						"apiVersion": "v1",
+						"kind":       "ServiceAccount",
+						"metadata": map[string]interface{}{
+							"name": "foo",
+						},
+					}},
+				},
+			},
+			hasError:  true,
+			errString: `invalid service account found in bundle. sa name cannot match service account defined for deployment spec in CSV`,
+		},
+	}
+
+	for _, tt := range table {
+		t.Run(tt.description, func(t *testing.T) {
+			// Validate the bundle object
+			results := BundleValidator.Validate(tt.bundle)
+
+			require.Greater(t, len(results), 0)
+			if tt.hasError {
+				require.True(t, results[0].HasError(), "found no error when an error was expected")
+				require.Contains(t, results[0].Errors[0].Error(), tt.errString)
+			} else {
+				require.False(t, results[0].HasError(), "found error when an error was not expected")
+			}
+		})
 	}
 }
