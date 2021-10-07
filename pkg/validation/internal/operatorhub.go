@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/mail"
 	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	semver "github.com/blang/semver/v4"
@@ -93,6 +95,14 @@ func validateBundleOperatorHub(bundle *manifests.Bundle, k8sVersion string) erro
 	if bundle.CSV == nil {
 		result.Add(errors.ErrInvalidBundle("Bundle csv is nil", bundle.Name))
 		return result
+	}
+
+	sizeTooLargeResult := checkBundleSize(bundle)
+	for _, err := range sizeTooLargeResult.errs {
+		result.Add(errors.ErrInvalidBundle(err.Error(), bundle.Name))
+	}
+	for _, warn := range sizeTooLargeResult.warns {
+		result.Add(errors.ErrInvalidBundle(warn.Error(), bundle.Name))
 	}
 
 	csvChecksResult := validateHubCSVSpec(*bundle.CSV)
@@ -348,4 +358,60 @@ func extractCategories(path string) (map[string]struct{}, error) {
 		customCategories[c] = struct{}{}
 	}
 	return customCategories, nil
+}
+
+func checkBundleSize(bundle *manifests.Bundle) BundleChecks {
+	// Crawl the bundle, mounted at ./bundle, and add up the bytes
+	// Should we do something with the bundle parameter?
+	checks := BundleChecks{errs: []error{}, warns: []error{}}
+	bundleDir := "./bundle"
+	abs, absErr := filepath.Abs(bundleDir)
+	if absErr != nil {
+		checks.errs = append(checks.errs, fmt.Errorf("could not get absolute path to bundle dir: %w", absErr))
+	}
+	errChDir := os.Chdir(abs)
+	if errChDir != nil {
+		checks.errs = append(checks.errs, fmt.Errorf("could not change to bundle dir: %w", errChDir))
+	}
+	size, dirSizeErr := dirSize(abs)
+	if dirSizeErr != nil {
+		checks.errs = append(checks.errs, fmt.Errorf("could not check size of bundle: %w", dirSizeErr))
+	}
+	checkSize(size, checks)
+	return checks
+}
+
+type BundleChecks struct {
+	errs  []error
+	warns []error
+}
+
+func checkSize(size int64, checks BundleChecks) (bundleChecks BundleChecks) {
+	warnPercent := 0.15
+	if size > 1048576 {
+		checks.errs = append(checks.errs,
+			fmt.Errorf("Total bundle size of %w is greater than 1,048,576 bytes will not work yet",
+				strconv.FormatInt(size, 10)))
+	}
+	warnSize := int64(1048576 - math.Round(1048576*warnPercent))
+	if size > warnSize {
+		checks.errs = append(checks.errs,
+			fmt.Errorf("Total bundle size of %w is greater than %w bytes, close to the current 1,048,576 byte limit",
+				strconv.FormatInt(size, 10), warnSize))
+	}
+	return checks
+}
+
+func dirSize(path string) (int64, error) {
+	var size int64
+	err := filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			size += info.Size()
+		}
+		return err
+	})
+	return size, err
 }
