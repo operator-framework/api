@@ -390,13 +390,13 @@ func checkSize(size int64, checks BundleChecks) (bundleChecks BundleChecks) {
 	warnPercent := 0.15
 	if size > 1048576 {
 		checks.errs = append(checks.errs,
-			fmt.Errorf("Total bundle size of %w is greater than 1,048,576 bytes will not work yet",
+			fmt.Errorf("total bundle size of %s is greater than 1,048,576 bytes will not work yet",
 				strconv.FormatInt(size, 10)))
 	}
 	warnSize := int64(1048576 - math.Round(1048576*warnPercent))
 	if size > warnSize {
 		checks.errs = append(checks.errs,
-			fmt.Errorf("Total bundle size of %w is greater than %w bytes, close to the current 1,048,576 byte limit",
+			fmt.Errorf("total bundle size of %s is greater than %d bytes, close to the current 1,048,576 byte limit",
 				strconv.FormatInt(size, 10), warnSize))
 	}
 	return checks
