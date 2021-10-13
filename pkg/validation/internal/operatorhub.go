@@ -362,9 +362,8 @@ func extractCategories(path string) (map[string]struct{}, error) {
 
 func checkBundleSize(bundle *manifests.Bundle) BundleChecks {
 	// Crawl the bundle, mounted at ./bundle, and add up the bytes
-	// Should we do something with the bundle parameter?
 	checks := BundleChecks{errs: []error{}, warns: []error{}}
-	bundleDir := "./bundle"
+	bundleDir := "." // pretty sure this isn't right, but how to get bundle path from bundle?
 	abs, absErr := filepath.Abs(bundleDir)
 	if absErr != nil {
 		checks.errs = append(checks.errs, fmt.Errorf("could not get absolute path to bundle dir: %w", absErr))
