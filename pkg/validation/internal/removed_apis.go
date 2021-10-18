@@ -21,6 +21,7 @@ const minKubeVersionWarnMessage = "csv.Spec.minKubeVersion is not informed. It i
 
 // K8s version where the apis v1betav1 is no longer supported
 const k8sVerV1betav1Unsupported = "1.22.0"
+
 // K8s version where the apis v1betav1 was deprecated
 const k8sVerV1betav1Deprecated = "1.16.0"
 

@@ -37,6 +37,7 @@ import (
 // * "Database"
 // * "Integration & Delivery"
 // * "Logging & Tracing"
+// * "Modernization & Migration"
 // * "Monitoring"
 // * "Networking"
 // * "OpenShift Optional"
@@ -101,20 +102,21 @@ var validMediatypes = map[string]struct{}{
 }
 
 var validCategories = map[string]struct{}{
-	"AI/Machine Learning":    {},
-	"Application Runtime":    {},
-	"Big Data":               {},
-	"Cloud Provider":         {},
-	"Developer Tools":        {},
-	"Database":               {},
-	"Integration & Delivery": {},
-	"Logging & Tracing":      {},
-	"Monitoring":             {},
-	"Networking":             {},
-	"OpenShift Optional":     {},
-	"Security":               {},
-	"Storage":                {},
-	"Streaming & Messaging":  {},
+	"AI/Machine Learning":       {},
+	"Application Runtime":       {},
+	"Big Data":                  {},
+	"Cloud Provider":            {},
+	"Developer Tools":           {},
+	"Database":                  {},
+	"Integration & Delivery":    {},
+	"Logging & Tracing":         {},
+	"Monitoring":                {},
+	"Modernization & Migration": {},
+	"Networking":                {},
+	"OpenShift Optional":        {},
+	"Security":                  {},
+	"Storage":                   {},
+	"Streaming & Messaging":     {},
 }
 
 func validateOperatorHub(objs ...interface{}) (results []errors.ManifestResult) {
