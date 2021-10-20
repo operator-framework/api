@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -10,9 +11,12 @@ import (
 )
 
 const (
-	CatalogSourceCRDAPIVersion = GroupName + "/" + GroupVersion
-	CatalogSourceKind          = "CatalogSource"
+	CatalogSourceCRDAPIVersion  = GroupName + "/" + GroupVersion
+	CatalogSourceKind           = "CatalogSource"
+	DefaultRegistryPollDuration = "15m"
 )
+
+var defaultPollingDuration, _ = time.ParseDuration(DefaultRegistryPollDuration)
 
 // SourceType indicates the type of backing store for a CatalogSource
 type SourceType string
@@ -90,6 +94,34 @@ type CatalogSourceSpec struct {
 // Currently only registry polling strategy is implemented
 type UpdateStrategy struct {
 	*RegistryPoll `json:"registryPoll,omitempty"`
+}
+
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface and thus supports custom unmarshaling for an updateStrategy.
+// UnmarshalJSON checks to see if the provided polling interval is valid. If so, use it, if not set it to a default interval.
+// This custom unmarshaling is required in the case where a user provides an invalid string for the polling interval.
+// An invalid interval causes informer operations to fail at the cache level since the unmarshalerDecoder cannot populate the concrete type.
+func (u *UpdateStrategy) UnmarshalJSON(data []byte) error {
+	var updateStrategy map[string]map[string]string
+	if err := json.Unmarshal(data, &updateStrategy); err != nil {
+		return err
+	}
+	if updateStrategy == nil {
+		return nil
+	}
+
+	registryPoll := &RegistryPoll{}
+	if rp, ok := updateStrategy["registryPoll"]; ok {
+		if i, ok := rp["interval"]; ok {
+			duration, err := time.ParseDuration(i)
+			if err != nil {
+				registryPoll.Interval = &metav1.Duration{Duration: defaultPollingDuration}
+			} else {
+				registryPoll.Interval = &metav1.Duration{Duration: duration}
+			}
+		}
+	}
+	u.RegistryPoll = registryPoll
+	return nil
 }
 
 type RegistryPoll struct {
