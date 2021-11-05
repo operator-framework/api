@@ -54,6 +54,7 @@ type InstallModeSet map[InstallModeType]bool
 type NamedInstallStrategy struct {
 	StrategyName string                    `json:"strategy"`
 	StrategySpec StrategyDetailsDeployment `json:"spec,omitempty"`
+	Label labels.Set                     `json:"labels,omitempty"`
 }
 
 // StrategyDeploymentPermissions describe the rbac rules and service account needed by the install strategy
@@ -61,6 +62,7 @@ type NamedInstallStrategy struct {
 type StrategyDeploymentPermissions struct {
 	ServiceAccountName string            `json:"serviceAccountName"`
 	Rules              []rbac.PolicyRule `json:"rules"`
+	Label labels.Set                     `json:"labels,omitempty"`
 }
 
 // StrategyDeploymentSpec contains the name, spec and labels for the deployment ALM should create

@@ -526,6 +526,11 @@ spec:
                   required:
                     - strategy
                   properties:
+                    labels:
+                      description: Set is a map of label:value. It implements Labels.
+                      type: object
+                      additionalProperties:
+                        type: string
                     spec:
                       description: StrategyDetailsDeployment represents the parsed details of a Deployment InstallStrategy.
                       type: object
@@ -541,6 +546,11 @@ spec:
                               - rules
                               - serviceAccountName
                             properties:
+                              labels:
+                                description: Set is a map of label:value. It implements Labels.
+                                type: object
+                                additionalProperties:
+                                  type: string
                               rules:
                                 type: array
                                 items:
@@ -4603,6 +4613,11 @@ spec:
                               - rules
                               - serviceAccountName
                             properties:
+                              labels:
+                                description: Set is a map of label:value. It implements Labels.
+                                type: object
+                                additionalProperties:
+                                  type: string
                               rules:
                                 type: array
                                 items:
