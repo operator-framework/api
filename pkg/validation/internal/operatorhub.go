@@ -22,33 +22,55 @@ import (
 // the projects on OperatorHub.io.
 //
 // This validator will ensure that:
-// - The annotations capabilities into the CSV has a valid option, which are:
-// * "Basic Install"
-// * "Seamless Upgrades"
-// * "Full Lifecycle"
-// * "Deep Insights"
-// * "Auto Pilot"
-// - The annotations categories into the CSV has a valid option, which are:
-// * "AI/Machine Learning"
-// * "Application Runtime"
-// * "Big Data"
-// * "Cloud Provider"
-// * "Developer Tools"
-// * "Database"
-// * "Integration & Delivery"
-// * "Logging & Tracing"
-// * "Modernization & Migration"
-// * "Monitoring"
-// * "Networking"
-// * "OpenShift Optional"
-// * "Security"
-// * "Storage"
-// * "Streaming & Messaging"
 //
-// NOTE: The operatorhub validator can verify against custom bundle categories by setting the OPERATOR_BUNDLE_CATEGORIES
+// - The annotations capabilities into the CSV has a valid option, which are:
+//
+// * Basic Install
+//
+// * Seamless Upgrades
+//
+// * Full Lifecycle
+//
+// * Deep Insights
+//
+// * Auto Pilot
+//
+// - The annotations categories into the CSV has a valid option, which are:
+//
+// * AI/Machine Learning
+//
+// * Application Runtime
+//
+// * Big Data
+//
+// * Cloud Provider
+//
+// * Developer Tools
+//
+// * Database
+//
+// * Integration & Delivery
+//
+// * Logging & Tracing
+//
+// * Modernization & Migration
+//
+// * Monitoring
+//
+// * Networking
+//
+// * OpenShift Optional
+//
+// * Security
+//
+// * Storage
+//
+// * Streaming & Messaging
+//
+// NOTE: The OperatorHub validator can verify against custom bundle categories by setting the OPERATOR_BUNDLE_CATEGORIES
 // environment variable. Setting the OPERATOR_BUNDLE_CATEGORIES environment variable to the path to a json file
 // containing a list of categories will enable those categories to be used when comparing CSV categories for
-// operatorhub validation. The json file should be in the following format:
+// OperatorHub validation. The json file should be in the following format:
 //
 //	```json
 //	{
@@ -60,24 +82,41 @@ import (
 //	}
 // 	```
 //
-// - The csv.Spec.Provider.Name was provided
-// - The csv.Spec.Maintainers elements contains both name and email
-// - The csv.Spec.Links elements contains both name and url
-// - The csv.Spec.Links.Url is a valid value
-// - The csv.Spec.Version is provided
-// - The checks.csv.Spec.Icon was provided and has not more than one element
-// - The csv.Spec.Icon elements should contain both data and mediatype
-// - The csv.Spec.Icon elements should contain both data and mediatype
-// - The csv.Spec.Icon has a valid mediatype, which are
-// * "image/gif"
-// * "image/jpeg"
-// * "image/png"
-// * "image/svg+xml"
+// - The `csv.Spec.Provider.Name` was provided
+//
+// - The `csv.Spec.Maintainers` elements contains both name and email
+//
+// - The `csv.Spec.Links` elements contains both name and url
+//
+// - The `csv.Spec.Links.Url` is a valid value
+//
+// - The `csv.Spec.Version` is provided
+//
+// - The `csv.Spec.Icon` was provided and has not more than one element
+//
+// - The `csv.Spec.Icon` elements should contain both data and `mediatype`
+//
+// - The `csv.Spec.Icon` elements should contain both data and `mediatype`
+//
+// - The `csv.Spec.Icon` has a valid `mediatype`, which are
+//
+// * image/gif
+//
+// * image/jpeg
+//
+// * image/png
+//
+// * image/svg+xml
+//
 // - If informed ONLY, check if the value csv.Spec.MinKubeVersion is parsable according to semver (https://semver.org/)
 // Also, this validator will raise warnings when:
+//
 // - The bundle name (CSV.metadata.name) does not follow the naming convention: <operator-name>.v<semver> e.g. memcached-operator.v0.0.1
+//
 // NOTE: The bundle name must be 63 characters or less because it will be used as k8s ownerref label which only allows max of 63 characters.
+//
 // - The channel names seems are not following the convention https://olm.operatorframework.io/docs/best-practices/channel-naming/
+//
 // - The usage of the removed APIs on Kubernetes 1.22 is found. More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22
 //
 // Note that this validator allows to receive a List of optional values as key=values. Currently, only the
