@@ -52,7 +52,10 @@ func validateServiceAccounts(bundle *manifests.Bundle) []errors.Error {
 		sa := v1.ServiceAccount{}
 		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(obj.Object, &sa); err == nil {
 			if _, ok := saNamesFromCSV[sa.Name]; ok {
-				errs = append(errs, errors.ErrInvalidBundle("invalid service account found in bundle. sa name cannot match service account defined for deployment spec in CSV", sa.Name))
+				errs = append(errs, errors.ErrInvalidBundle(fmt.Sprintf("invalid service account found in bundle. " +
+					"OLM cannot handle more than one Service Account defined with the same name. " +
+					"Please, remove the Service Account manifest with the name %s from the bundle " +
+					"because it is already defined in the CSV.",sa.Name), sa.Name))
 			}
 		}
 	}
