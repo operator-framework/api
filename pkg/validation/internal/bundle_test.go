@@ -49,7 +49,7 @@ func TestValidateBundle(t *testing.T) {
 			description: "invalid bundle service account can't match sa in csv",
 			directory:   "./testdata/invalid_bundle_sa",
 			hasError:    true,
-			errString:   `invalid service account found in bundle. sa name cannot match service account defined for deployment spec in CSV`,
+			errString:   `invalid service account found in bundle. This service account etcd-operator in your bundle is not valid, because a service account with the same name was already specified in your CSV. If this was unintentional, please remove the service account manifest from your bundle. If it was intentional to specify a separate service account, please rename the SA in either the bundle manifest or the CSV.`,
 		},
 	}
 
@@ -141,7 +141,7 @@ func TestValidateServiceAccount(t *testing.T) {
 				},
 			},
 			hasError:  true,
-			errString: `invalid service account found in bundle. sa name cannot match service account defined for deployment spec in CSV`,
+			errString: `invalid service account found in bundle. This service account foo in your bundle is not valid, because a service account with the same name was already specified in your CSV. If this was unintentional, please remove the service account manifest from your bundle. If it was intentional to specify a separate service account, please rename the SA in either the bundle manifest or the CSV.`,
 		},
 	}
 
