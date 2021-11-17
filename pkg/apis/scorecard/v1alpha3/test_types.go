@@ -14,6 +14,8 @@ const (
 	FailState State = "fail"
 	// ErrorState occurs when a Test encounters a fatal error and the reported points should not be considered.
 	ErrorState State = "error"
+	//WarnState occurs when a Test's ExpectedPoints == 0 && Test is not required for functionality
+	WarnState State = "warn"
 )
 
 // TestResult contains the results of an individual scorecard test
