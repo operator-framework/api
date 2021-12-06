@@ -85,7 +85,7 @@ TEST_PKGS:=$(shell go list ./...)
 test-unit: ## Run the unit tests
 	$(Q)go test -count=1 -short ${TEST_PKGS}
 
-verify: manifests generate
+verify: manifests generate format
 	git diff --exit-code
 
 # Utilities.
