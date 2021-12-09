@@ -1,4 +1,4 @@
-package cel
+package constraints
 
 import (
 	"fmt"
@@ -16,6 +16,7 @@ import (
 // PropertiesKey is the key for bundle properties map (input data for CEL evaluation)
 const PropertiesKey = "properties"
 
+// Constraint is a struct representing the new generic constraint type
 type Constraint struct {
 	// Constraint message that surfaces in resolution
 	// This field is optional
@@ -26,37 +27,38 @@ type Constraint struct {
 	Cel *Cel `json:"cel" yaml:"cel"`
 }
 
+// Cel is a struct representing CEL expression information
 type Cel struct {
 	// The CEL expression
 	Rule string `json:"rule" yaml:"rule"`
 }
 
-type Evaluator interface {
-	Evaluate(env map[string]interface{}) (bool, error)
-}
-
-type EvaluatorProvider interface {
-	Evaluator(rule string) (Evaluator, error)
-}
-
-func NewCelEvaluatorProvider() *celEvaluatorProvider {
+// NewCelEnvironment returns a CEL environment which can be used to
+// evaluate CEL expression and an error if occurs
+func NewCelEnvironment() *CelEnvironment {
 	env, err := cel.NewEnv(cel.Declarations(
 		decls.NewVar(PropertiesKey, decls.NewListType(decls.NewMapType(decls.String, decls.Any)))),
 		cel.Lib(semverLib{}),
 	)
+	// If an error occurs here, it means the CEL enviroment is unable to load
+	// configuration for custom libraries propertly. Hence, the CEL enviroment is
+	// unusable. Panic here will cause the program to fail immediately to prevent
+	// cascading failures later on when this CEL env is in use.
 	if err != nil {
 		panic(err)
 	}
-	return &celEvaluatorProvider{
+	return &CelEnvironment{
 		env: env,
 	}
 }
 
-type celEvaluatorProvider struct {
+// CelEnvironment is a struct that encapsulates CEL custom program enviroment
+type CelEnvironment struct {
 	env *cel.Env
 }
 
-type celEvaluator struct {
+// CelProgram is a struct that encapsulates compiled CEL program
+type CelProgram struct {
 	program cel.Program
 }
 
@@ -64,7 +66,7 @@ type celEvaluator struct {
 This section of code is for custom library for semver comparison in CEL
 The code is inspired by https://github.com/google/cel-go/blob/master/cel/cel_test.go#L46
 
-The semver_compare is wrriten based on `Compare` function in https://github.com/blang/semver
+The semver_compare is written based on `Compare` function in https://github.com/blang/semver
 particularly in https://github.com/blang/semver/blob/master/semver.go#L125
 
 Example:
@@ -110,8 +112,9 @@ func semverCompare(val1, val2 ref.Val) ref.Val {
 	return types.Int(v1.Compare(v2))
 }
 
-func (e celEvaluator) Evaluate(env map[string]interface{}) (bool, error) {
-	result, _, err := e.program.Eval(env)
+// Evaluate to evaluate the compiled CEL program against input data (map)
+func (e CelProgram) Evaluate(data map[string]interface{}) (bool, error) {
+	result, _, err := e.program.Eval(data)
 	if err != nil {
 		return false, err
 	}
@@ -123,19 +126,21 @@ func (e celEvaluator) Evaluate(env map[string]interface{}) (bool, error) {
 	return false, fmt.Errorf("cel expression evalutated to %T, not bool", result.Value())
 }
 
-func (e *celEvaluatorProvider) Evaluator(rule string) (Evaluator, error) {
+// Validate to validate the CEL expression string by compiling it into CEL program
+func (e *CelEnvironment) Validate(rule string) (CelProgram, error) {
+	var celProg CelProgram
 	ast, issues := e.env.Compile(rule)
 	if err := issues.Err(); err != nil {
-		return nil, err
+		return celProg, err
 	}
 
 	if ast.ResultType() != decls.Bool {
-		return nil, fmt.Errorf("cel expressions must have type Bool")
+		return celProg, fmt.Errorf("cel expressions must have type Bool")
 	}
 
 	prog, err := e.env.Program(ast)
 	if err != nil {
-		return nil, err
+		return celProg, err
 	}
-	return celEvaluator{program: prog}, nil
+	return CelProgram{program: prog}, nil
 }
