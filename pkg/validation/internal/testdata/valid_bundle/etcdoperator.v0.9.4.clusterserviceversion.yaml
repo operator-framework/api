@@ -207,6 +207,13 @@ spec:
                       fieldPath: metadata.name
                 image: quay.io/coreos/etcd-operator@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b
                 name: etcd-operator
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 128Mi
+                  requests:
+                    cpu: 10m
+                    memory: 64Mi
               - command:
                 - etcd-backup-operator
                 - --create-crd=false
@@ -221,6 +228,13 @@ spec:
                       fieldPath: metadata.name
                 image: quay.io/coreos/etcd-operator@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b
                 name: etcd-backup-operator
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 128Mi
+                  requests:
+                    cpu: 10m
+                    memory: 64Mi
               - command:
                 - etcd-restore-operator
                 - --create-crd=false
@@ -235,6 +249,13 @@ spec:
                       fieldPath: metadata.name
                 image: quay.io/coreos/etcd-operator@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b
                 name: etcd-restore-operator
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 128Mi
+                  requests:
+                    cpu: 10m
+                    memory: 64Mi
               serviceAccountName: etcd-operator
       permissions:
       - rules:
