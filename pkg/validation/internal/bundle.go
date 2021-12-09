@@ -52,11 +52,11 @@ func validateServiceAccounts(bundle *manifests.Bundle) []errors.Error {
 		sa := v1.ServiceAccount{}
 		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(obj.Object, &sa); err == nil {
 			if _, ok := saNamesFromCSV[sa.Name]; ok {
-				errs = append(errs, errors.ErrInvalidBundle(fmt.Sprintf("invalid service account found in bundle. " +
-					"This service account %s in your bundle is not valid, because a service account with the same name " +
-					"was already specified in your CSV. If this was unintentional, please remove the service account " +
-					"manifest from your bundle. If it was intentional to specify a separate service account, " +
-					"please rename the SA in either the bundle manifest or the CSV.",sa.Name), sa.Name))
+				errs = append(errs, errors.ErrInvalidBundle(fmt.Sprintf("invalid service account found in bundle. "+
+					"This service account %s in your bundle is not valid, because a service account with the same name "+
+					"was already specified in your CSV. If this was unintentional, please remove the service account "+
+					"manifest from your bundle. If it was intentional to specify a separate service account, "+
+					"please rename the SA in either the bundle manifest or the CSV.", sa.Name), sa.Name))
 			}
 		}
 	}
