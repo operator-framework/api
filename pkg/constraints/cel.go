@@ -16,17 +16,6 @@ import (
 // PropertiesKey is the key for bundle properties map (input data for CEL evaluation)
 const PropertiesKey = "properties"
 
-// Constraint is a struct representing the new generic constraint type
-type Constraint struct {
-	// Constraint message that surfaces in resolution
-	// This field is optional
-	Message string `json:"message" yaml:"message"`
-
-	// The cel struct that contraints CEL expression
-	// This field is required
-	Cel *Cel `json:"cel" yaml:"cel"`
-}
-
 // Cel is a struct representing CEL expression information
 type Cel struct {
 	// The CEL expression
