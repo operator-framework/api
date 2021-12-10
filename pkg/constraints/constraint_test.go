@@ -31,7 +31,7 @@ func TestParse(t *testing.T) {
 			input: json.RawMessage(inputBasicPackage),
 			expConstraint: Constraint{
 				Message: "blah",
-				Package: &PackageConstraint{Name: "foo", VersionRange: ">=1.0.0"},
+				Package: &PackageConstraint{PackageName: "foo", VersionRange: ">=1.0.0"},
 			},
 		},
 		{
@@ -43,7 +43,7 @@ func TestParse(t *testing.T) {
 					Constraints: []Constraint{
 						{
 							Message: "blah blah",
-							Package: &PackageConstraint{Name: "fuz", VersionRange: ">=1.0.0"},
+							Package: &PackageConstraint{PackageName: "fuz", VersionRange: ">=1.0.0"},
 						},
 					},
 				},
@@ -58,7 +58,7 @@ func TestParse(t *testing.T) {
 					Constraints: []Constraint{
 						{
 							Message: "blah blah",
-							Package: &PackageConstraint{Name: "fuz", VersionRange: ">=1.0.0"},
+							Package: &PackageConstraint{PackageName: "fuz", VersionRange: ">=1.0.0"},
 						},
 					},
 				},
@@ -73,7 +73,7 @@ func TestParse(t *testing.T) {
 					Constraints: []Constraint{
 						{
 							Message: "blah blah",
-							Package: &PackageConstraint{Name: "fuz", VersionRange: ">=1.0.0"},
+							Package: &PackageConstraint{PackageName: "fuz", VersionRange: ">=1.0.0"},
 						},
 					},
 				},
@@ -86,14 +86,14 @@ func TestParse(t *testing.T) {
 				Message: "blah",
 				All: &CompoundConstraint{
 					Constraints: []Constraint{
-						{Package: &PackageConstraint{Name: "fuz", VersionRange: ">=1.0.0"}},
+						{Package: &PackageConstraint{PackageName: "fuz", VersionRange: ">=1.0.0"}},
 						{GVK: &GVKConstraint{Group: "fals.example.com", Kind: "Fal", Version: "v1"}},
 						{
 							Message: "foo and buf must be stable versions",
 							All: &CompoundConstraint{
 								Constraints: []Constraint{
-									{Package: &PackageConstraint{Name: "foo", VersionRange: ">=1.0.0"}},
-									{Package: &PackageConstraint{Name: "buf", VersionRange: ">=1.0.0"}},
+									{Package: &PackageConstraint{PackageName: "foo", VersionRange: ">=1.0.0"}},
+									{Package: &PackageConstraint{PackageName: "buf", VersionRange: ">=1.0.0"}},
 									{GVK: &GVKConstraint{Group: "foos.example.com", Kind: "Foo", Version: "v1"}},
 								},
 							},
@@ -164,7 +164,7 @@ const (
 	inputBasicPackage = `{
 		"message": "blah",
 		"package": {
-			"name": "foo",
+			"packageName": "foo",
 			"versionRange": ">=1.0.0"
 		}
 	}`
@@ -176,7 +176,7 @@ const (
 		{
 			"message": "blah blah",
 			"package": {
-				"name": "fuz",
+				"packageName": "fuz",
 				"versionRange": ">=1.0.0"
 			}
 		}
@@ -190,7 +190,7 @@ const (
 	"constraints": [
 		{
 			"package": {
-				"name": "fuz",
+				"packageName": "fuz",
 				"versionRange": ">=1.0.0"
 			}
 		},
@@ -207,13 +207,13 @@ const (
 				"constraints": [
 					{
 						"package": {
-							"name": "foo",
+							"packageName": "foo",
 							"versionRange": ">=1.0.0"
 						}
 					},
 					{
 						"package": {
-							"name": "buf",
+							"packageName": "buf",
 							"versionRange": ">=1.0.0"
 						}
 					},

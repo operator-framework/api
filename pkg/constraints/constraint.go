@@ -38,22 +38,22 @@ type Constraint struct {
 // CompoundConstraint holds a list of potentially nested constraints
 // over which a boolean operation is applied.
 type CompoundConstraint struct {
-	Constraints []Constraint `json:"constraints"`
+	Constraints []Constraint `json:"constraints" yaml:"constraints"`
 }
 
 // GVKConstraint defines a GVK constraint.
 type GVKConstraint struct {
-	Group   string `json:"group"`
-	Kind    string `json:"kind"`
-	Version string `json:"version"`
+	Group   string `json:"group" yaml:"group"`
+	Kind    string `json:"kind" yaml:"kind"`
+	Version string `json:"version" yaml:"version"`
 }
 
 // PackageConstraint defines a package constraint.
 type PackageConstraint struct {
-	// Name of the package.
-	Name string `json:"name"`
+	// PackageName is the name of the package.
+	PackageName string `json:"packageName" yaml:"packageName"`
 	// VersionRange required for the package.
-	VersionRange string `json:"versionRange"`
+	VersionRange string `json:"versionRange" yaml:"versionRange"`
 }
 
 // maxConstraintSize defines the maximum raw size in bytes of an olm.constraint.
