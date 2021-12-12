@@ -32,8 +32,8 @@ func Test_ValidateGoodPractices(t *testing.T) {
 		{
 			name:        "should raise an waring when the resource request is NOT set for any of the containers defined in the bundle",
 			wantWarning: true,
-			warnStrings: []string{"Warning: Value memcached-operator.v0.0.1: unable to find the resource requests for the container kube-rbac-proxy. It is recommended to ensure the resource request for CPU and Memory. Be aware that for some clusters configurations it is required to specify requests or limits for those values. Otherwise, the system or quota may reject Pod creation. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
-				"Warning: Value memcached-operator.v0.0.1: unable to find the resource requests for the container manager. It is recommended to ensure the resource request for CPU and Memory. Be aware that for some clusters configurations it is required to specify requests or limits for those values. Otherwise, the system or quota may reject Pod creation. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"},
+			warnStrings: []string{"Warning: Value memcached-operator.v0.0.1: unable to find the resource requests for the container: (kube-rbac-proxy). It is recommended to ensure the resource request for CPU and Memory. Be aware that for some clusters configurations it is required to specify requests or limits for those values. Otherwise, the system or quota may reject Pod creation. More info: https://master.sdk.operatorframework.io/docs/best-practices/managing-resources/",
+				"Warning: Value memcached-operator.v0.0.1: unable to find the resource requests for the container: (manager). It is recommended to ensure the resource request for CPU and Memory. Be aware that for some clusters configurations it is required to specify requests or limits for those values. Otherwise, the system or quota may reject Pod creation. More info: https://master.sdk.operatorframework.io/docs/best-practices/managing-resources/"},
 			args: args{
 				bundleDir: "./testdata/valid_bundle_v1",
 			},
