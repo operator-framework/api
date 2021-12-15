@@ -7,8 +7,7 @@ import (
 	"testing"
 )
 
-func Test_getDeprecatedAPIs(t *testing.T) {
-
+func Test_GetRemovedAPIsOn1_22From(t *testing.T) {
 	// Mock the expected result for ./testdata/valid_bundle_v1beta1
 	crdMock := make(map[string][]string)
 	crdMock["CRD"] = []string{"etcdbackups.etcd.database.coreos.com", "etcdclusters.etcd.database.coreos.com", "etcdrestores.etcd.database.coreos.com"}
@@ -64,6 +63,89 @@ func Test_getDeprecatedAPIs(t *testing.T) {
 	}
 }
 
+func Test_GetRemovedAPIsOn1_25From(t *testing.T) {
+	mock := make(map[string][]string)
+	mock["HorizontalPodAutoscaler"] = []string{"memcached-operator-hpa"}
+	mock["PodDisruptionBudget"] = []string{"memcached-operator-policy-manager"}
+
+	type args struct {
+		bundleDir string
+	}
+	tests := []struct {
+		name string
+		args args
+		want map[string][]string
+	}{
+		{
+			name: "should return an empty map when no deprecated apis are found",
+			args: args{
+				bundleDir: "./testdata/valid_bundle_v1",
+			},
+			want: map[string][]string{},
+		},
+		{
+			name: "should fail return the removed APIs in 1.25",
+			args: args{
+				bundleDir: "./testdata/removed_api_1_25",
+			},
+			want: mock,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			// Validate the bundle object
+			bundle, err := manifests.GetBundleFromDir(tt.args.bundleDir)
+			require.NoError(t, err)
+
+			if got := getRemovedAPIsOn1_25From(bundle); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("getRemovedAPIsOn1_25From() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_GetRemovedAPIsOn1_26From(t *testing.T) {
+	mock := make(map[string][]string)
+	mock["HorizontalPodAutoscaler"] = []string{"memcached-operator-hpa"}
+
+	type args struct {
+		bundleDir string
+	}
+	tests := []struct {
+		name string
+		args args
+		want map[string][]string
+	}{
+		{
+			name: "should return an empty map when no deprecated apis are found",
+			args: args{
+				bundleDir: "./testdata/valid_bundle_v1",
+			},
+			want: map[string][]string{},
+		},
+		{
+			name: "should fail return the removed APIs in 1.26",
+			args: args{
+				bundleDir: "./testdata/removed_api_1_26",
+			},
+			want: mock,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			// Validate the bundle object
+			bundle, err := manifests.GetBundleFromDir(tt.args.bundleDir)
+			require.NoError(t, err)
+
+			if got := getRemovedAPIsOn1_26From(bundle); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("getRemovedAPIsOn1_26From() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestValidateDeprecatedAPIS(t *testing.T) {
 	type args struct {
 		minKubeVersion string
@@ -79,16 +161,6 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 		warnStrings []string
 	}{
 		{
-			name: "should not return error or warning when the k8sVersion is <= 1.15",
-			args: args{
-				k8sVersion:     "1.15",
-				minKubeVersion: "",
-				directory:      "./testdata/valid_bundle_v1beta1",
-			},
-			wantWarning: true,
-			warnStrings: []string{"checking APIs against Kubernetes version : 1.15"},
-		},
-		{
 			name: "should return a warning when has the CRD v1beta1 and minKubeVersion is informed",
 			args: args{
 				k8sVersion:     "",
@@ -102,16 +174,6 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 				"\"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
 		},
 		{
-			name: "should not return a warning or error when has minKubeVersion but the k8sVersion informed is <= 1.15",
-			args: args{
-				k8sVersion:     "1.15",
-				minKubeVersion: "1.11.3",
-				directory:      "./testdata/valid_bundle_v1beta1",
-			},
-			wantWarning: true,
-			warnStrings: []string{"checking APIs against Kubernetes version : 1.15"},
-		},
-		{
 			name: "should return an error when the k8sVersion is >= 1.22 and has the deprecated API",
 			args: args{
 				k8sVersion:     "1.22",
@@ -123,8 +185,56 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
 				"Migrate the API(s) for CRD: ([\"etcdbackups.etcd.database.coreos.com\"" +
 				" \"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
+		},
+		{
+			name: "should return an error when the k8sVersion is >= 1.25 and found removed APIs on 1.25",
+			args: args{
+				k8sVersion:     "1.25",
+				minKubeVersion: "",
+				directory:      "./testdata/removed_api_1_25",
+			},
+			wantError: true,
+			errStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.25. " +
+				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25. " +
+				"Migrate the API(s) for HorizontalPodAutoscaler: ([\"memcached-operator-hpa\"])," +
+				"PodDisruptionBudget: ([\"memcached-operator-policy-manager\"]),"},
+		},
+		{
+			name: "should return a warning if the k8sVersion is empty and found removed APIs on 1.25",
+			args: args{
+				k8sVersion:     "",
+				minKubeVersion: "",
+				directory:      "./testdata/removed_api_1_25",
+			},
 			wantWarning: true,
-			warnStrings: []string{"checking APIs against Kubernetes version : 1.22"},
+			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.25. " +
+				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25. " +
+				"Migrate the API(s) for HorizontalPodAutoscaler: ([\"memcached-operator-hpa\"])," +
+				"PodDisruptionBudget: ([\"memcached-operator-policy-manager\"]),"},
+		},
+		{
+			name: "should return an error when the k8sVersion is >= 1.26 and found removed APIs on 1.26",
+			args: args{
+				k8sVersion:     "1.26",
+				minKubeVersion: "",
+				directory:      "./testdata/removed_api_1_26",
+			},
+			wantError: true,
+			errStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.26. " +
+				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-26. " +
+				"Migrate the API(s) for HorizontalPodAutoscaler: ([\"memcached-operator-hpa\"])"},
+		},
+		{
+			name: "should return a warning when the k8sVersion is empty and found removed APIs on 1.26",
+			args: args{
+				k8sVersion:     "",
+				minKubeVersion: "",
+				directory:      "./testdata/removed_api_1_26",
+			},
+			wantWarning: true,
+			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.26. " +
+				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-26. " +
+				"Migrate the API(s) for HorizontalPodAutoscaler: ([\"memcached-operator-hpa\"])"},
 		},
 		{
 			name: "should return an error when the k8sVersion informed is invalid",
@@ -133,8 +243,13 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 				minKubeVersion: "",
 				directory:      "./testdata/valid_bundle_v1beta1",
 			},
-			wantError:  true,
-			errStrings: []string{"invalid value informed via the k8s key option : invalid"},
+			wantError:   true,
+			errStrings:  []string{"invalid value informed via the k8s key option : invalid"},
+			wantWarning: true,
+			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.22. " +
+				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
+				"Migrate the API(s) for CRD: ([\"etcdbackups.etcd.database.coreos.com\"" +
+				" \"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
 		},
 		{
 			name: "should return an error when the csv.spec.minKubeVersion informed is invalid",

@@ -70,6 +70,50 @@ Following an example.
  return nonEmptyResults
 ```
 
+#### Passing optional key/values to the validators
+
+Validators may accept pass optional key/values which will be used in the checks made.
+These values are global and if the key/value pair provided is not used for 1 or more
+validators called then, it is ignored.
+
+The following example calls `AlphaDeprecatedAPIsValidator`, which allows us to inform
+the K8s version intended to publish the OLM Bundle:
+
+```go
+	validators := apivalidation.DefaultBundleValidators
+	validators = validators.WithValidators(apivalidation.OperatorHubValidator)
+	validators = validators.WithValidators(apivalidation.ObjectValidator)
+	validators = validators.WithValidators(apivalidation.AlphaDeprecatedAPIsValidator)
+	validators = validators.WithValidators(apivalidation.GoodPracticesValidator)
+
+	objs := auditBundle.Bundle.ObjectsToValidate()
+
+	// Pass the --optional-values. e.g. --optional-values="k8s-version=1.22"
+	// or --optional-values="image-path=bundle.Dockerfile"
+	var optionalValues = map[string]string{
+		"k8s-version":"1.22",
+	}
+	objs = append(objs, optionalValues)
+
+	results := validators.Validate(objs...)
+	nonEmptyResults := []errors.ManifestResult{}
+
+	for _, result := range results {
+		if result.HasError() || result.HasWarn() {
+			nonEmptyResults = append(nonEmptyResults, result)
+		}
+	}
+```
+
+**How the optional key/values are informed via the CLI?**
+
+By using [Operator-SDK][sdk] you can pass a list of key/values via the flag `--optional-values`, for example,
+to validate that your manifests can work with a Kubernetes cluster of a particular version using the `k8s-version`:
+
+```sh
+$ operator-sdk bundle validate ./bundle --select-optional suite=operatorframework --optional-values=k8s-version=1.22
+```
+
 ## API CLI Usage
 
 You can install the `operator-verify` tool from source using:
