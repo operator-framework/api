@@ -19,6 +19,7 @@ type Bundle struct {
 	V1beta1CRDs    []*apiextensionsv1beta1.CustomResourceDefinition
 	V1CRDs         []*apiextensionsv1.CustomResourceDefinition
 	Dependencies   []*Dependency
+	Size           *int64
 }
 
 func (b *Bundle) ObjectsToValidate() []interface{} {

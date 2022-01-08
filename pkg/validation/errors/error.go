@@ -116,7 +116,7 @@ func ErrInvalidBundle(detail string, value interface{}) Error {
 }
 
 func WarnInvalidBundle(detail string, value interface{}) Error {
-	return invalidBundle(LevelError, detail, value)
+	return invalidBundle(LevelWarn, detail, value)
 }
 
 func invalidBundle(lvl Level, detail string, value interface{}) Error {

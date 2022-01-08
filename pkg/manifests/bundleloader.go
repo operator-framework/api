@@ -103,6 +103,13 @@ func (b *bundleLoader) LoadBundleWalkFunc(path string, f os.FileInfo, err error)
 	}
 
 	b.bundle = bundle
+	if !f.IsDir() {
+		total := f.Size()
+		if b.bundle.Size != nil {
+			total += *b.bundle.Size
+		}
+		b.bundle.Size = &total
+	}
 
 	return utilerrors.NewAggregate(errs)
 }

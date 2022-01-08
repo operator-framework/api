@@ -2,6 +2,8 @@ package internal
 
 import (
 	"fmt"
+	"math"
+	"strconv"
 	"strings"
 
 	"github.com/operator-framework/api/pkg/manifests"
@@ -14,6 +16,9 @@ import (
 )
 
 var BundleValidator interfaces.Validator = interfaces.ValidatorFunc(validateBundles)
+
+// max_bundle_sized_allowed defines the max size of the bundle
+const max_bundle_sized_allowed = 1048576
 
 func validateBundles(objs ...interface{}) (results []errors.ManifestResult) {
 	for _, obj := range objs {
@@ -31,6 +36,10 @@ func validateBundle(bundle *manifests.Bundle) (result errors.ManifestResult) {
 	saErrors := validateServiceAccounts(bundle)
 	if saErrors != nil {
 		result.Add(saErrors...)
+	}
+	sizeErrors := validateBundleSize(bundle)
+	if sizeErrors != nil {
+		result.Add(sizeErrors...)
 	}
 	return result
 }
@@ -99,7 +108,7 @@ func validateOwnedCRDs(bundle *manifests.Bundle, csv *operatorsv1alpha1.ClusterS
 
 	// All CRDs present in a CSV must be present in the bundle.
 	for key := range keySet {
-		result.Add(errors.WarnInvalidBundle(fmt.Sprintf("CRD %q is present in bundle %q but not defined in CSV", key, bundle.Name), key))
+		result.Add(errors.ErrInvalidBundle(fmt.Sprintf("CRD %q is present in bundle %q but not defined in CSV", key, bundle.Name), key))
 	}
 
 	return result
@@ -115,6 +124,30 @@ func getOwnedCustomResourceDefintionKeys(csv *operatorsv1alpha1.ClusterServiceVe
 		keys = append(keys, schema.GroupVersionKind{Group: group, Version: owned.Version, Kind: owned.Kind})
 	}
 	return keys
+}
+
+// validateBundleSize will raise an error if the bundle size is bigger than the value allowed
+// or a warning when the value is closed to it
+func validateBundleSize(bundle *manifests.Bundle) []errors.Error {
+	warnPercent := 0.15
+	warnSize := int64(max_bundle_sized_allowed - math.Round(max_bundle_sized_allowed*warnPercent))
+	var errs []errors.Error
+
+	if bundle.Size == nil || *bundle.Size == 0 {
+		errs = append(errs, errors.WarnFailedValidation("unable to check the bundle size", nil))
+		return errs
+	}
+
+	if *bundle.Size > max_bundle_sized_allowed {
+		errs = append(errs, errors.ErrInvalidBundle(fmt.Sprintf("total bundle size of %s is greater than %s bytes which is not allowed",
+			strconv.FormatInt(*bundle.Size, 10), strconv.FormatInt(max_bundle_sized_allowed, 10)), nil))
+
+	} else if *bundle.Size > warnSize {
+		errs = append(errs, errors.WarnInvalidBundle(fmt.Sprintf("total bundle size of %s is greater than %s bytes, close to the current %s byte limit",
+			strconv.FormatInt(*bundle.Size, 10), strconv.FormatInt(warnSize, 10), strconv.FormatInt(max_bundle_sized_allowed, 10)), nil))
+	}
+
+	return errs
 }
 
 // getBundleCRDKeys returns a set of definition keys for all CRDs in bundle.
