@@ -2,8 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"math"
-	"strconv"
 	"strings"
 
 	"github.com/operator-framework/api/pkg/manifests"
@@ -17,8 +15,10 @@ import (
 
 var BundleValidator interfaces.Validator = interfaces.ValidatorFunc(validateBundles)
 
-// max_bundle_sized_allowed defines the max size of the bundle
-const max_bundle_sized_allowed = 1048576
+// max_bundle_size is the maximum size of a bundle in bytes.
+// This ensures the bundle can be staged in a single ConfigMap by OLM during installation.
+// The value is derived from the standard upper bound for k8s resources (~1MB).
+const max_bundle_size = 1048576
 
 func validateBundles(objs ...interface{}) (results []errors.ManifestResult) {
 	for _, obj := range objs {
@@ -126,11 +126,14 @@ func getOwnedCustomResourceDefintionKeys(csv *operatorsv1alpha1.ClusterServiceVe
 	return keys
 }
 
-// validateBundleSize will raise an error if the bundle size is bigger than the value allowed
-// or a warning when the value is closed to it
+// validateBundleSize will check the bundle size according to its limits
+// note that this check will raise an error if the size is bigger than the max allowed
+// and warnings when:
+// - we are unable to check the bundle size because we are running a check without load the bundle
+// - we could identify that the bundle size is close to the limit (bigger than 85%)
 func validateBundleSize(bundle *manifests.Bundle) []errors.Error {
-	warnPercent := 0.15
-	warnSize := int64(max_bundle_sized_allowed - math.Round(max_bundle_sized_allowed*warnPercent))
+	warnPercent := 0.85
+	warnSize := int64(max_bundle_size * warnPercent)
 	var errs []errors.Error
 
 	if bundle.Size == nil || *bundle.Size == 0 {
@@ -138,13 +141,10 @@ func validateBundleSize(bundle *manifests.Bundle) []errors.Error {
 		return errs
 	}
 
-	if *bundle.Size > max_bundle_sized_allowed {
-		errs = append(errs, errors.ErrInvalidBundle(fmt.Sprintf("total bundle size of %s is greater than %s bytes which is not allowed",
-			strconv.FormatInt(*bundle.Size, 10), strconv.FormatInt(max_bundle_sized_allowed, 10)), nil))
-
+	if *bundle.Size > max_bundle_size {
+		errs = append(errs, errors.ErrInvalidBundle(fmt.Sprintf("maximum bundle size exceeded: size=%d bytes, max=%d bytes", *bundle.Size, max_bundle_size), nil))
 	} else if *bundle.Size > warnSize {
-		errs = append(errs, errors.WarnInvalidBundle(fmt.Sprintf("total bundle size of %s is greater than %s bytes, close to the current %s byte limit",
-			strconv.FormatInt(*bundle.Size, 10), strconv.FormatInt(warnSize, 10), strconv.FormatInt(max_bundle_sized_allowed, 10)), nil))
+		errs = append(errs, errors.WarnInvalidBundle(fmt.Sprintf("nearing maximum bundle size: size=%d, max=%d", *bundle.Size, max_bundle_size), nil))
 	}
 
 	return errs

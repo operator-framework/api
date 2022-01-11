@@ -177,16 +177,16 @@ func TestBundleSize(t *testing.T) {
 		{
 			name: "should pass when the size is not bigger or closer of the limit",
 			args: args{
-				size: int64(max_bundle_sized_allowed / 2),
+				size: int64(max_bundle_size / 2),
 			},
 		},
 		{
 			name: "should warn when the size is closer of the limit",
 			args: args{
-				size: int64(max_bundle_sized_allowed - 10),
+				size: int64(max_bundle_size - 10),
 			},
 			wantWarning: true,
-			warnStrings: []string{"Warning: : total bundle size of 1048566 is greater than 891290 bytes, close to the current 1048576 byte limit"},
+			warnStrings: []string{"Warning: : nearing maximum bundle size: size=1048566, max=1048576"},
 		},
 		{
 			name:        "should warn when is not possible to check the size",
@@ -196,10 +196,10 @@ func TestBundleSize(t *testing.T) {
 		{
 			name: "should raise an error when the size is bigger than the limit",
 			args: args{
-				size: int64(2 * max_bundle_sized_allowed),
+				size: int64(2 * max_bundle_size),
 			},
 			wantError:  true,
-			errStrings: []string{"Error: : total bundle size of 2097152 is greater than 1048576 bytes which is not allowed"},
+			errStrings: []string{"Error: : maximum bundle size exceeded: size=2097152 bytes, max=1048576 bytes"},
 		},
 	}
 	for _, tt := range tests {
