@@ -22,28 +22,28 @@ func TestParse(t *testing.T) {
 			name:  "Valid/BasicGVK",
 			input: json.RawMessage(inputBasicGVK),
 			expConstraint: Constraint{
-				Message: "blah",
-				GVK:     &GVKConstraint{Group: "example.com", Version: "v1", Kind: "Foo"},
+				FailureMessage: "blah",
+				GVK:            &GVKConstraint{Group: "example.com", Version: "v1", Kind: "Foo"},
 			},
 		},
 		{
 			name:  "Valid/BasicPackage",
 			input: json.RawMessage(inputBasicPackage),
 			expConstraint: Constraint{
-				Message: "blah",
-				Package: &PackageConstraint{PackageName: "foo", VersionRange: ">=1.0.0"},
+				FailureMessage: "blah",
+				Package:        &PackageConstraint{PackageName: "foo", VersionRange: ">=1.0.0"},
 			},
 		},
 		{
 			name:  "Valid/BasicAll",
 			input: json.RawMessage(fmt.Sprintf(inputBasicCompoundTmpl, "all")),
 			expConstraint: Constraint{
-				Message: "blah",
+				FailureMessage: "blah",
 				All: &CompoundConstraint{
 					Constraints: []Constraint{
 						{
-							Message: "blah blah",
-							Package: &PackageConstraint{PackageName: "fuz", VersionRange: ">=1.0.0"},
+							FailureMessage: "blah blah",
+							Package:        &PackageConstraint{PackageName: "fuz", VersionRange: ">=1.0.0"},
 						},
 					},
 				},
@@ -53,12 +53,12 @@ func TestParse(t *testing.T) {
 			name:  "Valid/BasicAny",
 			input: json.RawMessage(fmt.Sprintf(inputBasicCompoundTmpl, "any")),
 			expConstraint: Constraint{
-				Message: "blah",
+				FailureMessage: "blah",
 				Any: &CompoundConstraint{
 					Constraints: []Constraint{
 						{
-							Message: "blah blah",
-							Package: &PackageConstraint{PackageName: "fuz", VersionRange: ">=1.0.0"},
+							FailureMessage: "blah blah",
+							Package:        &PackageConstraint{PackageName: "fuz", VersionRange: ">=1.0.0"},
 						},
 					},
 				},
@@ -68,12 +68,12 @@ func TestParse(t *testing.T) {
 			name:  "Valid/BasicNone",
 			input: json.RawMessage(fmt.Sprintf(inputBasicCompoundTmpl, "none")),
 			expConstraint: Constraint{
-				Message: "blah",
+				FailureMessage: "blah",
 				None: &CompoundConstraint{
 					Constraints: []Constraint{
 						{
-							Message: "blah blah",
-							Package: &PackageConstraint{PackageName: "fuz", VersionRange: ">=1.0.0"},
+							FailureMessage: "blah blah",
+							Package:        &PackageConstraint{PackageName: "fuz", VersionRange: ">=1.0.0"},
 						},
 					},
 				},
@@ -83,13 +83,13 @@ func TestParse(t *testing.T) {
 			name:  "Valid/Complex",
 			input: json.RawMessage(inputComplex),
 			expConstraint: Constraint{
-				Message: "blah",
+				FailureMessage: "blah",
 				All: &CompoundConstraint{
 					Constraints: []Constraint{
 						{Package: &PackageConstraint{PackageName: "fuz", VersionRange: ">=1.0.0"}},
 						{GVK: &GVKConstraint{Group: "fals.example.com", Kind: "Fal", Version: "v1"}},
 						{
-							Message: "foo and buf must be stable versions",
+							FailureMessage: "foo and buf must be stable versions",
 							All: &CompoundConstraint{
 								Constraints: []Constraint{
 									{Package: &PackageConstraint{PackageName: "foo", VersionRange: ">=1.0.0"}},
@@ -99,7 +99,7 @@ func TestParse(t *testing.T) {
 							},
 						},
 						{
-							Message: "blah blah",
+							FailureMessage: "blah blah",
 							Any: &CompoundConstraint{
 								Constraints: []Constraint{
 									{GVK: &GVKConstraint{Group: "foos.example.com", Kind: "Foo", Version: "v1beta1"}},
@@ -132,7 +132,7 @@ func TestParse(t *testing.T) {
 		{
 			name: "Invalid/UnknownField",
 			input: json.RawMessage(
-				`{"message": "something", "arbitrary": {"key": "value"}}`,
+				`{"failureMessage": "something", "arbitrary": {"key": "value"}}`,
 			),
 			expError: `json: unknown field "arbitrary"`,
 		},
@@ -153,7 +153,7 @@ func TestParse(t *testing.T) {
 
 const (
 	inputBasicGVK = `{
-		"message": "blah",
+		"failureMessage": "blah",
 		"gvk": {
 			"group": "example.com",
 			"version": "v1",
@@ -162,7 +162,7 @@ const (
 	}`
 
 	inputBasicPackage = `{
-		"message": "blah",
+		"failureMessage": "blah",
 		"package": {
 			"packageName": "foo",
 			"versionRange": ">=1.0.0"
@@ -170,11 +170,11 @@ const (
 	}`
 
 	inputBasicCompoundTmpl = `{
-"message": "blah",
+"failureMessage": "blah",
 "%s": {
 	"constraints": [
 		{
-			"message": "blah blah",
+			"failureMessage": "blah blah",
 			"package": {
 				"packageName": "fuz",
 				"versionRange": ">=1.0.0"
@@ -185,7 +185,7 @@ const (
 `
 
 	inputComplex = `{
-"message": "blah",
+"failureMessage": "blah",
 "all": {
 	"constraints": [
 		{
@@ -202,7 +202,7 @@ const (
 			}
 		},
 		{
-			"message": "foo and buf must be stable versions",
+			"failureMessage": "foo and buf must be stable versions",
 			"all": {
 				"constraints": [
 					{
@@ -228,7 +228,7 @@ const (
 			}
 		},
 		{
-			"message": "blah blah",
+			"failureMessage": "blah blah",
 			"any": {
 				"constraints": [
 					{
