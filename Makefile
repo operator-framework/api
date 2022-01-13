@@ -12,7 +12,6 @@ endif
 REPO = github.com/operator-framework/api
 BUILD_PATH = $(REPO)/cmd/operator-verify
 PKGS = $(shell go list ./... | grep -v /vendor/)
-YQ := go run $(MOD_FLAGS) ./vendor/github.com/mikefarah/yq/v3/
 
 .PHONY: help
 help: ## Show this help screen
@@ -25,7 +24,6 @@ help: ## Show this help screen
 .PHONY: install
 
 install: ## Build & install operator-verify
-	
 	$(Q)go install \
 		-gcflags "all=-trimpath=${GOPATH}" \
 		-asmflags "all=-trimpath=${GOPATH}" \
@@ -35,17 +33,17 @@ install: ## Build & install operator-verify
 		" \
 		$(BUILD_PATH)
 
+###
 # Code management.
-.PHONY: format tidy clean vendor generate manifests
+###
+.PHONY: format tidy clean generate manifests
 
 format: ## Format the source code
 	$(Q)go fmt $(PKGS)
 
 tidy: ## Update dependencies
 	$(Q)go mod tidy -v
-
-vendor: tidy ## Update vendor directory
-	$(Q)go mod vendor 
+	$(Q)go mod verify
 
 clean: ## Clean up the build artifacts
 	$(Q)rm -rf build
@@ -53,7 +51,7 @@ clean: ## Clean up the build artifacts
 generate: controller-gen  ## Generate code
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths=./...
 
-manifests: controller-gen ## Generate manifests e.g. CRD, RBAC etc
+manifests: yq controller-gen ## Generate manifests e.g. CRD, RBAC etc
 	@# Create CRDs for new APIs
 	$(CONTROLLER_GEN) crd:crdVersions=v1 output:crd:dir=./crds paths=./pkg/operators/...
 
@@ -88,9 +86,28 @@ test-unit: ## Run the unit tests
 verify: manifests generate format
 	git diff --exit-code
 
+###
 # Utilities.
-.PHONY: controller-gen
+###
 
-controller-gen: vendor ## Find or download controller-gen 
-CONTROLLER_GEN=$(Q)go run -mod=vendor ./vendor/sigs.k8s.io/controller-tools/cmd/controller-gen
+# go-get-tool will 'go get' any package $2 and install it to $1.
+PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
+define go-get-tool
+@[ -f $(1) ] || { \
+set -e ;\
+TMP_DIR=$$(mktemp -d) ;\
+cd $$TMP_DIR ;\
+go mod init tmp ;\
+echo "Downloading $(2)" ;\
+GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
+rm -rf $$TMP_DIR ;\
+}
+endef
 
+CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
+controller-gen: ## Download controller-gen locally if necessary.
+	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.8.0)
+
+YQ = $(shell pwd)/bin/yq
+yq:
+	$(call go-get-tool,$(YQ),github.com/mikefarah/yq/v3)
