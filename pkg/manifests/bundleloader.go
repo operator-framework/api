@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/operator-framework/operator-registry/pkg/lib/encoding"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -33,6 +34,14 @@ func (b *bundleLoader) LoadBundle() error {
 	errs := make([]error, 0)
 	if err := filepath.Walk(b.dir, collectWalkErrs(b.LoadBundleWalkFunc, &errs)); err != nil {
 		errs = append(errs, err)
+	}
+
+	// Compress the bundle to check its size
+	if data, err := os.ReadFile(b.dir); err == nil {
+		if content, err := encoding.GzipBase64Encode(data); err != nil {
+			total := int64(len(content))
+			b.bundle.CompressedSize = &total
+		}
 	}
 
 	if !b.foundCSV {
@@ -103,13 +112,6 @@ func (b *bundleLoader) LoadBundleWalkFunc(path string, f os.FileInfo, err error)
 	}
 
 	b.bundle = bundle
-	if !f.IsDir() {
-		total := f.Size()
-		if b.bundle.Size != nil {
-			total += *b.bundle.Size
-		}
-		b.bundle.Size = &total
-	}
 
 	return utilerrors.NewAggregate(errs)
 }

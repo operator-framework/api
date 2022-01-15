@@ -13,6 +13,10 @@ package typeparams
 import (
 	"go/ast"
 	"go/token"
+<<<<<<< HEAD:vendor/golang.org/x/tools/internal/typeparams/common.go
+=======
+	"go/types"
+>>>>>>> b5e1417 (add operator-registry as dep and use gzip method to check bundle size):vendor/golang.org/x/tools/internal/typeparams/doc.go
 )
 
 // A IndexExprData holds data from both ast.IndexExpr and the new
@@ -23,3 +27,12 @@ type IndexExprData struct {
 	Indices []ast.Expr // index expressions
 	Rbrack  token.Pos  // position of "]"
 }
+<<<<<<< HEAD:vendor/golang.org/x/tools/internal/typeparams/common.go
+=======
+
+// IsTypeParam reports whether t is a type parameter.
+func IsTypeParam(t types.Type) bool {
+	_, ok := t.(*TypeParam)
+	return ok
+}
+>>>>>>> b5e1417 (add operator-registry as dep and use gzip method to check bundle size):vendor/golang.org/x/tools/internal/typeparams/doc.go

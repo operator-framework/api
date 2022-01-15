@@ -186,7 +186,7 @@ func TestBundleSize(t *testing.T) {
 				size: int64(max_bundle_size - 10),
 			},
 			wantWarning: true,
-			warnStrings: []string{"Warning: : nearing maximum bundle size: size=1048566, max=1048576"},
+			warnStrings: []string{"Warning: : nearing maximum bundle compressed size with gzip: size=~3 MegaByte, max=4 MegaByte"},
 		},
 		{
 			name:        "should warn when is not possible to check the size",
@@ -199,13 +199,13 @@ func TestBundleSize(t *testing.T) {
 				size: int64(2 * max_bundle_size),
 			},
 			wantError:  true,
-			errStrings: []string{"Error: : maximum bundle size exceeded: size=2097152 bytes, max=1048576 bytes"},
+			errStrings: []string{"Error: : maximum bundle compressed size with gzip size exceeded: size=~8 MegaByte, max=4 MegaByte"},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			bundle := &manifests.Bundle{
-				Size: &tt.args.size,
+				CompressedSize: &tt.args.size,
 			}
 			result := validateBundleSize(bundle)
 
