@@ -2,6 +2,7 @@ package internal
 
 import (
 	"io/ioutil"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"path/filepath"
 	"testing"
 
@@ -79,6 +80,16 @@ func TestValidateCSV(t *testing.T) {
 				},
 			},
 			filepath.Join("testdata", "invalid.alm-examples.csv.yaml"),
+		},
+		{
+			validatorFuncTest{
+				description: "should not fail when alm-examples is not informed",
+				wantWarn:    true,
+				errors: []errors.Error{
+					errors.WarnInvalidOperation("provided API should have an example annotation", schema.GroupVersionKind{Group: "etcd.database.coreos.com", Version: "v1beta2", Kind: "EtcdCluster"}),
+				},
+			},
+			filepath.Join("testdata", "correct.csv.empty.example.yaml"),
 		},
 	}
 	for _, c := range cases {

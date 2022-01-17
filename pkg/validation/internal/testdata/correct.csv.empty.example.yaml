@@ -1,0 +1,61 @@
+#! validate-crd: deploy/chart/templates/0000_30_02-clusterserviceversion.crd.yaml
+#! parse-kind: ClusterServiceVersion
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  name: etcdoperator.v0.9.0
+  namespace: placeholder
+  annotations:
+    "alm-examples": ""
+spec:
+  version: 0.9.0
+  installModes:
+  - type: AllNamespaces
+    supported: true
+  install:
+    strategy: deployment
+    spec:
+      permissions:
+      - serviceAccountName: etcd-operator
+        rules:
+        - apiGroups:
+          - etcd.database.coreos.com
+          resources:
+          - etcdclusters
+          - etcdbackups
+          - etcdrestores
+          verbs:
+          - "*"
+      deployments:
+      - name: etcd-operator
+        spec:
+          replicas: 1
+          template:
+            metadata:
+              name: etcd-operator-alm-owned
+              labels:
+                name: etcd-operator-alm-owned
+            spec:
+              serviceAccountName: etcd-operator
+              containers:
+              - name: etcd-operator
+                command:
+                - etcd-operator
+                - --create-crd=false
+                image: quay.io/coreos/etcd-operator@sha256:db563baa8194fcfe39d1df744ed70024b0f1f9e9b55b5923c2f3a413c44dc6b8
+                env:
+                - name: MY_POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: MY_POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+  customresourcedefinitions:
+    owned:
+    - name: etcdclusters.etcd.database.coreos.com
+      version: v1beta2
+      kind: EtcdCluster
+
+
