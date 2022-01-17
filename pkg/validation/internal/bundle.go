@@ -18,7 +18,7 @@ var BundleValidator interfaces.Validator = interfaces.ValidatorFunc(validateBund
 // max_bundle_size is the maximum size of a bundle in bytes.
 // This ensures the bundle can be staged in a single ConfigMap by OLM during installation.
 // The value is derived from the standard upper bound for k8s resources (~4MB).
-const max_bundle_size  = 4 << (10 * 2)
+const max_bundle_size = 4 << (10 * 2)
 
 func validateBundles(objs ...interface{}) (results []errors.ManifestResult) {
 	for _, obj := range objs {
@@ -142,9 +142,9 @@ func validateBundleSize(bundle *manifests.Bundle) []errors.Error {
 	}
 
 	if *bundle.CompressedSize > max_bundle_size {
-		errs = append(errs, errors.ErrInvalidBundle(fmt.Sprintf("maximum bundle compressed size with gzip size exceeded: size=~%d MegaByte, max=%d MegaByte", *bundle.CompressedSize/(1 << (10 * 2)), max_bundle_size/(1 << (10 * 2))), nil))
+		errs = append(errs, errors.ErrInvalidBundle(fmt.Sprintf("maximum bundle compressed size with gzip size exceeded: size=~%d MegaByte, max=%d MegaByte", *bundle.CompressedSize/(1<<(10*2)), max_bundle_size/(1<<(10*2))), nil))
 	} else if *bundle.CompressedSize > warnSize {
-		errs = append(errs, errors.WarnInvalidBundle(fmt.Sprintf("nearing maximum bundle compressed size with gzip: size=~%d MegaByte, max=%d MegaByte", *bundle.CompressedSize/(1 << (10 * 2)), max_bundle_size/(1 << (10 * 2))), nil))
+		errs = append(errs, errors.WarnInvalidBundle(fmt.Sprintf("nearing maximum bundle compressed size with gzip: size=~%d MegaByte, max=%d MegaByte", *bundle.CompressedSize/(1<<(10*2)), max_bundle_size/(1<<(10*2))), nil))
 	}
 
 	return errs
