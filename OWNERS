@@ -6,7 +6,6 @@ approvers:
   - kevinrizza
   - benluddy
   - joelanford
-  - estroz
   - jmrodri
 # review == this code is good /lgtm
 reviewers:
@@ -22,6 +21,5 @@ reviewers:
   - joelanford
   - benluddy
   - ankitathomas
-  - estroz
   - jmrodri
   - perdasilva
