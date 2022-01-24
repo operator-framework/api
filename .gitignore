@@ -18,3 +18,5 @@
 .LSOverride
 
 .idea/*
+vendor/
+bin/
