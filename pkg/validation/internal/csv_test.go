@@ -1,14 +1,15 @@
 package internal
 
 import (
+	"fmt"
 	"io/ioutil"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"path/filepath"
 	"testing"
 
 	"github.com/ghodss/yaml"
 	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/api/pkg/validation/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func TestValidateCSV(t *testing.T) {
@@ -91,7 +92,23 @@ func TestValidateCSV(t *testing.T) {
 			},
 			filepath.Join("testdata", "correct.csv.empty.example.yaml"),
 		},
+		{
+			validatorFuncTest{
+				description: "should warn when olm.properties are defined in the annotations",
+				wantWarn:    true,
+				errors: []errors.Error{
+					errors.WarnPropertiesAnnotationUsed(
+						fmt.Sprintf(
+							"found %s annotation, please define these properties in metadata/properties.yaml instead",
+							olmpropertiesAnnotation,
+						),
+					),
+				},
+			},
+			filepath.Join("testdata", "correct.csv.olm.properties.annotation.yaml"),
+		},
 	}
+
 	for _, c := range cases {
 		b, err := ioutil.ReadFile(c.csvPath)
 		if err != nil {
