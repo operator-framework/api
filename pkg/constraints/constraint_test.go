@@ -80,6 +80,21 @@ func TestParse(t *testing.T) {
 			},
 		},
 		{
+			name:  "Valid/BasicNone",
+			input: json.RawMessage(fmt.Sprintf(inputBasicCompoundTmpl, "none")),
+			expConstraint: Constraint{
+				FailureMessage: "blah",
+				None: &CompoundConstraint{
+					Constraints: []Constraint{
+						{
+							FailureMessage: "blah blah",
+							Package:        &PackageConstraint{PackageName: "fuz", VersionRange: ">=1.0.0"},
+						},
+					},
+				},
+			},
+		},
+		{
 			name:  "Valid/Complex",
 			input: json.RawMessage(inputComplex),
 			expConstraint: Constraint{

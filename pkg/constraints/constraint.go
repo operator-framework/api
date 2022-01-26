@@ -29,11 +29,15 @@ type Constraint struct {
 	// https://github.com/operator-framework/enhancements/blob/master/enhancements/compound-bundle-constraints.md
 	All *CompoundConstraint `json:"all,omitempty" yaml:"all,omitempty"`
 	Any *CompoundConstraint `json:"any,omitempty" yaml:"any,omitempty"`
-	// A note on Not: this constraint isn't particularly useful by itself.
+	// A note on Not: this constraint is not particularly useful by itself.
 	// It should be used within an All constraint alongside some other constraint type
 	// since saying "do not use any of these GVKs/packages/etc." without an alternative
-	// doesn't make sense.
+	// doesn't make sense. Both Not and None can be used for this type but None is
+	// deprecated. If values for both Not and None are defined, None will be ignored
+	// as Not is preferred.
 	Not *CompoundConstraint `json:"not,omitempty" yaml:"not,omitempty"`
+	// Deprecated: Use Not instead. This has been deprecated as Not has a clearer UX.
+	None *CompoundConstraint `json:"none,omitempty" yaml:"none,omitempty"`
 }
 
 // CompoundConstraint holds a list of potentially nested constraints
