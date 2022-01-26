@@ -65,11 +65,11 @@ func TestParse(t *testing.T) {
 			},
 		},
 		{
-			name:  "Valid/BasicNone",
-			input: json.RawMessage(fmt.Sprintf(inputBasicCompoundTmpl, "none")),
+			name:  "Valid/BasicNot",
+			input: json.RawMessage(fmt.Sprintf(inputBasicCompoundTmpl, "not")),
 			expConstraint: Constraint{
 				FailureMessage: "blah",
-				None: &CompoundConstraint{
+				Not: &CompoundConstraint{
 					Constraints: []Constraint{
 						{
 							FailureMessage: "blah blah",
@@ -109,7 +109,7 @@ func TestParse(t *testing.T) {
 							},
 						},
 						{
-							None: &CompoundConstraint{
+							Not: &CompoundConstraint{
 								Constraints: []Constraint{
 									{GVK: &GVKConstraint{Group: "bazs.example.com", Kind: "Baz", Version: "v1alpha1"}},
 								},
@@ -256,7 +256,7 @@ const (
 			}
 		},
 		{
-			"none": {
+			"not": {
 				"constraints": [
 					{
 						"gvk": {
