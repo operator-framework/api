@@ -53,6 +53,8 @@ import (
 //
 // * Logging & Tracing
 //
+// * Migration and Modernization
+//
 // * Modernization & Migration
 //
 // * Monitoring
@@ -141,21 +143,22 @@ var validMediatypes = map[string]struct{}{
 }
 
 var validCategories = map[string]struct{}{
-	"AI/Machine Learning":       {},
-	"Application Runtime":       {},
-	"Big Data":                  {},
-	"Cloud Provider":            {},
-	"Developer Tools":           {},
-	"Database":                  {},
-	"Integration & Delivery":    {},
-	"Logging & Tracing":         {},
-	"Monitoring":                {},
-	"Modernization & Migration": {},
-	"Networking":                {},
-	"OpenShift Optional":        {},
-	"Security":                  {},
-	"Storage":                   {},
-	"Streaming & Messaging":     {},
+	"AI/Machine Learning":         {},
+	"Application Runtime":         {},
+	"Big Data":                    {},
+	"Cloud Provider":              {},
+	"Developer Tools":             {},
+	"Database":                    {},
+	"Integration & Delivery":      {},
+	"Logging & Tracing":           {},
+	"Migration and Modernization": {},
+	"Modernization & Migration":   {},
+	"Monitoring":                  {},
+	"Networking":                  {},
+	"OpenShift Optional":          {},
+	"Security":                    {},
+	"Storage":                     {},
+	"Streaming & Messaging":       {},
 }
 
 const minKubeVersionWarnMessage = "csv.Spec.minKubeVersion is not informed. It is recommended you provide this information. " +
