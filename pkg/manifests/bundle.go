@@ -19,6 +19,8 @@ type Bundle struct {
 	V1beta1CRDs    []*apiextensionsv1beta1.CustomResourceDefinition
 	V1CRDs         []*apiextensionsv1.CustomResourceDefinition
 	Dependencies   []*Dependency
+	// CompressedSize stores the gzip size of the bundle
+	CompressedSize *int64
 }
 
 func (b *Bundle) ObjectsToValidate() []interface{} {

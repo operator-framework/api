@@ -13,6 +13,7 @@ import (
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apimachinery/pkg/util/yaml"
 
+	"github.com/operator-framework/api/pkg/encoding"
 	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 )
 
@@ -33,6 +34,14 @@ func (b *bundleLoader) LoadBundle() error {
 	errs := make([]error, 0)
 	if err := filepath.Walk(b.dir, collectWalkErrs(b.LoadBundleWalkFunc, &errs)); err != nil {
 		errs = append(errs, err)
+	}
+
+	// Compress the bundle to check its size
+	if data, err := os.ReadFile(b.dir); err == nil {
+		if content, err := encoding.GzipBase64Encode(data); err != nil {
+			total := int64(len(content))
+			b.bundle.CompressedSize = &total
+		}
 	}
 
 	if !b.foundCSV {
