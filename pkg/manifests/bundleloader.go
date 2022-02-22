@@ -36,13 +36,7 @@ func (b *bundleLoader) LoadBundle() error {
 		errs = append(errs, err)
 	}
 
-	// Compress the bundle to check its size
-	if data, err := os.ReadFile(b.dir); err == nil {
-		if content, err := encoding.GzipBase64Encode(data); err != nil {
-			total := int64(len(content))
-			b.bundle.CompressedSize = &total
-		}
-	}
+	errs = append(errs, b.calculateCompressedBundleSize())
 
 	if !b.foundCSV {
 		errs = append(errs, fmt.Errorf("unable to find a csv in bundle directory %s", b.dir))
@@ -51,6 +45,35 @@ func (b *bundleLoader) LoadBundle() error {
 	}
 
 	return utilerrors.NewAggregate(errs)
+}
+
+// Compress the bundle to check its size
+func (b *bundleLoader) calculateCompressedBundleSize() error {
+	err := filepath.Walk(b.dir,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if !info.IsDir() {
+				if data, err := os.ReadFile(path); err == nil {
+					content, err := encoding.GzipBase64Encode(data)
+					if err != nil {
+						return err
+					}
+					total := int64(len(content))
+					if b.bundle.CompressedSize != nil {
+						total += *b.bundle.CompressedSize
+					}
+					b.bundle.CompressedSize = &total
+				}
+			}
+			return nil
+		})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // collectWalkErrs calls the given walk func and appends any non-nil, non skip dir error returned to the given errors slice.

@@ -237,3 +237,43 @@ func TestBundleSize(t *testing.T) {
 		})
 	}
 }
+
+func Test_EnsureGetBundleSizeValue(t *testing.T) {
+	type args struct {
+		annotations    map[string]string
+		bundleDir      string
+		imageIndexPath string
+	}
+	tests := []struct {
+		name        string
+		args        args
+		wantWarning bool
+		warnStrings []string
+	}{
+		{
+			name: "should calculate the bundle size and not raise warnings when a valid bundle is informed",
+			args: args{
+				bundleDir: "./testdata/valid_bundle",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			// Validate the bundle object
+			bundle, err := manifests.GetBundleFromDir(tt.args.bundleDir)
+			require.NoError(t, err)
+
+			results := validateBundle(bundle)
+			require.Equal(t, tt.wantWarning, len(results.Warnings) > 0)
+			if tt.wantWarning {
+				require.Equal(t, len(tt.warnStrings), len(results.Warnings))
+				for _, w := range results.Warnings {
+					wString := w.Error()
+					require.Contains(t, tt.warnStrings, wString)
+				}
+			}
+		})
+	}
+}
