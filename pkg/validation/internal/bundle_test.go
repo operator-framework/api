@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -164,7 +165,8 @@ func TestValidateServiceAccount(t *testing.T) {
 
 func TestBundleSize(t *testing.T) {
 	type args struct {
-		size int64
+		sizeCompressed int64
+		size           int64
 	}
 	tests := []struct {
 		name        string
@@ -177,35 +179,54 @@ func TestBundleSize(t *testing.T) {
 		{
 			name: "should pass when the size is not bigger or closer of the limit",
 			args: args{
-				size: int64(max_bundle_size / 2),
+				sizeCompressed: max_bundle_size / 2,
+				size:           max_bundle_size / 2,
 			},
 		},
 		{
 			name: "should warn when the size is closer of the limit",
 			args: args{
-				size: int64(max_bundle_size - 10),
+				sizeCompressed: max_bundle_size - 100000,
+				size:           (max_bundle_size - 100000) * 10,
 			},
 			wantWarning: true,
-			warnStrings: []string{"Warning: : nearing maximum bundle compressed size with gzip: size=~3 MegaByte, max=4 MegaByte"},
+			warnStrings: []string{
+				"Warning: Value : nearing maximum bundle compressed size with gzip: size=~948.6 kB , max=1.0 MB. Bundle uncompressed size is 9.5 MB",
+			},
 		},
 		{
-			name:        "should warn when is not possible to check the size",
+			name: "should warn when is not possible to check the size compressed",
+			args: args{
+				size: max_bundle_size * 1024,
+			},
 			wantWarning: true,
-			warnStrings: []string{"Warning: : unable to check the bundle size"},
+			warnStrings: []string{"Warning: Value : unable to check the bundle compressed size"},
+		},
+		{
+			name: "should warn when is not possible to check the size",
+			args: args{
+				sizeCompressed: max_bundle_size / 2,
+			},
+			wantWarning: true,
+			warnStrings: []string{"Warning: Value : unable to check the bundle size"},
 		},
 		{
 			name: "should raise an error when the size is bigger than the limit",
 			args: args{
-				size: int64(2 * max_bundle_size),
+				sizeCompressed: 2 * max_bundle_size,
+				size:           (2 * max_bundle_size) * 10,
 			},
-			wantError:  true,
-			errStrings: []string{"Error: : maximum bundle compressed size with gzip size exceeded: size=~8 MegaByte, max=4 MegaByte"},
+			wantError: true,
+			errStrings: []string{
+				"Error: Value : maximum bundle compressed size with gzip size exceeded: size=~2.1 MB , max=1.0 MB. Bundle uncompressed size is 21.0 MB",
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			bundle := &manifests.Bundle{
-				CompressedSize: &tt.args.size,
+				CompressedSize: tt.args.sizeCompressed,
+				Size:           tt.args.size,
 			}
 			result := validateBundleSize(bundle)
 
@@ -264,6 +285,10 @@ func Test_EnsureGetBundleSizeValue(t *testing.T) {
 			// Validate the bundle object
 			bundle, err := manifests.GetBundleFromDir(tt.args.bundleDir)
 			require.NoError(t, err)
+
+			// Should have the values calculated
+			require.Greater(t, bundle.Size, int64(0), fmt.Sprintf("the bundle size is %d when should be > 0", bundle.Size))
+			require.Greater(t, bundle.CompressedSize, int64(0), fmt.Sprintf("the bundle compressed size is %d when should be > 0", bundle.CompressedSize))
 
 			results := validateBundle(bundle)
 			require.Equal(t, tt.wantWarning, len(results.Warnings) > 0)
