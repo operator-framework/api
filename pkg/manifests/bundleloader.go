@@ -49,26 +49,30 @@ func (b *bundleLoader) LoadBundle() error {
 
 // Compress the bundle to check its size
 func (b *bundleLoader) calculateCompressedBundleSize() error {
+	if b.bundle == nil {
+		return nil
+	}
 	err := filepath.Walk(b.dir,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
-
-			if !info.IsDir() {
-				if data, err := os.ReadFile(path); err == nil {
-					content, err := encoding.GzipBase64Encode(data)
-					if err != nil {
-						return err
-					}
-					total := int64(len(content))
-					if b.bundle.CompressedSize != nil {
-						total += *b.bundle.CompressedSize
-					}
-					b.bundle.CompressedSize = &total
-				}
+			if info.IsDir() {
+				return nil
 			}
-			return nil
+			data, err := os.ReadFile(path)
+			if err == nil {
+				// Sum the bundle amount
+				b.bundle.Size += info.Size()
+
+				// Sum the compressed amount
+				contentGzip, err := encoding.GzipBase64Encode(data)
+				if err != nil {
+					return err
+				}
+				b.bundle.CompressedSize += int64(len(contentGzip))
+			}
+			return err
 		})
 	if err != nil {
 		return err
