@@ -166,6 +166,18 @@ func validateBundleSize(bundle *manifests.Bundle) []errors.Error {
 			bundle.Name))
 	}
 
+	// Before these versions the bundles were not compressed
+	// and their size must be < ~1MB
+	// todo: remove me at 2023
+	if bundle.Size > max_bundle_size {
+		errs = append(errs, errors.WarnInvalidBundle(
+			fmt.Sprintf("bundle uncompressed size exceeded the limit support for OLM versions relesed prior 1.17.5 :  size=~%s , max=%s. "+
+				"(these bundle cannot work in any cluster or vendor which uses OLM versions < 1.17.5 like OpenShift versions < 4.9)",
+				formatBytesInUnit(bundle.Size),
+				formatBytesInUnit(max_bundle_size)),
+			bundle.Name))
+	}
+
 	return errs
 }
 

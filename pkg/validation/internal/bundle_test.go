@@ -192,6 +192,7 @@ func TestBundleSize(t *testing.T) {
 			wantWarning: true,
 			warnStrings: []string{
 				"Warning: Value : nearing maximum bundle compressed size with gzip: size=~948.6 kB , max=1.0 MB. Bundle uncompressed size is 9.5 MB",
+				"Warning: Value : bundle uncompressed size exceeded the limit support for OLM versions relesed prior 1.17.5 :  size=~9.5 MB , max=1.0 MB. (these bundle cannot work in any cluster or vendor which uses OLM versions < 1.17.5 like OpenShift versions < 4.9)",
 			},
 		},
 		{
@@ -216,9 +217,13 @@ func TestBundleSize(t *testing.T) {
 				sizeCompressed: 2 * max_bundle_size,
 				size:           (2 * max_bundle_size) * 10,
 			},
-			wantError: true,
+			wantError:   true,
+			wantWarning: true,
 			errStrings: []string{
 				"Error: Value : maximum bundle compressed size with gzip size exceeded: size=~2.1 MB , max=1.0 MB. Bundle uncompressed size is 21.0 MB",
+			},
+			warnStrings: []string{
+				"Warning: Value : bundle uncompressed size exceeded the limit support for OLM versions relesed prior 1.17.5 :  size=~21.0 MB , max=1.0 MB. (these bundle cannot work in any cluster or vendor which uses OLM versions < 1.17.5 like OpenShift versions < 4.9)",
 			},
 		},
 	}
