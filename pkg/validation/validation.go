@@ -25,6 +25,25 @@ var ClusterServiceVersionValidator = internal.CSVValidator
 var CustomResourceDefinitionValidator = internal.CRDValidator
 
 // BundleValidator implements Validator to validate Bundles.
+//
+// This check will verify if the Bundle spec is valid by checking:
+//
+// - for duplicate keys in the bundle, which may occur if a v1 and v1beta1 CRD of the same GVK appear.
+//
+// - if owned keys must matches with a CRD in bundle
+//
+// - if the bundle has APIs(CRDs) which are not defined in the CSV
+//
+// - if the bundle size compressed is < ~1MB
+//
+// NOTE: The bundle size test will raise an error if the size is bigger than the max allowed
+// and warnings when:
+// a) the api is unable to check the bundle size because we are running a check without load the bundle
+//
+// b) the api could identify that the bundle size is close to the limit (bigger than 85%)
+//
+// c) [Deprecated and planned to be removed at 2023 -  The API will start growing to encompass validation for all past history] - if the bundle size uncompressed < ~1MB and it cannot work on clusters which uses OLM versions < 1.17.5
+//
 var BundleValidator = internal.BundleValidator
 
 // OperatorHubValidator implements Validator to validate bundle objects

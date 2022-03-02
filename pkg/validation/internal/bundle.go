@@ -13,6 +13,25 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+// BundleValidator implements Validator to validate Bundles.
+//
+// This check will verify if the Bundle spec is valid by checking:
+//
+// - for duplicate keys in the bundle, which may occur if a v1 and v1beta1 CRD of the same GVK appear.
+//
+// - if owned keys must matches with a CRD in bundle
+//
+// - if the bundle has APIs(CRDs) which are not defined in the CSV
+//
+// - if the bundle size compressed is < ~1MB
+//
+// NOTE: The bundle size test will raise an error if the size is bigger than the max allowed
+// and warnings when:
+// a) the api is unable to check the bundle size because we are running a check without load the bundle
+//
+// b) the api could identify that the bundle size is close to the limit (bigger than 85%)
+//
+// c) [Deprecated and planned to be removed at 2023 -  The API will start growing to encompass validation for all past history] - if the bundle size uncompressed < ~1MB and it cannot work on clusters which uses OLM versions < 1.17.5
 var BundleValidator interfaces.Validator = interfaces.ValidatorFunc(validateBundles)
 
 // max_bundle_size is the maximum size of a bundle in bytes.
@@ -132,6 +151,7 @@ func getOwnedCustomResourceDefintionKeys(csv *operatorsv1alpha1.ClusterServiceVe
 // and warnings when:
 // - we are unable to check the bundle size because we are running a check without load the bundle
 // - we could identify that the bundle size is close to the limit (bigger than 85%)
+// - [Deprecated and planned to be removed at 2023 -  The API will start growing to encompass validation for all past history] if the bundle size uncompressed < ~1MB and it cannot work on clusters which uses OLM versions < 1.17.5
 func validateBundleSize(bundle *manifests.Bundle) []errors.Error {
 	warnPercent := 0.85
 	warnSize := float64(max_bundle_size) * warnPercent
@@ -166,6 +186,7 @@ func validateBundleSize(bundle *manifests.Bundle) []errors.Error {
 			bundle.Name))
 	}
 
+	// @Deprecated
 	// Before these versions the bundles were not compressed
 	// and their size must be < ~1MB
 	// todo: remove me at 2023
