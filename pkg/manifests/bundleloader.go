@@ -19,9 +19,10 @@ import (
 
 // bundleLoader loads a bundle directory from disk
 type bundleLoader struct {
-	dir      string
-	bundle   *Bundle
-	foundCSV bool
+	dir             string
+	bundle          *Bundle
+	foundCSV        bool
+	annotationsFile AnnotationsFile
 }
 
 func NewBundleLoader(dir string) bundleLoader {
@@ -37,6 +38,15 @@ func (b *bundleLoader) LoadBundle() error {
 	}
 
 	errs = append(errs, b.calculateCompressedBundleSize())
+
+	// Set values from the annotations when the values are not loaded
+	channels := strings.Split(b.annotationsFile.Annotations.Channels, ",")
+	if len(channels) > 0 && len(b.bundle.Channels) == 0 {
+		b.bundle.Channels = channels
+	}
+	if len(b.annotationsFile.Annotations.DefaultChannelName) > 0 && len(b.bundle.DefaultChannel) == 0 {
+		b.bundle.DefaultChannel = b.annotationsFile.Annotations.DefaultChannelName
+	}
 
 	if !b.foundCSV {
 		errs = append(errs, fmt.Errorf("unable to find a csv in bundle directory %s", b.dir))
@@ -108,6 +118,19 @@ func (b *bundleLoader) LoadBundleWalkFunc(path string, f os.FileInfo, err error)
 		return nil
 	}
 
+	annotationsFile := AnnotationsFile{}
+	if strings.HasPrefix(f.Name(), "annotations") {
+		annFile, err := readFile(path)
+		if err != nil {
+			return err
+		}
+		if err := yaml.Unmarshal(annFile, &annotationsFile); err == nil {
+			b.annotationsFile = annotationsFile
+		} else {
+			return fmt.Errorf("unable to load the annotations file %s: %s", path, err)
+		}
+	}
+
 	fileReader, err := os.Open(path)
 	if err != nil {
 		return fmt.Errorf("unable to load file %s: %s", path, err)
@@ -141,6 +164,21 @@ func (b *bundleLoader) LoadBundleWalkFunc(path string, f os.FileInfo, err error)
 	b.bundle = bundle
 
 	return utilerrors.NewAggregate(errs)
+}
+
+func readFile(file string) ([]byte, error) {
+	fileOpen, err := os.Open(file)
+	if err != nil {
+		return []byte{}, err
+	}
+	defer fileOpen.Close()
+
+	var byteValue []byte
+	byteValue, err = ioutil.ReadAll(fileOpen)
+	if err != nil {
+		return []byte{}, err
+	}
+	return byteValue, err
 }
 
 // loadBundle takes the directory that a CSV is in and assumes the rest of the objects in that directory

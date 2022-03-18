@@ -342,36 +342,3 @@ func TestCheckSpecMinKubeVersion(t *testing.T) {
 		})
 	}
 }
-
-func TestValidateHubChannels(t *testing.T) {
-	type args struct {
-		channels []string
-	}
-	tests := []struct {
-		name     string
-		args     args
-		wantWarn bool
-	}{
-		{
-			name: "should not return warning when the channel names following the convention",
-			args: args{
-				channels: []string{"fast", "candidate"},
-			},
-			wantWarn: false,
-		},
-		{
-			name: "should return warning when the channel names are NOT following the convention",
-			args: args{
-				channels: []string{"mychannel-4.5"},
-			},
-			wantWarn: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := validateHubChannels(tt.args.channels); (err != nil) != tt.wantWarn {
-				t.Errorf("validateHubChannels() error = %v, wantWarn %v", err, tt.wantWarn)
-			}
-		})
-	}
-}
