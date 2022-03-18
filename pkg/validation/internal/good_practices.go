@@ -3,9 +3,12 @@ package internal
 import (
 	goerrors "errors"
 	"fmt"
+	"regexp"
+	"strings"
+
+	"github.com/blang/semver/v4"
 
 	"github.com/operator-framework/api/pkg/manifests"
-	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/api/pkg/validation/errors"
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 )
@@ -16,7 +19,10 @@ import (
 //
 // This validator will raise an WARNING when:
 //
-// - The resources request for CPU and/or Memory are not defined for any of the containers found in the CSV
+// - The bundle name (CSV.metadata.name) does not follow the naming convention: <operator-name>.v<semver> e.g. memcached-operator.v0.0.1
+//
+// NOTE: The bundle name must be 63 characters or less because it will be used as k8s ownerref label which only allows max of 63 characters.
+
 var GoodPracticesValidator interfaces.Validator = interfaces.ValidatorFunc(goodPracticesValidator)
 
 func goodPracticesValidator(objs ...interface{}) (results []errors.ManifestResult) {
@@ -43,11 +49,15 @@ func validateGoodPracticesFrom(bundle *manifests.Bundle) errors.ManifestResult {
 		return result
 	}
 
-	errs, warns := validateResourceRequests(bundle.CSV)
-	for _, err := range errs {
+	checks := CSVChecks{csv: *bundle.CSV, errs: []error{}, warns: []error{}}
+
+	checks = validateResourceRequests(checks)
+	checks = checkBundleName(checks)
+
+	for _, err := range checks.errs {
 		result.Add(errors.ErrFailedValidation(err.Error(), bundle.CSV.GetName()))
 	}
-	for _, warn := range warns {
+	for _, warn := range checks.warns {
 		result.Add(errors.WarnFailedValidation(warn.Error(), bundle.CSV.GetName()))
 	}
 
@@ -55,12 +65,12 @@ func validateGoodPracticesFrom(bundle *manifests.Bundle) errors.ManifestResult {
 }
 
 // validateResourceRequests will return a WARN when the resource request is not set
-func validateResourceRequests(csv *operatorsv1alpha1.ClusterServiceVersion) (errs, warns []error) {
-	if csv.Spec.InstallStrategy.StrategySpec.DeploymentSpecs == nil {
-		errs = append(errs, goerrors.New("unable to find a deployment to install in the CSV"))
-		return errs, warns
+func validateResourceRequests(checks CSVChecks) CSVChecks {
+	if checks.csv.Spec.InstallStrategy.StrategySpec.DeploymentSpecs == nil {
+		checks.errs = append(checks.errs, goerrors.New("unable to find a deployment to install in the CSV"))
+		return checks
 	}
-	deploymentSpec := csv.Spec.InstallStrategy.StrategySpec.DeploymentSpecs
+	deploymentSpec := checks.csv.Spec.InstallStrategy.StrategySpec.DeploymentSpecs
 
 	for _, dSpec := range deploymentSpec {
 		for _, c := range dSpec.Spec.Template.Spec.Containers {
@@ -69,9 +79,37 @@ func validateResourceRequests(csv *operatorsv1alpha1.ClusterServiceVersion) (err
 					"to ensure the resource request for CPU and Memory. Be aware that for some clusters configurations "+
 					"it is required to specify requests or limits for those values. Otherwise, the system or quota may "+
 					"reject Pod creation. More info: https://master.sdk.operatorframework.io/docs/best-practices/managing-resources/", c.Name)
-				warns = append(warns, msg)
+				checks.warns = append(checks.warns, msg)
 			}
 		}
 	}
-	return errs, warns
+	return checks
+}
+
+// checkBundleName will validate the operator bundle name informed via CSV.metadata.name.
+// The motivation for the following check is to ensure that operators authors knows that operator bundles names should
+// follow a name and versioning convention
+func checkBundleName(checks CSVChecks) CSVChecks {
+
+	// Check if is following the semver
+	re := regexp.MustCompile("([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$")
+	match := re.FindStringSubmatch(checks.csv.Name)
+
+	if len(match) > 0 {
+		if _, err := semver.Parse(match[0]); err != nil {
+			checks.warns = append(checks.warns, fmt.Errorf("csv.metadata.Name %v is not following the versioning "+
+				"convention (MAJOR.MINOR.PATCH e.g 0.0.1): https://semver.org/", checks.csv.Name))
+		}
+	} else {
+		checks.warns = append(checks.warns, fmt.Errorf("csv.metadata.Name %v is not following the versioning "+
+			"convention (MAJOR.MINOR.PATCH e.g 0.0.1): https://semver.org/", checks.csv.Name))
+	}
+
+	// Check if its following the name convention
+	if len(strings.Split(checks.csv.Name, ".v")) != 2 {
+		checks.warns = append(checks.errs, fmt.Errorf("csv.metadata.Name %v is not following the recommended "+
+			"naming convention: <operator-name>.v<semver> e.g. memcached-operator.v0.0.1", checks.csv.Name))
+	}
+
+	return checks
 }

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/operator-framework/api/pkg/manifests"
+	"github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -87,6 +88,81 @@ func Test_ValidateGoodPractices(t *testing.T) {
 				for _, err := range results.Errors {
 					errString := err.Error()
 					require.Contains(t, tt.errStrings, errString)
+				}
+			}
+		})
+	}
+}
+
+func TestCheckBundleName(t *testing.T) {
+	type args struct {
+		bundleName string
+	}
+	tests := []struct {
+		name        string
+		args        args
+		wantWarning bool
+		errStrings  []string
+		warnStrings []string
+	}{
+		{
+			name: "should work with valid bundle name",
+			args: args{bundleName: "memcached-operator.v0.9.2"},
+		},
+		{
+			name:        "should return a warning when the bundle name is not following the convention",
+			args:        args{bundleName: "memcached-operator0.9.2"},
+			wantWarning: true,
+			warnStrings: []string{"csv.metadata.Name memcached-operator0.9.2 is not following the recommended naming " +
+				"convention: <operator-name>.v<semver> e.g. memcached-operator.v0.0.1"},
+		},
+		{
+			name:        "should return a warning when the bundle name version is not following semver",
+			args:        args{bundleName: "memcached-operator.v1"},
+			wantWarning: true,
+			warnStrings: []string{"csv.metadata.Name memcached-operator.v1 is not following the versioning convention " +
+				"(MAJOR.MINOR.PATCH e.g 0.0.1): https://semver.org/"},
+		},
+		{
+			name:        "should return a warning when the bundle name version is not following semver",
+			args:        args{bundleName: "memcached-operator.v1"},
+			wantWarning: true,
+			warnStrings: []string{"csv.metadata.Name memcached-operator.v1 is not following the " +
+				"versioning convention (MAJOR.MINOR.PATCH e.g 0.0.1): https://semver.org/"},
+		},
+		{
+			name:        "should return a warning when the bundle name version is not following semver",
+			args:        args{bundleName: "memcached-operator.v1--1.0"},
+			wantWarning: true,
+			warnStrings: []string{"csv.metadata.Name memcached-operator.v1--1.0 is not following the " +
+				"versioning convention (MAJOR.MINOR.PATCH e.g 0.0.1): https://semver.org/"},
+		},
+		{
+			name:        "should return a warning when the bundle name version is not following semver",
+			args:        args{bundleName: "memcached-operator.v1.3"},
+			wantWarning: true,
+			warnStrings: []string{"csv.metadata.Name memcached-operator.v1.3 is not following the " +
+				"versioning convention (MAJOR.MINOR.PATCH e.g 0.0.1): https://semver.org/"},
+		},
+		{
+			name: "should not warning for patch releases",
+			args: args{bundleName: "memcached-operator.v0.9.2+alpha"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			csv := v1alpha1.ClusterServiceVersion{}
+			csv.Name = tt.args.bundleName
+			checks := CSVChecks{csv: csv, errs: []error{}, warns: []error{}}
+			result := checkBundleName(checks)
+
+			require.Equal(t, tt.wantWarning, len(result.warns) > 0)
+			if tt.wantWarning {
+				require.Equal(t, len(tt.warnStrings), len(result.warns))
+				for _, w := range result.warns {
+					wString := w.Error()
+					require.Contains(t, tt.warnStrings, wString)
 				}
 			}
 		})
