@@ -38,15 +38,7 @@ func (b *bundleLoader) LoadBundle() error {
 	}
 
 	errs = append(errs, b.calculateCompressedBundleSize())
-
-	// Set values from the annotations when the values are not loaded
-	channels := strings.Split(b.annotationsFile.Annotations.Channels, ",")
-	if len(channels) > 0 && len(b.bundle.Channels) == 0 {
-		b.bundle.Channels = channels
-	}
-	if len(b.annotationsFile.Annotations.DefaultChannelName) > 0 && len(b.bundle.DefaultChannel) == 0 {
-		b.bundle.DefaultChannel = b.annotationsFile.Annotations.DefaultChannelName
-	}
+	b.addChannelsFromAnnotationsFile()
 
 	if !b.foundCSV {
 		errs = append(errs, fmt.Errorf("unable to find a csv in bundle directory %s", b.dir))
@@ -55,6 +47,21 @@ func (b *bundleLoader) LoadBundle() error {
 	}
 
 	return utilerrors.NewAggregate(errs)
+}
+
+// Add values from the annotations when the values are not loaded
+func (b *bundleLoader) addChannelsFromAnnotationsFile() {
+	// Note that they will not get load for Bundle Format directories
+	// and PackageManifest should not have the annotationsFile. However,
+	// the following check to ensure that channels and default channels
+	// are empty before set the annotations is just an extra precaution
+	channels := strings.Split(b.annotationsFile.Annotations.Channels, ",")
+	if len(channels) > 0 && len(b.bundle.Channels) == 0 {
+		b.bundle.Channels = channels
+	}
+	if len(b.annotationsFile.Annotations.DefaultChannelName) > 0 && len(b.bundle.DefaultChannel) == 0 {
+		b.bundle.DefaultChannel = b.annotationsFile.Annotations.DefaultChannelName
+	}
 }
 
 // Compress the bundle to check its size
@@ -120,7 +127,7 @@ func (b *bundleLoader) LoadBundleWalkFunc(path string, f os.FileInfo, err error)
 
 	annotationsFile := AnnotationsFile{}
 	if strings.HasPrefix(f.Name(), "annotations") {
-		annFile, err := readFile(path)
+		annFile, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
@@ -164,21 +171,6 @@ func (b *bundleLoader) LoadBundleWalkFunc(path string, f os.FileInfo, err error)
 	b.bundle = bundle
 
 	return utilerrors.NewAggregate(errs)
-}
-
-func readFile(file string) ([]byte, error) {
-	fileOpen, err := os.Open(file)
-	if err != nil {
-		return []byte{}, err
-	}
-	defer fileOpen.Close()
-
-	var byteValue []byte
-	byteValue, err = ioutil.ReadAll(fileOpen)
-	if err != nil {
-		return []byte{}, err
-	}
-	return byteValue, err
 }
 
 // loadBundle takes the directory that a CSV is in and assumes the rest of the objects in that directory

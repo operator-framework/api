@@ -125,7 +125,7 @@ func getUniqueValues(array []string) []string {
 			}
 		}
 		if !found {
-			result = append(result, n)
+			result = append(result, strings.TrimSpace(n))
 		}
 
 	}
