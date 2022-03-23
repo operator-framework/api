@@ -116,18 +116,13 @@ func validateHubChannels(channels []string) error {
 // getUniqueValues return the values without duplicates
 func getUniqueValues(array []string) []string {
 	var result []string
+	uniqueValues := make(map[string]string)
 	for _, n := range array {
-		found := false
-		for _, v := range result {
-			if strings.TrimSpace(n) == strings.TrimSpace(v) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			result = append(result, strings.TrimSpace(n))
-		}
+		uniqueValues[strings.TrimSpace(n)] = ""
+	}
 
+	for k, _ := range uniqueValues {
+		result = append(result, k)
 	}
 	return result
 }
