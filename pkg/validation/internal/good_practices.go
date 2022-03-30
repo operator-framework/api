@@ -3,6 +3,7 @@ package internal
 import (
 	goerrors "errors"
 	"fmt"
+	"strings"
 
 	"github.com/operator-framework/api/pkg/manifests"
 	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
@@ -17,6 +18,9 @@ import (
 // This validator will raise an WARNING when:
 //
 // - The resources request for CPU and/or Memory are not defined for any of the containers found in the CSV
+//
+// - The channel names seems are not following the convention https://olm.operatorframework.io/docs/best-practices/channel-naming/
+//
 var GoodPracticesValidator interfaces.Validator = interfaces.ValidatorFunc(goodPracticesValidator)
 
 func goodPracticesValidator(objs ...interface{}) (results []errors.ManifestResult) {
@@ -51,6 +55,10 @@ func validateGoodPracticesFrom(bundle *manifests.Bundle) errors.ManifestResult {
 		result.Add(errors.WarnFailedValidation(warn.Error(), bundle.CSV.GetName()))
 	}
 
+	channels := append(bundle.Channels, bundle.DefaultChannel)
+	if warn := validateHubChannels(channels); warn != nil {
+		result.Add(errors.WarnFailedValidation(warn.Error(), bundle.CSV.GetName()))
+	}
 	return result
 }
 
@@ -74,4 +82,47 @@ func validateResourceRequests(csv *operatorsv1alpha1.ClusterServiceVersion) (err
 		}
 	}
 	return errs, warns
+}
+
+// validateHubChannels will check the channels. The motivation for the following check is to ensure that operators
+// authors knows if their operator bundles are or not respecting the Naming Convention Rules.
+// However, the operator authors still able to choose the names as please them.
+func validateHubChannels(channels []string) error {
+	const candidate = "candidate"
+	const stable = "stable"
+	const fast = "fast"
+
+	channels = getUniqueValues(channels)
+	var channelsNotFollowingConventional []string
+	for _, channel := range channels {
+		if !strings.HasPrefix(channel, candidate) &&
+			!strings.HasPrefix(channel, stable) &&
+			!strings.HasPrefix(channel, fast) &&
+			channel != "" {
+			channelsNotFollowingConventional = append(channelsNotFollowingConventional, channel)
+		}
+
+	}
+
+	if len(channelsNotFollowingConventional) > 0 {
+		return fmt.Errorf("channel(s) %+q are not following the recommended naming convention: "+
+			"https://olm.operatorframework.io/docs/best-practices/channel-naming",
+			channelsNotFollowingConventional)
+	}
+
+	return nil
+}
+
+// getUniqueValues return the values without duplicates
+func getUniqueValues(array []string) []string {
+	var result []string
+	uniqueValues := make(map[string]string)
+	for _, n := range array {
+		uniqueValues[strings.TrimSpace(n)] = ""
+	}
+
+	for k, _ := range uniqueValues {
+		result = append(result, k)
+	}
+	return result
 }
