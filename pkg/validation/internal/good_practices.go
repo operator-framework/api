@@ -54,6 +54,9 @@ func validateGoodPracticesFrom(bundle *manifests.Bundle) errors.ManifestResult {
 	for _, warn := range warns {
 		result.Add(errors.WarnFailedValidation(warn.Error(), bundle.CSV.GetName()))
 	}
+	for _, warn := range validateCrdDescriptions(bundle.CSV.Spec.CustomResourceDefinitions) {
+		result.Add(errors.WarnFailedValidation(warn.Error(), bundle.CSV.GetName()))
+	}
 
 	channels := append(bundle.Channels, bundle.DefaultChannel)
 	if warn := validateHubChannels(channels); warn != nil {
@@ -125,4 +128,19 @@ func getUniqueValues(array []string) []string {
 		result = append(result, k)
 	}
 	return result
+}
+
+// validateCrdDescrptions ensures that all CRDs defined in the bundle have non-empty descriptions.
+func validateCrdDescriptions(crds operatorsv1alpha1.CustomResourceDefinitions) []error {
+	f := func(crds []operatorsv1alpha1.CRDDescription, relation string) []error {
+		errors := make([]error, 0, len(crds))
+		for _, crd := range crds {
+			if crd.Description == "" {
+				errors = append(errors, fmt.Errorf("%s CRD %q has an empty description", relation, crd.Name))
+			}
+		}
+		return errors
+	}
+
+	return append(f(crds.Owned, "owned"), f(crds.Required, "required")...)
 }

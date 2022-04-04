@@ -1,14 +1,18 @@
 package internal
 
 import (
+	"testing"
+
 	"github.com/operator-framework/api/pkg/manifests"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func Test_ValidateGoodPractices(t *testing.T) {
 	bundleWithDeploymentSpecEmpty, _ := manifests.GetBundleFromDir("./testdata/valid_bundle")
 	bundleWithDeploymentSpecEmpty.CSV.Spec.InstallStrategy.StrategySpec.DeploymentSpecs = nil
+
+	bundleWithMissingCrdDescription, _ := manifests.GetBundleFromDir("./testdata/valid_bundle")
+	bundleWithMissingCrdDescription.CSV.Spec.CustomResourceDefinitions.Owned[0].Description = ""
 
 	type args struct {
 		bundleDir string
@@ -69,6 +73,14 @@ func Test_ValidateGoodPractices(t *testing.T) {
 				bundleDir: "./testdata/bundle_with_metadata",
 			},
 			warnStrings: []string{"Warning: Value memcached-operator.v0.0.1: channel(s) [\"alpha\"] are not following the recommended naming convention: https://olm.operatorframework.io/docs/best-practices/channel-naming"},
+		},
+		{
+			name:        "should raise a warn when a CRD does not have a description",
+			wantWarning: true,
+			args: args{
+				bundle: bundleWithMissingCrdDescription,
+			},
+			warnStrings: []string{"Warning: Value etcdoperator.v0.9.4: owned CRD \"etcdclusters.etcd.database.coreos.com\" has an empty description"},
 		},
 	}
 
