@@ -352,6 +352,7 @@ func (r StepResource) String() string {
 // +kubebuilder:printcolumn:name="CSV",type=string,JSONPath=`.spec.clusterServiceVersionNames[0]`,description="The first CSV in the list of clusterServiceVersionNames"
 // +kubebuilder:printcolumn:name="Approval",type=string,JSONPath=`.spec.approval`,description="The approval mode"
 // +kubebuilder:printcolumn:name="Approved",type=boolean,JSONPath=`.spec.approved`
+// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`
 
 // InstallPlan defines the installation of a set of operators.
 type InstallPlan struct {
