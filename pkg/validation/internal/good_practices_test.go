@@ -149,7 +149,10 @@ func TestValidateHubChannels(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateHubChannels(tt.args.channels)
+			bundle, err := manifests.GetBundleFromDir("./testdata/valid_bundle")
+			require.NoError(t, err)
+			bundle.Channels = tt.args.channels
+			err = validateHubChannels(bundle)
 			if (err != nil) != tt.wantWarn {
 				t.Errorf("validateHubChannels() error = %v, wantWarn %v", err, tt.wantWarn)
 			}
