@@ -21,6 +21,7 @@ import (
 //
 // - The channel names seems are not following the convention https://olm.operatorframework.io/docs/best-practices/channel-naming/
 //
+// - CRDs defined in the bundle have empty descriptions
 var GoodPracticesValidator interfaces.Validator = interfaces.ValidatorFunc(goodPracticesValidator)
 
 func goodPracticesValidator(objs ...interface{}) (results []errors.ManifestResult) {
@@ -48,20 +49,20 @@ func validateGoodPracticesFrom(bundle *manifests.Bundle) errors.ManifestResult {
 	}
 
 	errs, warns := validateResourceRequests(bundle.CSV)
+	warns = append(warns, validateCrdDescriptions(bundle.CSV.Spec.CustomResourceDefinitions)...)
+	warns = append(warns, validateHubChannels(bundle))
+
 	for _, err := range errs {
-		result.Add(errors.ErrFailedValidation(err.Error(), bundle.CSV.GetName()))
+		if err != nil {
+			result.Add(errors.ErrFailedValidation(err.Error(), bundle.CSV.GetName()))
+		}
 	}
 	for _, warn := range warns {
-		result.Add(errors.WarnFailedValidation(warn.Error(), bundle.CSV.GetName()))
-	}
-	for _, warn := range validateCrdDescriptions(bundle.CSV.Spec.CustomResourceDefinitions) {
-		result.Add(errors.WarnFailedValidation(warn.Error(), bundle.CSV.GetName()))
+		if warn != nil {
+			result.Add(errors.WarnFailedValidation(warn.Error(), bundle.CSV.GetName()))
+		}
 	}
 
-	channels := append(bundle.Channels, bundle.DefaultChannel)
-	if warn := validateHubChannels(channels); warn != nil {
-		result.Add(errors.WarnFailedValidation(warn.Error(), bundle.CSV.GetName()))
-	}
 	return result
 }
 
@@ -90,7 +91,8 @@ func validateResourceRequests(csv *operatorsv1alpha1.ClusterServiceVersion) (err
 // validateHubChannels will check the channels. The motivation for the following check is to ensure that operators
 // authors knows if their operator bundles are or not respecting the Naming Convention Rules.
 // However, the operator authors still able to choose the names as please them.
-func validateHubChannels(channels []string) error {
+func validateHubChannels(bundle *manifests.Bundle) error {
+	channels := append(bundle.Channels, bundle.DefaultChannel)
 	const candidate = "candidate"
 	const stable = "stable"
 	const fast = "fast"
@@ -130,7 +132,7 @@ func getUniqueValues(array []string) []string {
 	return result
 }
 
-// validateCrdDescrptions ensures that all CRDs defined in the bundle have non-empty descriptions.
+// validateCrdDescriptions ensures that all CRDs defined in the bundle have non-empty descriptions.
 func validateCrdDescriptions(crds operatorsv1alpha1.CustomResourceDefinitions) []error {
 	f := func(crds []operatorsv1alpha1.CRDDescription, relation string) []error {
 		errors := make([]error, 0, len(crds))
