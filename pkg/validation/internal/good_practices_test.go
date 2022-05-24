@@ -3,6 +3,8 @@ package internal
 import (
 	"testing"
 
+	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
+
 	"github.com/operator-framework/api/pkg/manifests"
 	"github.com/stretchr/testify/require"
 )
@@ -100,15 +102,6 @@ func Test_ValidateGoodPractices(t *testing.T) {
 					require.Contains(t, tt.warnStrings, wString)
 				}
 			}
-
-			require.Equal(t, tt.wantError, len(results.Errors) > 0)
-			if tt.wantError {
-				require.Equal(t, len(tt.errStrings), len(results.Errors))
-				for _, err := range results.Errors {
-					errString := err.Error()
-					require.Contains(t, tt.errStrings, errString)
-				}
-			}
 		})
 	}
 }
@@ -157,6 +150,93 @@ func TestValidateHubChannels(t *testing.T) {
 				t.Errorf("validateHubChannels() error = %v, wantWarn %v", err, tt.wantWarn)
 			}
 			if len(tt.warnStrings) > 0 {
+				require.Contains(t, tt.warnStrings, err.Error())
+			}
+		})
+	}
+}
+
+func TestValidateRBACForCRDsWith(t *testing.T) {
+
+	bundle, err := manifests.GetBundleFromDir("./testdata/valid_bundle")
+	require.NoError(t, err)
+
+	bundleWithPermissions, _ := manifests.GetBundleFromDir("./testdata/valid_bundle")
+	bundleWithPermissions.CSV.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[0].APIGroups = []string{"apiextensions.k8s.io"}
+	bundleWithPermissions.CSV.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[0].Resources = []string{"*"}
+	bundleWithPermissions.CSV.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[0].Verbs = []string{"*"}
+
+	bundleWithPermissionsResource, _ := manifests.GetBundleFromDir("./testdata/valid_bundle")
+	bundleWithPermissionsResource.CSV.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[0].APIGroups = []string{"apiextensions.k8s.io"}
+	bundleWithPermissionsResource.CSV.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[0].Resources = []string{"customresourcedefinitions"}
+	bundleWithPermissionsResource.CSV.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[0].Verbs = []string{"*"}
+
+	bundleWithPermissionsResourceCreate, _ := manifests.GetBundleFromDir("./testdata/valid_bundle")
+	bundleWithPermissionsResourceCreate.CSV.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[0].APIGroups = []string{"apiextensions.k8s.io"}
+	bundleWithPermissionsResourceCreate.CSV.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[0].Resources = []string{"customresourcedefinitions"}
+	bundleWithPermissionsResourceCreate.CSV.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[0].Verbs = []string{"create"}
+
+	bundleWithPermissionsResourcePatch, _ := manifests.GetBundleFromDir("./testdata/valid_bundle")
+	bundleWithPermissionsResourcePatch.CSV.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[0].APIGroups = []string{"apiextensions.k8s.io"}
+	bundleWithPermissionsResourcePatch.CSV.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[0].Resources = []string{"customresourcedefinitions"}
+	bundleWithPermissionsResourcePatch.CSV.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[0].Verbs = []string{"patch"}
+
+	type args struct {
+		bundleCSV *operatorsv1alpha1.ClusterServiceVersion
+	}
+	tests := []struct {
+		name        string
+		args        args
+		wantWarn    bool
+		warnStrings []string
+	}{
+		{
+			name: "should not return warning when has no permissions",
+			args: args{
+				bundleCSV: bundle.CSV,
+			},
+			wantWarn: false,
+		},
+		{
+			name: "should return warning when has permissions for all verbs and resources kind of the apiGroup",
+			args: args{
+				bundleCSV: bundleWithPermissions.CSV,
+			},
+			wantWarn:    true,
+			warnStrings: []string{"CSV contains permissions to create CRD. An Operator shouldn't deploy or manage other operators (such patterns are known as meta or super operators or include CRDs in its Operands). It's the Operator Lifecycle Manager's job to manage the deployment and lifecycle of operators.  Please, review the design of your solution and if you should not be using Dependency Resolution from OLM instead. More info: https://sdk.operatorframework.io/docs/best-practices/common-recommendation/"},
+		},
+		{
+			name: "should return warning when has permissions for all verbs with the resource specified",
+			args: args{
+				bundleCSV: bundleWithPermissionsResource.CSV,
+			},
+			wantWarn:    true,
+			warnStrings: []string{"CSV contains permissions to create CRD. An Operator shouldn't deploy or manage other operators (such patterns are known as meta or super operators or include CRDs in its Operands). It's the Operator Lifecycle Manager's job to manage the deployment and lifecycle of operators.  Please, review the design of your solution and if you should not be using Dependency Resolution from OLM instead. More info: https://sdk.operatorframework.io/docs/best-practices/common-recommendation/"},
+		},
+		{
+			name: "should return warning when has permissions to create a CRD",
+			args: args{
+				bundleCSV: bundleWithPermissionsResourceCreate.CSV,
+			},
+			wantWarn:    true,
+			warnStrings: []string{"CSV contains permissions to create CRD. An Operator shouldn't deploy or manage other operators (such patterns are known as meta or super operators or include CRDs in its Operands). It's the Operator Lifecycle Manager's job to manage the deployment and lifecycle of operators.  Please, review the design of your solution and if you should not be using Dependency Resolution from OLM instead. More info: https://sdk.operatorframework.io/docs/best-practices/common-recommendation/"},
+		},
+		{
+			name: "should return warning when has permissions to create a Patch a CRD",
+			args: args{
+				bundleCSV: bundleWithPermissionsResourcePatch.CSV,
+			},
+			wantWarn:    true,
+			warnStrings: []string{"CSV contains permissions to create CRD. An Operator shouldn't deploy or manage other operators (such patterns are known as meta or super operators or include CRDs in its Operands). It's the Operator Lifecycle Manager's job to manage the deployment and lifecycle of operators.  Please, review the design of your solution and if you should not be using Dependency Resolution from OLM instead. More info: https://sdk.operatorframework.io/docs/best-practices/common-recommendation/"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err = validateRBACForCRDsWith(tt.args.bundleCSV)
+			if (err != nil) != tt.wantWarn {
+				t.Errorf("validateHubChannels() error = %v, wantWarn %v", err, tt.wantWarn)
+			}
+			if err != nil && len(tt.warnStrings) > 0 {
 				require.Contains(t, tt.warnStrings, err.Error())
 			}
 		})

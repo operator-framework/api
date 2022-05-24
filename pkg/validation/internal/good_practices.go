@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/operator-framework/api/pkg/manifests"
+	"github.com/operator-framework/api/pkg/operators/v1alpha1"
 	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/api/pkg/validation/errors"
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
@@ -22,6 +23,13 @@ import (
 // - The channel names seems are not following the convention https://olm.operatorframework.io/docs/best-practices/channel-naming/
 //
 // - CRDs defined in the bundle have empty descriptions
+//
+// - Check if the CSV has permissions to create CRDs. Note that:
+// a) "Operators should own a CRD and only one Operator should control a CRD on a cluster. Two Operators managing the same CRD is not a recommended best practice. In the case where an API exists but with multiple implementations, this is typically an example of a no-op Operator because it doesn't have any deployment or reconciliation loop to define the shared API and other Operators depend on this Operator to provide one implementation of the API, e.g. similar to PVCs or Ingress."
+//
+// b) "An Operator shouldn't deploy or manage other operators (such patterns are known as meta or super operators or include CRDs in its Operands). It's the Operator Lifecycle Manager's job to manage the deployment and lifecycle of operators. For further information check Dependency Resolution: https://olm.operatorframework.io/docs/concepts/olm-architecture/dependency-resolution/"
+//
+// WARNING: if you create CRD's via the reconciliations or via the Operands then, OLM cannot handle CRDs migration and update, validation.
 var GoodPracticesValidator interfaces.Validator = interfaces.ValidatorFunc(goodPracticesValidator)
 
 func goodPracticesValidator(objs ...interface{}) (results []errors.ManifestResult) {
@@ -51,7 +59,7 @@ func validateGoodPracticesFrom(bundle *manifests.Bundle) errors.ManifestResult {
 	errs, warns := validateResourceRequests(bundle.CSV)
 	warns = append(warns, validateCrdDescriptions(bundle.CSV.Spec.CustomResourceDefinitions)...)
 	warns = append(warns, validateHubChannels(bundle))
-
+	warns = append(warns, validateRBACForCRDsWith(bundle.CSV))
 	for _, err := range errs {
 		if err != nil {
 			result.Add(errors.ErrFailedValidation(err.Error(), bundle.CSV.GetName()))
@@ -116,6 +124,65 @@ func validateHubChannels(bundle *manifests.Bundle) error {
 	}
 
 	return nil
+}
+
+// validateRBACForCRDsWith to warning when/if permissions to create CRD are found in the rules
+func validateRBACForCRDsWith(csv *operatorsv1alpha1.ClusterServiceVersion) error {
+	apiGroupResourceMap := map[string][]string{
+		"apiextensions.k8s.io": {"customresourcedefinitions", "*", "[*]"},
+	}
+	verbs := []string{"create", "*", "[*]", "patch"}
+	warning := goerrors.New("CSV contains permissions to create CRD. An Operator shouldn't deploy or manage " +
+		"other operators (such patterns are known as meta or super operators or include CRDs in its Operands)." +
+		" It's the Operator Lifecycle Manager's job to manage the deployment and lifecycle of operators. " +
+		" Please, review the design of your solution and if you should not be using Dependency Resolution from OLM instead." +
+		" More info: https://sdk.operatorframework.io/docs/best-practices/common-recommendation/")
+
+	for _, perm := range csv.Spec.InstallStrategy.StrategySpec.Permissions {
+		if hasRBACFor(perm, apiGroupResourceMap, verbs) {
+			return warning
+		}
+	}
+
+	for _, perm := range csv.Spec.InstallStrategy.StrategySpec.ClusterPermissions {
+		if hasRBACFor(perm, apiGroupResourceMap, verbs) {
+			return warning
+		}
+	}
+
+	return nil
+}
+
+func hasRBACFor(perm v1alpha1.StrategyDeploymentPermissions, apiGroupResourceMap map[string][]string, verbs []string) bool {
+	// For each APIGroup and list of resources that we are looking for
+	for apiFromMap, resourcesFromMap := range apiGroupResourceMap {
+		for _, rule := range perm.Rules {
+			for _, api := range rule.APIGroups {
+				// If we found the APIGroup
+				if api == apiFromMap {
+					for _, res := range rule.Resources {
+						for _, resFromMap := range resourcesFromMap {
+							// If we found the resource
+							if resFromMap == res {
+								// Check if we find the verbs:
+								for _, verbFromList := range verbs {
+									for _, ruleVerb := range rule.Verbs {
+										// If we found the verb
+										if verbFromList == ruleVerb {
+											// stopping by returning true
+											return true
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return false
 }
 
 // getUniqueValues return the values without duplicates
