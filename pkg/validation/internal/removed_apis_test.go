@@ -1,11 +1,10 @@
 package internal
 
 import (
-	"reflect"
-	"testing"
-
 	"github.com/operator-framework/api/pkg/manifests"
 	"github.com/stretchr/testify/require"
+	"reflect"
+	"testing"
 )
 
 func Test_GetRemovedAPIsOn1_22From(t *testing.T) {
