@@ -2,6 +2,8 @@ package internal
 
 import (
 	"reflect"
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/operator-framework/api/pkg/manifests"
@@ -281,20 +283,40 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 			require.Equal(t, tt.wantWarning, len(warnsResult) > 0)
 			if tt.wantWarning {
 				require.Equal(t, len(tt.warnStrings), len(warnsResult))
+				// testing against sorted strings to address flakiness on the order
+				// of APIs listed
+				sortedWarnStrings := sortStringSlice(tt.warnStrings)
 				for _, w := range warnsResult {
 					wString := w.Error()
-					require.Contains(t, tt.warnStrings, wString)
+					require.Contains(t, sortedWarnStrings, sortString(wString))
 				}
 			}
 
 			require.Equal(t, tt.wantError, len(errsResult) > 0)
 			if tt.wantError {
 				require.Equal(t, len(tt.errStrings), len(errsResult))
+				// testing against sorted strings to address flakiness on the order
+				// of APIs listed
+				sortedErrStrings := sortStringSlice(tt.errStrings)
 				for _, err := range errsResult {
-					errString := err.Error()
-					require.Contains(t, tt.errStrings, errString)
+					errString := sortString(err.Error())
+					require.Contains(t, sortedErrStrings, errString)
 				}
 			}
 		})
 	}
+}
+
+func sortString(str string) string {
+	split := strings.Split(str, "")
+	sort.Strings(split)
+	return strings.Join(split, "")
+}
+
+func sortStringSlice(slice []string) []string {
+	var newSlice []string
+	for _, str := range slice {
+		newSlice = append(newSlice, sortString(str))
+	}
+	return newSlice
 }
