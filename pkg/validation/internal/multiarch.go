@@ -70,7 +70,7 @@ type multiArchValidator struct {
 	managerImagesString []string
 	// managerArchs contains a map of the arch types found
 	managerArchs map[string]string
-	// managerOs contains a map of the so(s) found
+	// managerOs contains a map of the OSes found
 	managerOs map[string]string
 	// Store the bundle load
 	bundle *manifests.Bundle
