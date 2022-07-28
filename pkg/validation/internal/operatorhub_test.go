@@ -4,10 +4,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/operator-framework/api/pkg/manifests"
-	"github.com/operator-framework/api/pkg/operators/v1alpha1"
-
 	"github.com/stretchr/testify/require"
+
+	"github.com/operator-framework/api/pkg/manifests"
+	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 )
 
 func TestValidateBundleOperatorHub(t *testing.T) {
@@ -131,11 +131,11 @@ func TestExtractCategories(t *testing.T) {
 }
 
 func TestCheckSpecIcon(t *testing.T) {
-	validIcon := v1alpha1.Icon{
+	validIcon := operatorsv1alpha1.Icon{
 		Data:      "iVBORw0KGgoAAAANSUhEUgAAAOEAAADZCAYAAADWmle6AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAGXRFWHRTb2Z0d2Fy",
 		MediaType: "image/png",
 	}
-	invalidIcon := v1alpha1.Icon{
+	invalidIcon := operatorsv1alpha1.Icon{
 		MediaType: "image/png",
 	}
 
@@ -143,7 +143,7 @@ func TestCheckSpecIcon(t *testing.T) {
 	invalidMediaTypeIcon.MediaType = "invalid"
 
 	type args struct {
-		icon []v1alpha1.Icon
+		icon []operatorsv1alpha1.Icon
 	}
 	tests := []struct {
 		name        string
@@ -155,7 +155,7 @@ func TestCheckSpecIcon(t *testing.T) {
 	}{
 		{
 			name: "should work with a valid value",
-			args: args{icon: []v1alpha1.Icon{validIcon}},
+			args: args{icon: []operatorsv1alpha1.Icon{validIcon}},
 		},
 		{
 			name:        "should return an warning when the icon is not provided",
@@ -164,20 +164,20 @@ func TestCheckSpecIcon(t *testing.T) {
 		},
 		{
 			name:       "should fail when the data informed for the icon is invalid",
-			args:       args{icon: []v1alpha1.Icon{invalidIcon}},
+			args:       args{icon: []operatorsv1alpha1.Icon{invalidIcon}},
 			wantError:  true,
 			errStrings: []string{"csv.Spec.Icon elements should contain both data and mediatype"},
 		},
 		{
 			name:       "should fail when the data informed has not a valid MediaType",
-			args:       args{icon: []v1alpha1.Icon{invalidMediaTypeIcon}},
+			args:       args{icon: []operatorsv1alpha1.Icon{invalidMediaTypeIcon}},
 			wantError:  true,
 			errStrings: []string{"csv.Spec.Icon invalid does not have a valid mediatype"},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			csv := v1alpha1.ClusterServiceVersion{}
+			csv := operatorsv1alpha1.ClusterServiceVersion{}
 			csv.Spec.Icon = tt.args.icon
 			checks := CSVChecks{csv: csv, errs: []error{}, warns: []error{}}
 
@@ -235,7 +235,7 @@ func TestCheckSpecMinKubeVersion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			csv := v1alpha1.ClusterServiceVersion{}
+			csv := operatorsv1alpha1.ClusterServiceVersion{}
 			csv.Spec.MinKubeVersion = tt.args.minKubeVersion
 			checks := CSVChecks{csv: csv, errs: []error{}, warns: []error{}}
 

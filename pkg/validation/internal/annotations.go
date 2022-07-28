@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	v1 "github.com/operator-framework/api/pkg/operators/v1"
-	"github.com/operator-framework/api/pkg/operators/v1alpha1"
+	operatorsv1 "github.com/operator-framework/api/pkg/operators/v1"
+	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/api/pkg/validation/errors"
 )
 
@@ -16,11 +16,11 @@ const olmpropertiesAnnotation = "olm.properties"
 // contains the expected case sensitive string. This may not be an exhaustive list.
 var CaseSensitiveAnnotationKeySet = map[string]string{
 
-	strings.ToLower(v1.OperatorGroupAnnotationKey):             v1.OperatorGroupAnnotationKey,
-	strings.ToLower(v1.OperatorGroupNamespaceAnnotationKey):    v1.OperatorGroupNamespaceAnnotationKey,
-	strings.ToLower(v1.OperatorGroupTargetsAnnotationKey):      v1.OperatorGroupTargetsAnnotationKey,
-	strings.ToLower(v1.OperatorGroupProvidedAPIsAnnotationKey): v1.OperatorGroupProvidedAPIsAnnotationKey,
-	strings.ToLower(v1alpha1.SkipRangeAnnotationKey):           v1alpha1.SkipRangeAnnotationKey,
+	strings.ToLower(operatorsv1.OperatorGroupAnnotationKey):             operatorsv1.OperatorGroupAnnotationKey,
+	strings.ToLower(operatorsv1.OperatorGroupNamespaceAnnotationKey):    operatorsv1.OperatorGroupNamespaceAnnotationKey,
+	strings.ToLower(operatorsv1.OperatorGroupTargetsAnnotationKey):      operatorsv1.OperatorGroupTargetsAnnotationKey,
+	strings.ToLower(operatorsv1.OperatorGroupProvidedAPIsAnnotationKey): operatorsv1.OperatorGroupProvidedAPIsAnnotationKey,
+	strings.ToLower(operatorsv1alpha1.SkipRangeAnnotationKey):           operatorsv1alpha1.SkipRangeAnnotationKey,
 }
 
 /*

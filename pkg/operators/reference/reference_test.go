@@ -10,8 +10,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
-	v1 "github.com/operator-framework/api/pkg/operators/v1"
-	"github.com/operator-framework/api/pkg/operators/v1alpha1"
+	operatorsv1 "github.com/operator-framework/api/pkg/operators/v1"
+	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 )
 
 func TestGetReference(t *testing.T) {
@@ -38,12 +38,12 @@ func TestGetReference(t *testing.T) {
 		{
 			name: "v1alpha1/ClusterServiceVersion",
 			args: args{
-				&v1alpha1.ClusterServiceVersion{
+				&operatorsv1alpha1.ClusterServiceVersion{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "ns",
 						Name:      "csv",
 						UID:       types.UID("uid"),
-						SelfLink:  buildSelfLink(v1alpha1.SchemeGroupVersion.String(), "clusterserviceversions", "ns", "csv"),
+						SelfLink:  buildSelfLink(operatorsv1alpha1.SchemeGroupVersion.String(), "clusterserviceversions", "ns", "csv"),
 					},
 				},
 			},
@@ -52,8 +52,8 @@ func TestGetReference(t *testing.T) {
 					Namespace:  "ns",
 					Name:       "csv",
 					UID:        types.UID("uid"),
-					Kind:       v1alpha1.ClusterServiceVersionKind,
-					APIVersion: v1alpha1.SchemeGroupVersion.String(),
+					Kind:       operatorsv1alpha1.ClusterServiceVersionKind,
+					APIVersion: operatorsv1alpha1.SchemeGroupVersion.String(),
 				},
 				err: nil,
 			},
@@ -61,12 +61,12 @@ func TestGetReference(t *testing.T) {
 		{
 			name: "v1alpha1/InstallPlan",
 			args: args{
-				&v1alpha1.InstallPlan{
+				&operatorsv1alpha1.InstallPlan{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "ns",
 						Name:      "ip",
 						UID:       types.UID("uid"),
-						SelfLink:  buildSelfLink(v1alpha1.SchemeGroupVersion.String(), "installplans", "ns", "ip"),
+						SelfLink:  buildSelfLink(operatorsv1alpha1.SchemeGroupVersion.String(), "installplans", "ns", "ip"),
 					},
 				},
 			},
@@ -75,8 +75,8 @@ func TestGetReference(t *testing.T) {
 					Namespace:  "ns",
 					Name:       "ip",
 					UID:        types.UID("uid"),
-					Kind:       v1alpha1.InstallPlanKind,
-					APIVersion: v1alpha1.SchemeGroupVersion.String(),
+					Kind:       operatorsv1alpha1.InstallPlanKind,
+					APIVersion: operatorsv1alpha1.SchemeGroupVersion.String(),
 				},
 				err: nil,
 			},
@@ -84,12 +84,12 @@ func TestGetReference(t *testing.T) {
 		{
 			name: "v1alpha1/Subscription",
 			args: args{
-				&v1alpha1.Subscription{
+				&operatorsv1alpha1.Subscription{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "ns",
 						Name:      "sub",
 						UID:       types.UID("uid"),
-						SelfLink:  buildSelfLink(v1alpha1.SchemeGroupVersion.String(), "subscriptions", "ns", "sub"),
+						SelfLink:  buildSelfLink(operatorsv1alpha1.SchemeGroupVersion.String(), "subscriptions", "ns", "sub"),
 					},
 				},
 			},
@@ -98,8 +98,8 @@ func TestGetReference(t *testing.T) {
 					Namespace:  "ns",
 					Name:       "sub",
 					UID:        types.UID("uid"),
-					Kind:       v1alpha1.SubscriptionKind,
-					APIVersion: v1alpha1.SchemeGroupVersion.String(),
+					Kind:       operatorsv1alpha1.SubscriptionKind,
+					APIVersion: operatorsv1alpha1.SchemeGroupVersion.String(),
 				},
 				err: nil,
 			},
@@ -107,12 +107,12 @@ func TestGetReference(t *testing.T) {
 		{
 			name: "v1alpha1/CatalogSource",
 			args: args{
-				&v1alpha1.CatalogSource{
+				&operatorsv1alpha1.CatalogSource{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "ns",
 						Name:      "catsrc",
 						UID:       types.UID("uid"),
-						SelfLink:  buildSelfLink(v1alpha1.SchemeGroupVersion.String(), "catalogsources", "ns", "catsrc"),
+						SelfLink:  buildSelfLink(operatorsv1alpha1.SchemeGroupVersion.String(), "catalogsources", "ns", "catsrc"),
 					},
 				},
 			},
@@ -121,8 +121,8 @@ func TestGetReference(t *testing.T) {
 					Namespace:  "ns",
 					Name:       "catsrc",
 					UID:        types.UID("uid"),
-					Kind:       v1alpha1.CatalogSourceKind,
-					APIVersion: v1alpha1.SchemeGroupVersion.String(),
+					Kind:       operatorsv1alpha1.CatalogSourceKind,
+					APIVersion: operatorsv1alpha1.SchemeGroupVersion.String(),
 				},
 				err: nil,
 			},
@@ -130,12 +130,12 @@ func TestGetReference(t *testing.T) {
 		{
 			name: "v1/OperatorGroup",
 			args: args{
-				&v1.OperatorGroup{
+				&operatorsv1.OperatorGroup{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "ns",
 						Name:      "og",
 						UID:       types.UID("uid"),
-						SelfLink:  buildSelfLink(v1.SchemeGroupVersion.String(), "operatorgroups", "ns", "og"),
+						SelfLink:  buildSelfLink(operatorsv1.SchemeGroupVersion.String(), "operatorgroups", "ns", "og"),
 					},
 				},
 			},
@@ -144,8 +144,8 @@ func TestGetReference(t *testing.T) {
 					Namespace:  "ns",
 					Name:       "og",
 					UID:        types.UID("uid"),
-					Kind:       v1.OperatorGroupKind,
-					APIVersion: v1.SchemeGroupVersion.String(),
+					Kind:       operatorsv1.OperatorGroupKind,
+					APIVersion: operatorsv1.SchemeGroupVersion.String(),
 				},
 				err: nil,
 			},

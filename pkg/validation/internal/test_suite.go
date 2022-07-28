@@ -3,9 +3,9 @@ package internal
 import (
 	"testing"
 
-	"github.com/operator-framework/api/pkg/validation/errors"
-
 	"github.com/stretchr/testify/require"
+
+	"github.com/operator-framework/api/pkg/validation/errors"
 )
 
 type validatorFuncTest struct {

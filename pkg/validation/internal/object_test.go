@@ -1,10 +1,11 @@
 package internal
 
 import (
-	"github.com/ghodss/yaml"
-	"io/ioutil"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"os"
 	"testing"
+
+	"github.com/ghodss/yaml"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 func TestValidateObject(t *testing.T) {
@@ -65,7 +66,7 @@ func TestValidateObject(t *testing.T) {
 
 	for _, tt := range table {
 		u := unstructured.Unstructured{}
-		o, err := ioutil.ReadFile(tt.path)
+		o, err := os.ReadFile(tt.path)
 		if err != nil {
 			t.Fatalf("reading yaml object file: %s", err)
 		}
@@ -101,5 +102,4 @@ func TestValidateObject(t *testing.T) {
 			}
 		}
 	}
-
 }

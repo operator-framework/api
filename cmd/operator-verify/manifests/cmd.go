@@ -70,6 +70,4 @@ func manifestsFunc(cmd *cobra.Command, args []string) {
 			log.Warnf(err.Error())
 		}
 	}
-
-	return
 }

@@ -6,8 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/operator-framework/api/pkg/manifests"
 	"github.com/stretchr/testify/require"
+
+	"github.com/operator-framework/api/pkg/manifests"
 )
 
 func Test_GetRemovedAPIsOn1_22From(t *testing.T) {
@@ -54,7 +55,6 @@ func Test_GetRemovedAPIsOn1_22From(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			// Validate the bundle object
 			bundle, err := manifests.GetBundleFromDir(tt.args.bundleDir)
 			require.NoError(t, err)
@@ -96,7 +96,6 @@ func Test_GetRemovedAPIsOn1_25From(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			// Validate the bundle object
 			bundle, err := manifests.GetBundleFromDir(tt.args.bundleDir)
 			require.NoError(t, err)
@@ -137,7 +136,6 @@ func Test_GetRemovedAPIsOn1_26From(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			// Validate the bundle object
 			bundle, err := manifests.GetBundleFromDir(tt.args.bundleDir)
 			require.NoError(t, err)

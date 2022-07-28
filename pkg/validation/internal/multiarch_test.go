@@ -1,30 +1,31 @@
 package internal
 
 import (
-	"github.com/operator-framework/api/pkg/manifests"
-	"github.com/operator-framework/api/pkg/operators/v1alpha1"
-	"github.com/stretchr/testify/require"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/operator-framework/api/pkg/manifests"
+	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 )
 
-const opm_test_image = "quay.io/operator-framework/opm:latest"
+const opmTestImage = "quay.io/operator-framework/opm:latest"
 
 func Test_ValidateMultiArchFrom(t *testing.T) {
-
 	// Mock bundle
 	bundleWithoutLabels, _ := manifests.GetBundleFromDir("./testdata/valid_bundle")
 
 	if bundleWithoutLabels.CSV.Spec.InstallStrategy.StrategySpec.DeploymentSpecs != nil {
 		for indexDeployment, v := range bundleWithoutLabels.CSV.Spec.InstallStrategy.StrategySpec.DeploymentSpecs {
-			for indexContainer, _ := range v.Spec.Template.Spec.Containers {
-				bundleWithoutLabels.CSV.Spec.InstallStrategy.StrategySpec.DeploymentSpecs[indexDeployment].Spec.Template.Spec.Containers[indexContainer].Image = opm_test_image
+			for indexContainer := range v.Spec.Template.Spec.Containers {
+				bundleWithoutLabels.CSV.Spec.InstallStrategy.StrategySpec.DeploymentSpecs[indexDeployment].Spec.Template.Spec.Containers[indexContainer].Image = opmTestImage
 			}
 		}
 	}
 
-	for i, _ := range bundleWithoutLabels.CSV.Spec.RelatedImages {
-		bundleWithoutLabels.CSV.Spec.RelatedImages[i].Image = opm_test_image
+	for i := range bundleWithoutLabels.CSV.Spec.RelatedImages {
+		bundleWithoutLabels.CSV.Spec.RelatedImages[i].Image = opmTestImage
 	}
 
 	allLabels := map[string]string{}
@@ -135,7 +136,7 @@ func Test_LoadImagesFromCSV(t *testing.T) {
 
 func Test_LoadImagesFromCSVWithRelatedImage(t *testing.T) {
 	validBundle, _ := manifests.GetBundleFromDir("./testdata/valid_bundle")
-	validBundle.CSV.Spec.RelatedImages = []v1alpha1.RelatedImage{
+	validBundle.CSV.Spec.RelatedImages = []operatorsv1alpha1.RelatedImage{
 		{Image: "related-image-test", Name: "etcd-operator"},
 	}
 
@@ -230,7 +231,7 @@ func Test_RunManifestInspect(t *testing.T) {
 			name: "should return the data from the manifest",
 			args: args{
 				tool:  "docker",
-				image: opm_test_image,
+				image: opmTestImage,
 			},
 			want: manifestInspect{[]manifestData{
 				{platform{Architecture: "amd64", OS: "linux"}},
@@ -419,7 +420,7 @@ func Test_multiArchValidator_checkSupportDefined(t *testing.T) {
 			data.loadImagesFromCSV()
 
 			// Mock inspected platform
-			for key, _ := range data.managerImages {
+			for key := range data.managerImages {
 				data.managerImages[key] = []platform{{"amd64", "linux"}}
 			}
 
@@ -517,7 +518,7 @@ func Test_multiArchValidator_checkMissingLabels(t *testing.T) {
 			data.loadImagesFromCSV()
 
 			// Mock inspected platform
-			for key, _ := range data.managerImages {
+			for key := range data.managerImages {
 				data.managerImages[key] = tt.fields.supportedPlatforms
 			}
 

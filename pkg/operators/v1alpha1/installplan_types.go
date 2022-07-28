@@ -119,9 +119,6 @@ type InstallPlanCondition struct {
 	Message            string                     `json:"message,omitempty"`
 }
 
-// allow overwriting `now` function for deterministic tests
-var now = metav1.Now
-
 // GetCondition returns the InstallPlanCondition of the given type if it exists in the InstallPlanStatus' Conditions.
 // Returns a condition of the given type with a ConditionStatus of "Unknown" if not found.
 func (s InstallPlanStatus) GetCondition(conditionType InstallPlanConditionType) InstallPlanCondition {

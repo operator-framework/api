@@ -1,15 +1,15 @@
 package internal
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
-	"github.com/operator-framework/api/pkg/validation/errors"
+	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 
-	"github.com/ghodss/yaml"
+	"github.com/operator-framework/api/pkg/validation/errors"
 )
 
 func TestValidateCRD(t *testing.T) {
@@ -57,12 +57,12 @@ func TestValidateCRD(t *testing.T) {
 		},
 	}
 	for _, tt := range table {
-		b, err := ioutil.ReadFile(tt.filePath)
+		b, err := os.ReadFile(tt.filePath)
 		if err != nil {
 			t.Fatalf("Error reading CRD path %s: %v", tt.filePath, err)
 		}
 
-		results := []errors.ManifestResult{}
+		var results []errors.ManifestResult
 		switch tt.version {
 		case "v1":
 			crd := &v1.CustomResourceDefinition{}

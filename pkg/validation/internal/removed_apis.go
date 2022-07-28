@@ -5,10 +5,11 @@ import (
 	"sort"
 
 	"github.com/blang/semver/v4"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
 	"github.com/operator-framework/api/pkg/manifests"
 	"github.com/operator-framework/api/pkg/validation/errors"
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 // k8sVersionKey defines the key which can be used by its consumers
@@ -49,7 +50,6 @@ var K8sVersionsSupportedByValidator = []string{"1.22.0", "1.25.0", "1.26.0"}
 var AlphaDeprecatedAPIsValidator interfaces.Validator = interfaces.ValidatorFunc(validateDeprecatedAPIsValidator)
 
 func validateDeprecatedAPIsValidator(objs ...interface{}) (results []errors.ManifestResult) {
-
 	// Obtain the k8s version if informed via the objects an optional
 	k8sVersion := ""
 	for _, obj := range objs {
@@ -144,9 +144,12 @@ func validateDeprecatedAPIS(bundle *manifests.Bundle, versionProvided string) (e
 // for the version informed (k8sVersionToCheck)
 func checkRemovedAPIsForVersion(
 	bundle *manifests.Bundle,
-	k8sVersionToCheck, semVerVersionProvided, semverMinKube semver.Version,
-	errs []error, warns []error) ([]error, []error) {
-
+	k8sVersionToCheck,
+	semVerVersionProvided,
+	semverMinKube semver.Version,
+	errs []error,
+	warns []error,
+) ([]error, []error) {
 	found := map[string][]string{}
 	switch k8sVersionToCheck.String() {
 	case "1.22.0":
@@ -220,11 +223,11 @@ func generateMessageWithDeprecatedAPIs(deprecatedAPIs map[string][]string) strin
 func getRemovedAPIsOn1_22From(bundle *manifests.Bundle) map[string][]string {
 	deprecatedAPIs := make(map[string][]string)
 	if len(bundle.V1beta1CRDs) > 0 {
-		var crdApiNames []string
+		var crdAPINames []string
 		for _, obj := range bundle.V1beta1CRDs {
-			crdApiNames = append(crdApiNames, obj.Name)
+			crdAPINames = append(crdAPINames, obj.Name)
 		}
-		deprecatedAPIs["CRD"] = crdApiNames
+		deprecatedAPIs["CRD"] = crdAPINames
 	}
 
 	for _, obj := range bundle.Objects {

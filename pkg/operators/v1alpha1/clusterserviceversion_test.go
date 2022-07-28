@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestSetRequirementStatus(t *testing.T) {
@@ -379,7 +378,7 @@ func TestWebhookDescGetValidatingConfigurations(t *testing.T) {
 		TimeoutSeconds:          &timeout,
 		WebhookPath:             &webhookPath,
 		Rules: []admissionregistrationv1.RuleWithOperations{
-			admissionregistrationv1.RuleWithOperations{
+			{
 				Operations: []admissionregistrationv1.OperationType{},
 				Rule: admissionregistrationv1.Rule{
 					APIGroups:   []string{"*"},

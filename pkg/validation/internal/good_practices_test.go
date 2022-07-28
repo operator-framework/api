@@ -3,10 +3,10 @@ package internal
 import (
 	"testing"
 
-	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
+	"github.com/stretchr/testify/require"
 
 	"github.com/operator-framework/api/pkg/manifests"
-	"github.com/stretchr/testify/require"
+	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 )
 
 func Test_ValidateGoodPractices(t *testing.T) {
@@ -157,7 +157,6 @@ func TestValidateHubChannels(t *testing.T) {
 }
 
 func TestValidateRBACForCRDsWith(t *testing.T) {
-
 	bundle, err := manifests.GetBundleFromDir("./testdata/valid_bundle")
 	require.NoError(t, err)
 
@@ -300,7 +299,6 @@ func TestCheckBundleName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			csv := operatorsv1alpha1.ClusterServiceVersion{}
 			csv.Name = tt.args.bundleName
 			result := checkBundleName(&csv)

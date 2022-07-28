@@ -4,22 +4,23 @@ import (
 	"fmt"
 	"strings"
 
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	"github.com/operator-framework/api/pkg/manifests"
 	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/api/pkg/validation/errors"
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 var BundleValidator interfaces.Validator = interfaces.ValidatorFunc(validateBundles)
 
-// max_bundle_size is the maximum size of a bundle in bytes.
+// maxBundleSize is the maximum size of a bundle in bytes.
 // This ensures the bundle can be staged in a single ConfigMap by OLM during installation.
 // The value is derived from the standard upper bound for k8s resources (~1MB).
 // We will use this value to check the bundle compressed is < ~1MB
-const max_bundle_size = int64(1 << (10 * 2))
+const maxBundleSize = int64(1 << (10 * 2))
 
 func validateBundles(objs ...interface{}) (results []errors.ManifestResult) {
 	for _, obj := range objs {
@@ -56,10 +57,10 @@ func validateServiceAccounts(bundle *manifests.Bundle) []errors.Error {
 	// find any hardcoded service account objects are in the bundle, then check if they match any sa definition in the csv
 	var errs []errors.Error
 	for _, obj := range bundle.Objects {
-		if obj.GroupVersionKind() != v1.SchemeGroupVersion.WithKind("ServiceAccount") {
+		if obj.GroupVersionKind() != corev1.SchemeGroupVersion.WithKind("ServiceAccount") {
 			continue
 		}
-		sa := v1.ServiceAccount{}
+		sa := corev1.ServiceAccount{}
 		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(obj.Object, &sa); err == nil {
 			if _, ok := saNamesFromCSV[sa.Name]; ok {
 				errs = append(errs, errors.ErrInvalidBundle(fmt.Sprintf("invalid service account found in bundle. "+
@@ -134,7 +135,7 @@ func getOwnedCustomResourceDefintionKeys(csv *operatorsv1alpha1.ClusterServiceVe
 // - we could identify that the bundle size is close to the limit (bigger than 85%)
 func validateBundleSize(bundle *manifests.Bundle) []errors.Error {
 	warnPercent := 0.85
-	warnSize := float64(max_bundle_size) * warnPercent
+	warnSize := float64(maxBundleSize) * warnPercent
 	var errs []errors.Error
 
 	if bundle.CompressedSize == 0 {
@@ -150,18 +151,18 @@ func validateBundleSize(bundle *manifests.Bundle) []errors.Error {
 	// From OPM (https://github.com/operator-framework/operator-registry) 1.17.5
 	// and OLM (https://github.com/operator-framework/operator-lifecycle-manager) : v0.19.0
 	// the total size checked is compressed
-	if bundle.CompressedSize > max_bundle_size {
+	if bundle.CompressedSize > maxBundleSize {
 		errs = append(errs, errors.ErrInvalidBundle(
 			fmt.Sprintf("maximum bundle compressed size with gzip size exceeded: size=~%s , max=%s. Bundle uncompressed size is %s",
 				formatBytesInUnit(bundle.CompressedSize),
-				formatBytesInUnit(max_bundle_size),
+				formatBytesInUnit(maxBundleSize),
 				formatBytesInUnit(bundle.Size)),
 			bundle.Name))
 	} else if float64(bundle.CompressedSize) > warnSize {
 		errs = append(errs, errors.WarnInvalidBundle(
 			fmt.Sprintf("nearing maximum bundle compressed size with gzip: size=~%s , max=%s. Bundle uncompressed size is %s",
 				formatBytesInUnit(bundle.CompressedSize),
-				formatBytesInUnit(max_bundle_size),
+				formatBytesInUnit(maxBundleSize),
 				formatBytesInUnit(bundle.Size)),
 			bundle.Name))
 	}

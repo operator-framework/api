@@ -3,7 +3,7 @@ package v1alpha1
 import (
 	"fmt"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
 )
@@ -62,9 +62,9 @@ func (c *ClusterServiceVersion) SetPhaseWithEventIfChanged(phase ClusterServiceV
 func (c *ClusterServiceVersion) SetPhaseWithEvent(phase ClusterServiceVersionPhase, reason ConditionReason, message string, now *metav1.Time, recorder record.EventRecorder) {
 	var eventtype string
 	if phase == CSVPhaseFailed {
-		eventtype = v1.EventTypeWarning
+		eventtype = corev1.EventTypeWarning
 	} else {
-		eventtype = v1.EventTypeNormal
+		eventtype = corev1.EventTypeNormal
 	}
 	go recorder.Event(c, eventtype, string(reason), message)
 	c.SetPhase(phase, reason, message, now)
@@ -173,7 +173,7 @@ func (set InstallModeSet) Supports(operatorNamespace string, namespaces []string
 			if !set[InstallModeTypeOwnNamespace] {
 				return fmt.Errorf("%s InstallModeType not supported, cannot configure to watch own namespace", InstallModeTypeOwnNamespace)
 			}
-		case v1.NamespaceAll:
+		case corev1.NamespaceAll:
 			if !set[InstallModeTypeAllNamespaces] {
 				return fmt.Errorf("%s InstallModeType not supported, cannot configure to watch all namespaces", InstallModeTypeAllNamespaces)
 			}
@@ -189,7 +189,7 @@ func (set InstallModeSet) Supports(operatorNamespace string, namespaces []string
 			if namespace == operatorNamespace && !set[InstallModeTypeOwnNamespace] {
 				return fmt.Errorf("%s InstallModeType not supported, cannot configure to watch own namespace", InstallModeTypeOwnNamespace)
 			}
-			if namespace == v1.NamespaceAll {
+			if namespace == corev1.NamespaceAll {
 				return fmt.Errorf("operatorgroup has invalid selected namespaces, NamespaceAll found when |selected namespaces| > 1")
 			}
 		}

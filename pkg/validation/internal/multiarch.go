@@ -50,9 +50,9 @@ const operatorFrameworkArchLabel = "operatorframework.io/arch."
 // operatorFrameworkOSLabel stores the labels for the supported OS from the CSV
 const operatorFrameworkOSLabel = "operatorframework.io/os."
 
-// default_container_scaffold_by_sdk defines the name of a default scaffold done by SDK
+// defaultContainerScaffoldBySDK defines the name of a default scaffold done by SDK
 // it is useful for we are able to find the operator manager image more assertively
-const default_container_scaffold_by_sdk = "kube-rbac-proxy"
+const defaultContainerScaffoldBySDK = "kube-rbac-proxy"
 
 // multiArchValidator store the data to perform the tests
 type multiArchValidator struct {
@@ -230,7 +230,7 @@ func (data *multiArchValidator) loadImagesFromCSV() {
 		// kube-rbac-proxy image scaffold by default
 		if !foundManager {
 			for _, c := range v.Spec.Template.Spec.Containers {
-				if c.Name != default_container_scaffold_by_sdk && len(data.managerImages[c.Image]) == 0 {
+				if c.Name != defaultContainerScaffoldBySDK && len(data.managerImages[c.Image]) == 0 {
 					data.managerImages[c.Image] = append(data.managerImages[c.Image], platform{})
 					data.managerImagesString = append(data.managerImagesString, c.Image)
 				}
@@ -419,7 +419,6 @@ func (data *multiArchValidator) checkMissingLabelsForSO() {
 			if !(supported == "linux" && len(data.managerOs) == 1 && len(data.managerOs["linux"]) > 0) {
 				notFoundSoLabel = append(notFoundSoLabel, supported)
 			}
-
 		}
 	}
 

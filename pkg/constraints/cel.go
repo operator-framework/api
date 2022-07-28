@@ -29,8 +29,8 @@ func NewCelEnvironment() *CelEnvironment {
 		decls.NewVar(PropertiesKey, decls.NewListType(decls.NewMapType(decls.String, decls.Any)))),
 		cel.Lib(semverLib{}),
 	)
-	// If an error occurs here, it means the CEL enviroment is unable to load
-	// configuration for custom libraries propertly. Hence, the CEL enviroment is
+	// If an error occurs here, it means the CEL environment is unable to load
+	// configuration for custom libraries property. Hence, the CEL environment is
 	// unusable. Panic here will cause the program to fail immediately to prevent
 	// cascading failures later on when this CEL env is in use.
 	if err != nil {
@@ -41,7 +41,7 @@ func NewCelEnvironment() *CelEnvironment {
 	}
 }
 
-// CelEnvironment is a struct that encapsulates CEL custom program enviroment
+// CelEnvironment is a struct that encapsulates CEL custom program environment
 type CelEnvironment struct {
 	env *cel.Env
 }
@@ -63,7 +63,7 @@ Example:
 
 The result is `semver_compare` is an integer just like `Compare`. So, the CEL
 expression `semver_compare(v1, v2) == 0` is equivalent v1.Compare(v2) == 0. In
-the other words, it checks if v1 is equal to v2 in term of semver comparision.
+the other words, it checks if v1 is equal to v2 in term of semver comparison.
 */
 type semverLib struct{}
 

@@ -2,14 +2,15 @@ package internal
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/ghodss/yaml"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/api/pkg/validation/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func TestValidateCSV(t *testing.T) {
@@ -110,7 +111,7 @@ func TestValidateCSV(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		b, err := ioutil.ReadFile(c.csvPath)
+		b, err := os.ReadFile(c.csvPath)
 		if err != nil {
 			t.Fatalf("Error reading CSV path %s: %v", c.csvPath, err)
 		}

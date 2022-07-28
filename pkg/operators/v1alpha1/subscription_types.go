@@ -282,7 +282,7 @@ type SubscriptionCatalogHealth struct {
 }
 
 // Equals returns true if a SubscriptionCatalogHealth equals the one given, false otherwise.
-// Equality is based SOLEY on health and UID.
+// Equality is based SOLELY on health and UID.
 func (s SubscriptionCatalogHealth) Equals(health SubscriptionCatalogHealth) bool {
 	return s.Healthy == health.Healthy && s.CatalogSourceRef.UID == health.CatalogSourceRef.UID
 }

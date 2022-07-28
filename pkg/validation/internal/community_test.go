@@ -1,10 +1,11 @@
 package internal
 
 import (
-	"fmt"
-	"github.com/operator-framework/api/pkg/manifests"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/operator-framework/api/pkg/manifests"
 )
 
 func Test_communityValidator(t *testing.T) {
@@ -36,7 +37,7 @@ func Test_communityValidator(t *testing.T) {
 				bundleDir:      "./testdata/valid_bundle_v1beta1",
 				imageIndexPath: "./testdata/dockerfile/valid_bundle.Dockerfile",
 				annotations: map[string]string{
-					"olm.properties": fmt.Sprintf(`[{"type": "olm.maxOpenShiftVersion", "value": "4.8"}]`),
+					"olm.properties": `[{"type": "olm.maxOpenShiftVersion", "value": "4.8"}]`,
 				},
 			},
 		},
@@ -63,7 +64,7 @@ func Test_communityValidator(t *testing.T) {
 				bundleDir:      "./testdata/valid_bundle_v1beta1",
 				imageIndexPath: "./testdata/dockerfile/valid_bundle.Dockerfile",
 				annotations: map[string]string{
-					"olm.properties": fmt.Sprintf(`[{"type": "olm.invalid", "value": "4.9"}]`),
+					"olm.properties": `[{"type": "olm.invalid", "value": "4.9"}]`,
 				},
 			},
 			errStrings: []string{"Error: Value : (etcdoperator.v0.9.4) csv.Annotations.olm.properties with the key " +
@@ -79,7 +80,7 @@ func Test_communityValidator(t *testing.T) {
 				bundleDir:      "./testdata/valid_bundle_v1beta1",
 				imageIndexPath: "./testdata/dockerfile/valid_bundle.Dockerfile",
 				annotations: map[string]string{
-					"olm.properties": fmt.Sprintf(`[{"type": "olm.maxOpenShiftVersion", "value": "4.9"}]`),
+					"olm.properties": `[{"type": "olm.maxOpenShiftVersion", "value": "4.9"}]`,
 				},
 			},
 			errStrings: []string{"Error: Value : (etcdoperator.v0.9.4) csv.Annotations.olm.properties with the key " +
@@ -93,7 +94,7 @@ func Test_communityValidator(t *testing.T) {
 			args: args{
 				bundleDir: "./testdata/valid_bundle_v1beta1",
 				annotations: map[string]string{
-					"olm.properties": fmt.Sprintf(`[{"type": "olm.maxOpenShiftVersion", "value": "4.8"}]`),
+					"olm.properties": `[{"type": "olm.maxOpenShiftVersion", "value": "4.8"}]`,
 				},
 			},
 			warnStrings: []string{"Warning: Value : (etcdoperator.v0.9.4) please, inform the path of its index image " +
@@ -111,7 +112,7 @@ func Test_communityValidator(t *testing.T) {
 				bundleDir:      "./testdata/valid_bundle_v1beta1",
 				imageIndexPath: "./testdata/dockerfile/valid_bundle.Dockerfile",
 				annotations: map[string]string{
-					"olm.properties": fmt.Sprintf(`[{"type": "olm.maxOpenShiftVersion", "value": "4.8.1"}]`),
+					"olm.properties": `[{"type": "olm.maxOpenShiftVersion", "value": "4.8.1"}]`,
 				},
 			},
 			warnStrings: []string{
@@ -125,7 +126,7 @@ func Test_communityValidator(t *testing.T) {
 				bundleDir:      "./testdata/valid_bundle_v1beta1",
 				imageIndexPath: "./testdata/dockerfile/valid_bundle.Dockerfile",
 				annotations: map[string]string{
-					"olm.properties": fmt.Sprintf(`[{"type": "olm.maxOpenShiftVersion", "value": "4.8.0+build"}]`),
+					"olm.properties": `[{"type": "olm.maxOpenShiftVersion", "value": "4.8.0+build"}]`,
 				},
 			},
 		},
@@ -137,7 +138,7 @@ func Test_communityValidator(t *testing.T) {
 				bundleDir:      "./testdata/valid_bundle_v1beta1",
 				imageIndexPath: "./testdata/dockerfile/valid_bundle_4_8.Dockerfile",
 				annotations: map[string]string{
-					"olm.properties": fmt.Sprintf(`[{"type": "olm.maxOpenShiftVersion", "value": "4.8"}]`),
+					"olm.properties": `[{"type": "olm.maxOpenShiftVersion", "value": "4.8"}]`,
 				},
 			},
 		},
@@ -145,7 +146,6 @@ func Test_communityValidator(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			// Validate the bundle object
 			bundle, err := manifests.GetBundleFromDir(tt.args.bundleDir)
 			require.NoError(t, err)

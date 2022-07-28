@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	goerrors "errors"
+
 	"github.com/blang/semver/v4"
 
 	"github.com/operator-framework/api/pkg/manifests"
-	"github.com/operator-framework/api/pkg/operators/v1alpha1"
 	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/api/pkg/validation/errors"
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
@@ -150,7 +150,6 @@ func validateHubChannels(bundle *manifests.Bundle) error {
 			channel != "" {
 			channelsNotFollowingConventional = append(channelsNotFollowingConventional, channel)
 		}
-
 	}
 
 	if len(channelsNotFollowingConventional) > 0 {
@@ -189,7 +188,7 @@ func validateRBACForCRDsWith(csv *operatorsv1alpha1.ClusterServiceVersion) error
 	return nil
 }
 
-func hasRBACFor(perm v1alpha1.StrategyDeploymentPermissions, apiGroupResourceMap map[string][]string, verbs []string) bool {
+func hasRBACFor(perm operatorsv1alpha1.StrategyDeploymentPermissions, apiGroupResourceMap map[string][]string, verbs []string) bool {
 	// For each APIGroup and list of resources that we are looking for
 	for apiFromMap, resourcesFromMap := range apiGroupResourceMap {
 		for _, rule := range perm.Rules {
@@ -229,7 +228,7 @@ func getUniqueValues(array []string) []string {
 		uniqueValues[strings.TrimSpace(n)] = ""
 	}
 
-	for k, _ := range uniqueValues {
+	for k := range uniqueValues {
 		result = append(result, k)
 	}
 	return result

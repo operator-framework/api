@@ -419,12 +419,8 @@ const (
 )
 
 // HasCaResources returns true if the CSV has owned APIServices or Webhooks.
-func (c *ClusterServiceVersion) HasCAResources() bool {
-	// Return early if there are no owned APIServices
-	if len(c.Spec.APIServiceDefinitions.Owned)+len(c.Spec.WebhookDefinitions) == 0 {
-		return false
-	}
-	return true
+func (csv *ClusterServiceVersion) HasCAResources() bool {
+	return len(csv.Spec.APIServiceDefinitions.Owned)+len(csv.Spec.WebhookDefinitions) != 0
 }
 
 // Conditions appear in the status as a record of state transitions on the ClusterServiceVersion
@@ -669,9 +665,7 @@ func (csv ClusterServiceVersion) GetRequiredAPIServiceDescriptions() []APIServic
 	// Remove any shared owned from the set
 	for _, owned := range csv.Spec.APIServiceDefinitions.Owned {
 		name := fmt.Sprintf("%s.%s", owned.Version, owned.Group)
-		if _, ok := set[name]; ok {
-			delete(set, name)
-		}
+		delete(set, name)
 	}
 
 	keys := make([]string, 0)

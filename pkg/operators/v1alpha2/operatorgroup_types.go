@@ -82,11 +82,7 @@ func (o *OperatorGroup) BuildTargetNamespaces() string {
 
 // IsServiceAccountSpecified returns true if the spec has a service account name specified.
 func (o *OperatorGroup) IsServiceAccountSpecified() bool {
-	if o.Spec.ServiceAccountName == "" {
-		return false
-	}
-
-	return true
+	return o.Spec.ServiceAccountName != ""
 }
 
 // HasServiceAccountSynced returns true if the service account specified has been synced.

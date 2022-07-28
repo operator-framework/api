@@ -31,8 +31,8 @@ var BundleValidator = internal.BundleValidator
 // for OperatorHub.io requirements.
 var OperatorHubValidator = internal.OperatorHubValidator
 
-// Object Validator validates various custom objects in the bundle like PDBs and SCCs.
-// Object validation is optional and not a default-level validation.
+// ObjectValidator validates various custom objects in the bundle like PDBs and SCCs.
+// ObjectValidator is optional and not a default-level validation.
 var ObjectValidator = internal.ObjectValidator
 
 // OperatorGroupValidator implements Validator to validate OperatorGroup manifests

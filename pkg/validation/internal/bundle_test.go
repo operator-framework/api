@@ -8,7 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/operator-framework/api/pkg/manifests"
-	"github.com/operator-framework/api/pkg/operators/v1alpha1"
+	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/api/pkg/validation/errors"
 )
 
@@ -75,9 +75,9 @@ func TestValidateBundle(t *testing.T) {
 }
 
 func TestValidateServiceAccount(t *testing.T) {
-	csvWithSAs := func(saNames ...string) *v1alpha1.ClusterServiceVersion {
-		csv := &v1alpha1.ClusterServiceVersion{}
-		depSpecs := make([]v1alpha1.StrategyDeploymentSpec, len(saNames))
+	csvWithSAs := func(saNames ...string) *operatorsv1alpha1.ClusterServiceVersion {
+		csv := &operatorsv1alpha1.ClusterServiceVersion{}
+		depSpecs := make([]operatorsv1alpha1.StrategyDeploymentSpec, len(saNames))
 		for i, saName := range saNames {
 			depSpecs[i].Spec.Template.Spec.ServiceAccountName = saName
 		}
@@ -179,15 +179,15 @@ func TestBundleSize(t *testing.T) {
 		{
 			name: "should pass when the size is not bigger or closer of the limit",
 			args: args{
-				sizeCompressed: max_bundle_size / 2,
-				size:           max_bundle_size / 2,
+				sizeCompressed: maxBundleSize / 2,
+				size:           maxBundleSize / 2,
 			},
 		},
 		{
 			name: "should warn when the size is closer of the limit",
 			args: args{
-				sizeCompressed: max_bundle_size - 100000,
-				size:           (max_bundle_size - 100000) * 10,
+				sizeCompressed: maxBundleSize - 100000,
+				size:           (maxBundleSize - 100000) * 10,
 			},
 			wantWarning: true,
 			warnStrings: []string{
@@ -197,7 +197,7 @@ func TestBundleSize(t *testing.T) {
 		{
 			name: "should warn when is not possible to check the size compressed",
 			args: args{
-				size: max_bundle_size * 1024,
+				size: maxBundleSize * 1024,
 			},
 			wantWarning: true,
 			warnStrings: []string{"Warning: Value : unable to check the bundle compressed size"},
@@ -205,7 +205,7 @@ func TestBundleSize(t *testing.T) {
 		{
 			name: "should warn when is not possible to check the size",
 			args: args{
-				sizeCompressed: max_bundle_size / 2,
+				sizeCompressed: maxBundleSize / 2,
 			},
 			wantWarning: true,
 			warnStrings: []string{"Warning: Value : unable to check the bundle size"},
@@ -213,8 +213,8 @@ func TestBundleSize(t *testing.T) {
 		{
 			name: "should raise an error when the size is bigger than the limit",
 			args: args{
-				sizeCompressed: 2 * max_bundle_size,
-				size:           (2 * max_bundle_size) * 10,
+				sizeCompressed: 2 * maxBundleSize,
+				size:           (2 * maxBundleSize) * 10,
 			},
 			wantError: true,
 			errStrings: []string{
@@ -281,7 +281,6 @@ func Test_EnsureGetBundleSizeValue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			// Validate the bundle object
 			bundle, err := manifests.GetBundleFromDir(tt.args.bundleDir)
 			require.NoError(t, err)

@@ -33,9 +33,6 @@ var (
 	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
 	// AddToScheme is a global function that registers this API group & version to a scheme
 	AddToScheme = SchemeBuilder.AddToScheme
-
-	// localSchemeBuilder is expected by generated conversion functions
-	localSchemeBuilder = &SchemeBuilder
 )
 
 // addKnownTypes adds the list of known types to Scheme

@@ -156,11 +156,7 @@ func (o *OperatorGroup) UpgradeStrategy() UpgradeStrategy {
 
 // IsServiceAccountSpecified returns true if the spec has a service account name specified.
 func (o *OperatorGroup) IsServiceAccountSpecified() bool {
-	if o.Spec.ServiceAccountName == "" {
-		return false
-	}
-
-	return true
+	return o.Spec.ServiceAccountName != ""
 }
 
 // HasServiceAccountSynced returns true if the service account specified has been synced.
@@ -176,7 +172,7 @@ func (o *OperatorGroup) HasServiceAccountSynced() bool {
 // If the UID is not set an error is returned.
 func (o *OperatorGroup) OGLabelKeyAndValue() (string, string, error) {
 	if string(o.GetUID()) == "" {
-		return "", "", fmt.Errorf("Missing UID")
+		return "", "", fmt.Errorf("missing UID")
 	}
 	return fmt.Sprintf(OperatorGroupLabelTemplate, o.GetUID()), "", nil
 }

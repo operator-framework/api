@@ -3,7 +3,6 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -38,7 +37,6 @@ const ocpVerV1beta1Unsupported = "4.9"
 var CommunityOperatorValidator interfaces.Validator = interfaces.ValidatorFunc(communityValidator)
 
 func communityValidator(objs ...interface{}) (results []errors.ManifestResult) {
-
 	// Obtain the k8s version if informed via the objects an optional
 	var indexImagePath = ""
 	for _, obj := range objs {
@@ -68,14 +66,13 @@ type CommunityOperatorChecks struct {
 	warns          []error
 }
 
-// validateCommunityBundle will check the bundle against the community-operator criterias
+// validateCommunityBundle will check the bundle against the community-operator criteria.
 func validateCommunityBundle(bundle *manifests.Bundle, indexImagePath string) errors.ManifestResult {
-	result := errors.ManifestResult{Name: bundle.Name}
 	if bundle == nil {
-		result.Add(errors.ErrInvalidBundle("Bundle is nil", nil))
-		return result
+		return errors.ManifestResult{Errors: []errors.Error{errors.ErrInvalidBundle("Bundle is nil", nil)}}
 	}
 
+	result := errors.ManifestResult{Name: bundle.Name}
 	if bundle.CSV == nil {
 		result.Add(errors.ErrInvalidBundle("Bundle csv is nil", bundle.Name))
 		return result
@@ -225,7 +222,7 @@ func validateImageFile(checks CommunityOperatorChecks, deprecatedAPImsg string) 
 		return checks
 	}
 
-	b, err := ioutil.ReadFile(checks.indexImagePath)
+	b, err := os.ReadFile(checks.indexImagePath)
 	if err != nil {
 		checks.errs = append(checks.errs, fmt.Errorf("unable to read the index image in the path "+
 			"(%s). Error : %s", checks.indexImagePath, err))

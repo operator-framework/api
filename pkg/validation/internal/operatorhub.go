@@ -3,7 +3,6 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/mail"
 	"net/url"
 	"os"
@@ -11,8 +10,9 @@ import (
 	"strings"
 
 	"github.com/blang/semver/v4"
+
 	"github.com/operator-framework/api/pkg/manifests"
-	"github.com/operator-framework/api/pkg/operators/v1alpha1"
+	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/api/pkg/validation/errors"
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 )
@@ -158,7 +158,6 @@ const minKubeVersionWarnMessage = "csv.Spec.minKubeVersion is not informed. It i
 	"available, which is not necessarily the case for all projects."
 
 func validateOperatorHub(objs ...interface{}) (results []errors.ManifestResult) {
-
 	// Obtain the k8s version if informed via the objects an optional
 	k8sVersion := ""
 	for _, obj := range objs {
@@ -182,13 +181,13 @@ func validateOperatorHub(objs ...interface{}) (results []errors.ManifestResult) 
 }
 
 func validateBundleOperatorHub(bundle *manifests.Bundle, k8sVersion string) errors.ManifestResult {
-	result := errors.ManifestResult{Name: bundle.Name}
-
+	result := errors.ManifestResult{}
 	if bundle == nil {
 		result.Add(errors.ErrInvalidBundle("Bundle is nil", nil))
 		return result
 	}
 
+	result.Name = bundle.Name
 	if bundle.CSV == nil {
 		result.Add(errors.ErrInvalidBundle("Bundle csv is nil", bundle.Name))
 		return result
@@ -215,7 +214,7 @@ func validateBundleOperatorHub(bundle *manifests.Bundle, k8sVersion string) erro
 
 // validateHubCSVSpec will check the CSV against the criteria to publish an
 // operator bundle in the OperatorHub.io
-func validateHubCSVSpec(csv v1alpha1.ClusterServiceVersion) CSVChecks {
+func validateHubCSVSpec(csv operatorsv1alpha1.ClusterServiceVersion) CSVChecks {
 	checks := CSVChecks{csv: csv, errs: []error{}, warns: []error{}}
 
 	checks = checkSpecProviderName(checks)
@@ -230,7 +229,7 @@ func validateHubCSVSpec(csv v1alpha1.ClusterServiceVersion) CSVChecks {
 }
 
 type CSVChecks struct {
-	csv   v1alpha1.ClusterServiceVersion
+	csv   operatorsv1alpha1.ClusterServiceVersion
 	errs  []error
 	warns []error
 }
@@ -239,10 +238,10 @@ type CSVChecks struct {
 func checkSpecMinKubeVersion(checks CSVChecks) CSVChecks {
 	if len(strings.TrimSpace(checks.csv.Spec.MinKubeVersion)) == 0 {
 		checks.warns = append(checks.warns, fmt.Errorf(minKubeVersionWarnMessage))
-	} else {
-		if _, err := semver.ParseTolerant(checks.csv.Spec.MinKubeVersion); err != nil {
-			checks.errs = append(checks.errs, fmt.Errorf("csv.Spec.MinKubeVersion has an invalid value: %s", checks.csv.Spec.MinKubeVersion))
-		}
+		return checks
+	}
+	if _, err := semver.ParseTolerant(checks.csv.Spec.MinKubeVersion); err != nil {
+		checks.errs = append(checks.errs, fmt.Errorf("csv.Spec.MinKubeVersion has an invalid value: %s", checks.csv.Spec.MinKubeVersion))
 	}
 	return checks
 }
@@ -268,29 +267,31 @@ func checkAnnotations(checks CSVChecks) CSVChecks {
 		}
 	}
 
-	if categories, ok := checks.csv.ObjectMeta.Annotations["categories"]; ok {
-		categorySlice := strings.Split(categories, ",")
+	categories, ok := checks.csv.ObjectMeta.Annotations["categories"]
+	if !ok {
+		return checks
+	}
+	categorySlice := strings.Split(categories, ",")
 
-		// use custom categories for validation if provided
-		customCategoriesPath := os.Getenv("OPERATOR_BUNDLE_CATEGORIES")
-		if customCategoriesPath != "" {
-			customCategories, err := extractCategories(customCategoriesPath)
-			if err != nil {
-				checks.errs = append(checks.errs, fmt.Errorf("could not extract custom categories from categories %#v: %s", customCategories, err))
-			} else {
-				for _, category := range categorySlice {
-					if _, ok := customCategories[strings.TrimSpace(category)]; !ok {
-						checks.errs = append(checks.errs, fmt.Errorf("csv.Metadata.Annotations[\"categories\"] value %s is not in the set of custom categories", category))
-					}
-				}
-			}
+	// use custom categories for validation if provided
+	customCategoriesPath := os.Getenv("OPERATOR_BUNDLE_CATEGORIES")
+	if customCategoriesPath != "" {
+		customCategories, err := extractCategories(customCategoriesPath)
+		if err != nil {
+			checks.errs = append(checks.errs, fmt.Errorf("could not extract custom categories from categories %#v: %s", customCategories, err))
 		} else {
-			// use default categories
 			for _, category := range categorySlice {
-				if _, ok := validCategories[strings.TrimSpace(category)]; !ok {
-					checks.errs = append(checks.errs, fmt.Errorf("csv.Metadata.Annotations[\"categories\"] value %s is not in the set of default categories", category))
+				if _, ok := customCategories[strings.TrimSpace(category)]; !ok {
+					checks.errs = append(checks.errs, fmt.Errorf("csv.Metadata.Annotations[\"categories\"] value %s is not in the set of custom categories", category))
 				}
 			}
+		}
+		return checks
+	}
+	// use default categories
+	for _, category := range categorySlice {
+		if _, ok := validCategories[strings.TrimSpace(category)]; !ok {
+			checks.errs = append(checks.errs, fmt.Errorf("csv.Metadata.Annotations[\"categories\"] value %s is not in the set of default categories", category))
 		}
 	}
 	return checks
@@ -298,24 +299,24 @@ func checkAnnotations(checks CSVChecks) CSVChecks {
 
 // checkSpecIcon will validate if the CSV.spec.Icon was informed and is correct
 func checkSpecIcon(checks CSVChecks) CSVChecks {
-	if checks.csv.Spec.Icon != nil {
-		// only one icon is allowed
-		if len(checks.csv.Spec.Icon) != 1 {
-			checks.errs = append(checks.errs, fmt.Errorf("csv.Spec.Icon should only have one element"))
-		}
-
-		icon := checks.csv.Spec.Icon[0]
-		if icon.MediaType == "" || icon.Data == "" {
-			checks.errs = append(checks.errs, fmt.Errorf("csv.Spec.Icon elements should contain both data and mediatype"))
-		}
-
-		if icon.MediaType != "" {
-			if _, ok := validMediatypes[icon.MediaType]; !ok {
-				checks.errs = append(checks.errs, fmt.Errorf("csv.Spec.Icon %s does not have a valid mediatype", icon.MediaType))
-			}
-		}
-	} else {
+	if checks.csv.Spec.Icon == nil {
 		checks.warns = append(checks.warns, fmt.Errorf("csv.Spec.Icon not specified"))
+		return checks
+	}
+	// only one icon is allowed
+	if len(checks.csv.Spec.Icon) != 1 {
+		checks.errs = append(checks.errs, fmt.Errorf("csv.Spec.Icon should only have one element"))
+	}
+
+	icon := checks.csv.Spec.Icon[0]
+	if icon.MediaType == "" || icon.Data == "" {
+		checks.errs = append(checks.errs, fmt.Errorf("csv.Spec.Icon elements should contain both data and mediatype"))
+	}
+
+	if icon.MediaType != "" {
+		if _, ok := validMediatypes[icon.MediaType]; !ok {
+			checks.errs = append(checks.errs, fmt.Errorf("csv.Spec.Icon %s does not have a valid mediatype", icon.MediaType))
+		}
 	}
 	return checks
 }
@@ -371,7 +372,7 @@ func extractCategories(path string) (map[string]struct{}, error) {
 		return nil, fmt.Errorf("finding category file: %w", err)
 	}
 
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("reading category file: %w", err)
 	}

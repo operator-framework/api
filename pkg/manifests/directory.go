@@ -12,7 +12,7 @@ func GetManifestsDir(dir string) (*PackageManifest, []*Bundle, error) {
 	return loader.pkg, loader.bundles, nil
 }
 
-// GetBundleFromDir takes a raw directory containg an Operator Bundle and
+// GetBundleFromDir takes a raw directory containing an Operator Bundle and
 // serializes its component files (CSVs, CRDs, other native kube manifests)
 // and returns it as a Bundle
 func GetBundleFromDir(dir string) (*Bundle, error) {

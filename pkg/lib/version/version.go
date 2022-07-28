@@ -45,9 +45,7 @@ func (v *OperatorVersion) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &versionString); err != nil {
 		return
 	}
-
-	version := semver.Version{}
-	version, err = semver.ParseTolerant(versionString)
+	version, err := semver.ParseTolerant(versionString)
 	if err != nil {
 		return err
 	}
@@ -59,9 +57,9 @@ func (v *OperatorVersion) UnmarshalJSON(data []byte) (err error) {
 // the OpenAPI spec of this type.
 //
 // See: https://github.com/kubernetes/kube-openapi/tree/master/pkg/generators
-func (_ OperatorVersion) OpenAPISchemaType() []string { return []string{"string"} }
+func (OperatorVersion) OpenAPISchemaType() []string { return []string{"string"} }
 
 // OpenAPISchemaFormat is used by the kube-openapi generator when constructing
 // the OpenAPI spec of this type.
 // "semver" is not a standard openapi format but tooling may use the value regardless
-func (_ OperatorVersion) OpenAPISchemaFormat() string { return "semver" }
+func (OperatorVersion) OpenAPISchemaFormat() string { return "semver" }

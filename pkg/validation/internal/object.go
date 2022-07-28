@@ -2,13 +2,14 @@ package internal
 
 import (
 	"encoding/json"
-	"github.com/operator-framework/api/pkg/validation/errors"
-	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 
 	policyv1beta1 "k8s.io/api/policy/v1beta1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	schedulingv1 "k8s.io/api/scheduling/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	"github.com/operator-framework/api/pkg/validation/errors"
+	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 )
 
 var ObjectValidator interfaces.Validator = interfaces.ValidatorFunc(validateObjects)
