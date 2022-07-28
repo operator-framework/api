@@ -35,10 +35,10 @@ install: ## Build & install operator-verify
 ###
 # Code management.
 ###
-.PHONY: format tidy clean generate manifests
+.PHONY: lint tidy clean generate manifests
 
-format: ## Format the source code
-	$(Q)go fmt $(PKGS)
+lint: golangci-lint ## Run golangci-lint linter checks.
+	$(GOLANGCI_LINT) run
 
 tidy: ## Update dependencies
 	$(Q)go mod tidy
@@ -82,7 +82,7 @@ TEST_PKGS:=$(shell go list ./...)
 test-unit: ## Run the unit tests
 	$(Q)go test -count=1 -short ${TEST_PKGS}
 
-verify: manifests generate format
+verify: manifests generate
 	git diff --exit-code
 
 ################
@@ -99,10 +99,12 @@ $(LOCALBIN):
 ## Tool Binaries
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 YQ ?= $(LOCALBIN)/yq
+GOLANGCI_LINT ?= $(LOCALBIN)/golangci-lint
 
 ## Tool Versions
 CONTROLLER_TOOLS_VERSION ?= v0.9.0
 YQ_VERSION ?= latest
+GOLANGCI_LINT_VERSION ?= v1.49.0
 
 .PHONY: controller-gen
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
@@ -113,3 +115,8 @@ $(CONTROLLER_GEN): $(LOCALBIN)
 yq: $(YQ) ## Download yq locally if necessary.
 $(YQ): $(LOCALBIN)
 	GOBIN=$(LOCALBIN) go install $(GO_INSTALL_OPTS) github.com/mikefarah/yq/v3@$(YQ_VERSION)
+
+.PHONY: golangci-lint
+golangci-lint: $(GOLANGCI_LINT)
+$(GOLANGCI_LINT): $(LOCALBIN) ## Download golangci-lint locally if necessary.
+	GOBIN=$(LOCALBIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
