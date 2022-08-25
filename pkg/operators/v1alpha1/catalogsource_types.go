@@ -3,11 +3,12 @@ package v1alpha1
 import (
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"time"
 )
 
 const (
@@ -87,6 +88,11 @@ type CatalogSourceSpec struct {
 	// It is best to keep this list small, since each will need to be tried for every catalog entry.
 	// +optional
 	Secrets []string `json:"secrets,omitempty"`
+
+	// RunAsRoot allows admins to indicate that they wish to run the CatalogSource pod in a privileged
+	// more as root
+	// +optional
+	RunAsRoot bool `json:"runAsRoot,omitempty"`
 
 	// Metadata
 	DisplayName string `json:"displayName,omitempty"`
