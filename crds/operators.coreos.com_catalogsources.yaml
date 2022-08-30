@@ -79,6 +79,9 @@ spec:
                     priorityClassName:
                       description: If specified, indicates the pod's priority. If not specified, the pod priority will be default or zero if there is no default.
                       type: string
+                    runAsRoot:
+                      description: RunAsRoot allows admins to indicate that they wish to run the container inside the CatalogSource pod in a privileged mode as root.  This should only be enabled when running older catalog images which could not be run as non-root.
+                      type: boolean
                     tolerations:
                       description: Tolerations are the catalog source's pod's tolerations.
                       type: array
@@ -120,9 +123,6 @@ spec:
                   type: integer
                 publisher:
                   type: string
-                runAsRoot:
-                  description: RunAsRoot allows admins to indicate that they wish to run the CatalogSource pod in a privileged pod as root.  This should only be enabled when running older catalog images which could not be run as non-root.
-                  type: boolean
                 secrets:
                   description: Secrets represent set of secrets that can be used to access the contents of the catalog. It is best to keep this list small, since each will need to be tried for every catalog entry.
                   type: array

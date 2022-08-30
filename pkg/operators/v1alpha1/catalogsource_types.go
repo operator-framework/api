@@ -3,11 +3,12 @@ package v1alpha1
 import (
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"time"
 )
 
 const (
@@ -88,11 +89,6 @@ type CatalogSourceSpec struct {
 	// +optional
 	Secrets []string `json:"secrets,omitempty"`
 
-	// RunAsRoot allows admins to indicate that they wish to run the CatalogSource pod in a privileged
-	// pod as root.  This should only be enabled when running older catalog images which could not be run as non-root.
-	// +optional
-	RunAsRoot bool `json:"runAsRoot,omitempty"`
-
 	// Metadata
 	DisplayName string `json:"displayName,omitempty"`
 	Description string `json:"description,omitempty"`
@@ -116,6 +112,11 @@ type GrpcPodConfig struct {
 	// default.
 	// +optional
 	PriorityClassName *string `json:"priorityClassName,omitempty"`
+
+	// RunAsRoot allows admins to indicate that they wish to run the container inside the CatalogSource pod in a privileged
+	// mode as root.  This should only be enabled when running older catalog images which could not be run as non-root.
+	// +optional
+	RunAsRoot bool `json:"runAsRoot,omitempty"`
 }
 
 // UpdateStrategy holds all the different types of catalog source update strategies
