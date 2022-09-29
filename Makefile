@@ -42,7 +42,8 @@ format: ## Format the source code
 	$(Q)go fmt $(PKGS)
 
 tidy: ## Update dependencies
-	$(Q)go mod tidy -v
+	$(Q)go mod tidy
+	$(Q)go mod vendor
 	$(Q)go mod verify
 
 clean: ## Clean up the build artifacts
