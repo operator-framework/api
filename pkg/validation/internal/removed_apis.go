@@ -2,12 +2,13 @@ package internal
 
 import (
 	"fmt"
-	"github.com/blang/semver"
+	"sort"
+
+	"github.com/blang/semver/v4"
 	"github.com/operator-framework/api/pkg/manifests"
 	"github.com/operator-framework/api/pkg/validation/errors"
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"sort"
 )
 
 // k8sVersionKey defines the key which can be used by its consumers
