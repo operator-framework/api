@@ -22,7 +22,6 @@ help: ## Show this help screen
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 .PHONY: install
-
 install: ## Build & install operator-verify
 	$(Q)go install \
 		-gcflags "all=-trimpath=${GOPATH}" \
@@ -43,7 +42,6 @@ format: ## Format the source code
 
 tidy: ## Update dependencies
 	$(Q)go mod tidy
-	$(Q)go mod vendor
 	$(Q)go mod verify
 
 clean: ## Clean up the build artifacts
@@ -103,7 +101,8 @@ CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 YQ ?= $(LOCALBIN)/yq
 
 ## Tool Versions
-CONTROLLER_TOOLS_VERSION ?= v0.8.0
+CONTROLLER_TOOLS_VERSION ?= v0.9.0
+YQ_VERSION ?= latest
 
 .PHONY: controller-gen
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
@@ -113,4 +112,4 @@ $(CONTROLLER_GEN): $(LOCALBIN)
 .PHONY: yq
 yq: $(YQ) ## Download yq locally if necessary.
 $(YQ): $(LOCALBIN)
-	GOBIN=$(LOCALBIN) go install $(GO_INSTALL_OPTS) github.com/mikefarah/yq/v3@latest
+	GOBIN=$(LOCALBIN) go install $(GO_INSTALL_OPTS) github.com/mikefarah/yq/v3@$(YQ_VERSION)
