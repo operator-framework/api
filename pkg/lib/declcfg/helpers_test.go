@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/operator-framework/operator-registry/alpha/model"
-	"github.com/operator-framework/operator-registry/alpha/property"
+	"github.com/grokspawn/api/pkg/lib/model"
+	"github.com/grokspawn/api/pkg/lib/property"
 )
 
 func buildValidDeclarativeConfig(includeUnrecognized bool) DeclarativeConfig {

@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/operator-framework/operator-registry/alpha/model"
+	"github.com/grokspawn/api/pkg/lib/model"
 )
 
 func TestConvertFromModel(t *testing.T) {

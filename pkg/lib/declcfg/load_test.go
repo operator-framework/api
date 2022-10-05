@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/util/yaml"
 
-	"github.com/operator-framework/operator-registry/alpha/property"
+	"github.com/grokspawn/api/pkg/lib/property"
 )
 
 func TestLoadReader(t *testing.T) {
