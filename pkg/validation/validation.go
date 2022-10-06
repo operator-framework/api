@@ -9,8 +9,8 @@
 package validation
 
 import (
+	"github.com/grokspawn/api/pkg/validation/internal"
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
-	"github.com/operator-framework/api/pkg/validation/internal"
 )
 
 // PackageManifestValidator implements Validator to validate package manifests.
