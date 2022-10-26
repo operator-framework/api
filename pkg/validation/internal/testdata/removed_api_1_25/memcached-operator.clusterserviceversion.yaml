@@ -27,6 +27,11 @@ spec:
       kind: Memcached
       name: memcacheds.cache.example.com
       version: v1alpha1
+    - description: CronJob
+      displayName: CronJob
+      kind: CronJob
+      name: batch
+      version: v1beta1
   description: Memcached Operator description. TODO.
   displayName: Memcached Operator
   icon:
@@ -94,6 +99,12 @@ spec:
           - subjectaccessreviews
           verbs:
           - create
+        - apiGroups:
+          - batch
+          resources:
+          - cronjobs
+          verbs:
+          - get
         serviceAccountName: memcached-operator-controller-manager
       deployments:
       - name: memcached-operator-controller-manager
