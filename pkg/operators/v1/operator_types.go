@@ -47,6 +47,36 @@ type Components struct {
 	Refs []RichReference `json:"refs,omitempty"`
 }
 
+// Len returns the number of Refs in the component.Refs array
+// Used to implement the interface required by sort.Sort function.
+func (c Components) Len() int {
+	return len(c.Refs)
+}
+
+// Less returns true if argument i should appear in an ordered list
+// of references before argument j.
+// Used to implement the sort.Sort interface.
+func (c Components) Less(i, j int) bool {
+	if c.Refs[i].Kind != c.Refs[j].Kind {
+		return c.Refs[i].Kind < c.Refs[j].Kind
+	}
+
+	if c.Refs[i].APIVersion != c.Refs[j].APIVersion {
+		return c.Refs[i].APIVersion < c.Refs[j].APIVersion
+	}
+
+	if c.Refs[i].Namespace != c.Refs[j].Namespace {
+		return c.Refs[i].Namespace < c.Refs[j].Namespace
+	}
+	return c.Refs[i].Name < c.Refs[j].Name
+}
+
+// Swap swaps the elements with indexes i and j.
+// Used to implement the sort.Sort interface.
+func (c Components) Swap(i, j int) {
+	c.Refs[i], c.Refs[j] = c.Refs[j], c.Refs[i]
+}
+
 // RichReference is a reference to a resource, enriched with its status conditions.
 type RichReference struct {
 	*corev1.ObjectReference `json:",inline"`
