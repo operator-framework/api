@@ -94,6 +94,12 @@ spec:
           - subjectaccessreviews
           verbs:
           - create
+        - apiGroups:
+          - batch
+          resources:
+          - cronjobs
+          verbs:
+          - get
         serviceAccountName: memcached-operator-controller-manager
       deployments:
       - name: memcached-operator-controller-manager
