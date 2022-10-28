@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/blang/semver/v4"
 	"github.com/operator-framework/api/pkg/manifests"
@@ -360,67 +361,67 @@ func getRemovedAPIsOn1_25From(bundle *manifests.Bundle) (map[string][]string, ma
 			case "operators.coreos.com/v1alpha1":
 				// Check a couple CSV fields for references to deprecated APIs
 				if u.GetKind() == "ClusterServiceVersion" {
+					resInCsvCrds := make(map[string]struct{})
 					csv := &v1alpha1.ClusterServiceVersion{}
 					err := runtime.DefaultUnstructuredConverter.FromUnstructured(obj.Object, csv)
 					if err != nil {
 						fmt.Println("failed to convert unstructured.Unstructed to v1alpha1.ClusterServiceVersion:", err)
 					}
 
-					// Loop through all the CRDs and their Owned Resources to see
+					// Loop through all the CRDDescriptions to see
 					// if there is any with an API Version & Kind that is deprecated
-					for i, own := range csv.Spec.CustomResourceDefinitions.Owned {
-						for j, res := range own.Resources {
-							unstruct := &unstructured.Unstructured{
-								Object: map[string]interface{}{
-									"apiVersion": res.Version,
-									"kind":       res.Kind,
-									"metadata": map[string]interface{}{
-										"name": fmt.Sprintf("ClusterServiceVersion.Spec.CustomResourceDefinition.Owned[%d].Resource[%d]", i, j),
+					crdCheck := func(crdsField string, crdDescriptions []v1alpha1.CRDDescription) {
+						for i, desc := range crdDescriptions {
+							for j, res := range desc.Resources {
+								resFromKind := fmt.Sprintf("%ss", strings.ToLower(res.Kind))
+								fmt.Println("XXX resFromKind:", resFromKind)
+								resInCsvCrds[resFromKind] = struct{}{}
+								unstruct := &unstructured.Unstructured{
+									Object: map[string]interface{}{
+										"apiVersion": res.Version,
+										"kind":       res.Kind,
+										"metadata": map[string]interface{}{
+											"name": fmt.Sprintf("ClusterServiceVersion.Spec.CustomResourceDefinitions.%s[%d].Resource[%d]", crdsField, i, j),
+										},
 									},
-								},
+								}
+								addIfDeprecated(unstruct)
 							}
-							addIfDeprecated(unstruct)
 						}
 					}
 
-					// Loop through all the CRDs and their Required Resources to see
-					// if there is any with an API Version & Kind that is deprecated
-					for i, req := range csv.Spec.CustomResourceDefinitions.Required {
-						for j, res := range req.Resources {
-							unstruct := &unstructured.Unstructured{
-								Object: map[string]interface{}{
-									"apiVersion": res.Version,
-									"kind":       res.Kind,
-									"metadata": map[string]interface{}{
-										"name": fmt.Sprintf("ClusterServiceVersion.Spec.CustomResourceDefinition.Required[%d].Resource[%d]", i, j),
-									},
-								},
-							}
-							addIfDeprecated(unstruct)
-						}
-					}
+					// Check the Owned Resources
+					crdCheck("Owned", csv.Spec.CustomResourceDefinitions.Owned)
 
-					// Loop through all the ClusterPermissions defined in the InstallStrategy.
+					// Check the Required Resources
+					crdCheck("Required", csv.Spec.CustomResourceDefinitions.Required)
+
+					fmt.Println("XXX resInCsvCrds:", resInCsvCrds)
+
+					// Loop through all the StrategyDeploymentPermissions to see
 					// if the rbacv1.PolicyRule that is defined specifies a resource that
 					// *may* have a deprecated API then add it to the warnings.
-					for i, cPerm := range csv.Spec.InstallStrategy.StrategySpec.ClusterPermissions {
-						for j, rule := range cPerm.Rules {
-							for _, res := range rule.Resources {
-								warnIfDeprecated(res, fmt.Sprintf("ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.ClusterPermissions[%d].Rules[%d]", i, j))
+					// Only present a warning if the resource was NOT found as a resource
+					// in the ClusterServiceVersion.Spec.CustomResourceDefinitions fields
+					permCheck := func(permField string, perms []v1alpha1.StrategyDeploymentPermissions) {
+						for i, perm := range perms {
+							for j, rule := range perm.Rules {
+								for _, res := range rule.Resources {
+									if _, ok := resInCsvCrds[res]; ok {
+										fmt.Println("XXX resource: ", res, "is in resInCsvCrds map!")
+										continue
+									}
+									warnIfDeprecated(res, fmt.Sprintf("ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.%s[%d].Rules[%d]", permField, i, j))
+								}
 							}
 						}
 					}
 
-					// Loop through all the Permissions defined in the InstallStrategy.
-					// if the rbacv1.PolicyRule that is defined specifies a resource that
-					// *may* have a deprecated API then add it to the warnings.
-					for i, perm := range csv.Spec.InstallStrategy.StrategySpec.Permissions {
-						for j, rule := range perm.Rules {
-							for _, res := range rule.Resources {
-								warnIfDeprecated(res, fmt.Sprintf("ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[%d].Rules[%d]", i, j))
-							}
-						}
-					}
+					// Check the ClusterPermissions
+					permCheck("ClusterPermissions", csv.Spec.InstallStrategy.StrategySpec.ClusterPermissions)
+
+					// Check the Permissions
+					permCheck("Permissions", csv.Spec.InstallStrategy.StrategySpec.Permissions)
 				}
 			default:
 				addIfDeprecated(u)

@@ -27,11 +27,6 @@ spec:
       kind: Memcached
       name: memcacheds.cache.example.com
       version: v1alpha1
-    - description: CronJob
-      displayName: CronJob
-      kind: CronJob
-      name: batch
-      version: v1beta1
   description: Memcached Operator description. TODO.
   displayName: Memcached Operator
   icon:
