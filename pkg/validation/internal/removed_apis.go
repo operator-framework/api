@@ -374,7 +374,6 @@ func getRemovedAPIsOn1_25From(bundle *manifests.Bundle) (map[string][]string, ma
 						for i, desc := range crdDescriptions {
 							for j, res := range desc.Resources {
 								resFromKind := fmt.Sprintf("%ss", strings.ToLower(res.Kind))
-								fmt.Println("XXX resFromKind:", resFromKind)
 								resInCsvCrds[resFromKind] = struct{}{}
 								unstruct := &unstructured.Unstructured{
 									Object: map[string]interface{}{
@@ -396,8 +395,6 @@ func getRemovedAPIsOn1_25From(bundle *manifests.Bundle) (map[string][]string, ma
 					// Check the Required Resources
 					crdCheck("Required", csv.Spec.CustomResourceDefinitions.Required)
 
-					fmt.Println("XXX resInCsvCrds:", resInCsvCrds)
-
 					// Loop through all the StrategyDeploymentPermissions to see
 					// if the rbacv1.PolicyRule that is defined specifies a resource that
 					// *may* have a deprecated API then add it to the warnings.
@@ -408,7 +405,6 @@ func getRemovedAPIsOn1_25From(bundle *manifests.Bundle) (map[string][]string, ma
 							for j, rule := range perm.Rules {
 								for _, res := range rule.Resources {
 									if _, ok := resInCsvCrds[res]; ok {
-										fmt.Println("XXX resource: ", res, "is in resInCsvCrds map!")
 										continue
 									}
 									warnIfDeprecated(res, fmt.Sprintf("ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.%s[%d].Rules[%d]", permField, i, j))
