@@ -94,6 +94,12 @@ spec:
           - subjectaccessreviews
           verbs:
           - create
+        - apiGroups:
+          - batch
+          resources:
+          - cronjobs
+          verbs:
+          - get
         serviceAccountName: memcached-operator-controller-manager
       deployments:
       - name: memcached-operator-controller-manager
@@ -177,9 +183,38 @@ spec:
           - patch
           - delete
         - apiGroups:
-          - ""
+          - events.k8s.io
           resources:
           - events
+          verbs:
+          - create
+          - patch
+        - apiGroups:
+          - discovery.k8s.io
+          resources:
+          - endpointslices
+          verbs:
+          - create
+          - patch
+        - apiGroups:
+          - autoscaling
+          resources:
+          - horizontalpodautoscalers
+          verbs:
+          - create
+          - patch
+        - apiGroups:
+          - policy
+          resources:
+          - poddisruptionbudgets
+          - podsecuritypolicies
+          verbs:
+          - create
+          - patch
+        - apiGroups:
+          - node.k8s.io
+          resources:
+          - runtimeclasses
           verbs:
           - create
           - patch

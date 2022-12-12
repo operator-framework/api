@@ -73,7 +73,12 @@ func Test_GetRemovedAPIsOn1_25From(t *testing.T) {
 
 	warnMock := make(map[string][]string)
 	warnMock["cronjobs"] = []string{"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.ClusterPermissions[0].Rules[7]"}
+	warnMock["endpointslices"] = []string{"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[3]"}
 	warnMock["events"] = []string{"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[2]"}
+	warnMock["horizontalpodautoscalers"] = []string{"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[4]"}
+	warnMock["poddisruptionbudgets"] = []string{"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[5]"}
+	warnMock["podsecuritypolicies"] = []string{"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[5]"}
+	warnMock["runtimeclasses"] = []string{"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[6]"}
 
 	type args struct {
 		bundleDir string
@@ -96,6 +101,14 @@ func Test_GetRemovedAPIsOn1_25From(t *testing.T) {
 			name: "should fail return the removed APIs in 1.25",
 			args: args{
 				bundleDir: "./testdata/removed_api_1_25",
+			},
+			errWant:  mock,
+			warnWant: map[string][]string{},
+		},
+		{
+			name: "should return warnings with all deprecated APIs in 1.25",
+			args: args{
+				bundleDir: "./testdata/deprecated_api_1_25",
 			},
 			errWant:  mock,
 			warnWant: warnMock,
@@ -187,11 +200,7 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.22. " +
 				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
 				"Migrate the API(s) for CRD: ([\"etcdbackups.etcd.database.coreos.com\" " +
-				"\"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])",
-				"this bundle is using APIs which were deprecated and removed in v1.25. " +
-					"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25. " +
-					"Migrate the API(s) for events: " +
-					"([\"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[1]\"])"},
+				"\"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
 		},
 		{
 			name: "should return an error when the k8sVersion is >= 1.22 and has the deprecated API",
@@ -205,11 +214,6 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
 				"Migrate the API(s) for CRD: ([\"etcdbackups.etcd.database.coreos.com\"" +
 				" \"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
-			wantWarning: true,
-			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.25. " +
-				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25. " +
-				"Migrate the API(s) for events: " +
-				"([\"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[1]\"])"},
 		},
 		{
 			name: "should return an error when the k8sVersion is >= 1.25 and found removed APIs on 1.25",
@@ -223,12 +227,6 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25. " +
 				"Migrate the API(s) for HorizontalPodAutoscaler: ([\"memcached-operator-hpa\"])," +
 				"PodDisruptionBudget: ([\"memcached-operator-policy-manager\"]),"},
-			wantWarning: true,
-			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.25. " +
-				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25. " +
-				"Migrate the API(s) for cronjobs: " +
-				"([\"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.ClusterPermissions[0].Rules[7]\"])" +
-				",events: ([\"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[2]\"]),"},
 		},
 		{
 			name: "should return a warning if the k8sVersion is empty and found removed APIs on 1.25",
@@ -241,12 +239,7 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.25. " +
 				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25. " +
 				"Migrate the API(s) for HorizontalPodAutoscaler: ([\"memcached-operator-hpa\"])," +
-				"PodDisruptionBudget: ([\"memcached-operator-policy-manager\"]),",
-				"this bundle is using APIs which were deprecated and removed in v1.25. " +
-					"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25. " +
-					"Migrate the API(s) for cronjobs: " +
-					"([\"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.ClusterPermissions[0].Rules[7]\"])" +
-					",events: ([\"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[2]\"]),"},
+				"PodDisruptionBudget: ([\"memcached-operator-policy-manager\"]),"},
 		},
 		{
 			name: "should return an error when the k8sVersion is >= 1.26 and found removed APIs on 1.26",
@@ -259,11 +252,6 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 			errStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.26. " +
 				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-26. " +
 				"Migrate the API(s) for HorizontalPodAutoscaler: ([\"memcached-operator-hpa\"])"},
-			wantWarning: true,
-			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.25. " +
-				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25. " +
-				"Migrate the API(s) for events: " +
-				"([\"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[2]\"])"},
 		},
 		{
 			name: "should return a warning when the k8sVersion is empty and found removed APIs on 1.26",
@@ -273,13 +261,9 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 				directory:      "./testdata/removed_api_1_26",
 			},
 			wantWarning: true,
-			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.25. " +
-				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25. " +
-				"Migrate the API(s) for events: " +
-				"([\"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[2]\"])",
-				"this bundle is using APIs which were deprecated and removed in v1.26. " +
-					"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-26. " +
-					"Migrate the API(s) for HorizontalPodAutoscaler: ([\"memcached-operator-hpa\"])"},
+			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.26. " +
+				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-26. " +
+				"Migrate the API(s) for HorizontalPodAutoscaler: ([\"memcached-operator-hpa\"])"},
 		},
 		{
 			name: "should return an error when the k8sVersion informed is invalid",
@@ -294,11 +278,7 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.22. " +
 				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
 				"Migrate the API(s) for CRD: ([\"etcdbackups.etcd.database.coreos.com\" " +
-				"\"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])",
-				"this bundle is using APIs which were deprecated and removed in v1.25. " +
-					"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25. " +
-					"Migrate the API(s) for events: " +
-					"([\"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[1]\"])"},
+				"\"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
 		},
 		{
 			name: "should return an error when the csv.spec.minKubeVersion informed is invalid",
@@ -313,11 +293,7 @@ func TestValidateDeprecatedAPIS(t *testing.T) {
 			warnStrings: []string{"this bundle is using APIs which were deprecated and removed in v1.22. " +
 				"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22. " +
 				"Migrate the API(s) for CRD: ([\"etcdbackups.etcd.database.coreos.com\" " +
-				"\"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])",
-				"this bundle is using APIs which were deprecated and removed in v1.25. " +
-					"More info: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25. " +
-					"Migrate the API(s) for events: " +
-					"([\"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[1]\"])"},
+				"\"etcdclusters.etcd.database.coreos.com\" \"etcdrestores.etcd.database.coreos.com\"])"},
 		},
 	}
 	for _, tt := range tests {

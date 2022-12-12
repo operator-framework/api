@@ -12,6 +12,7 @@ import (
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // k8sVersionKey defines the key which can be used by its consumers
@@ -335,23 +336,54 @@ func getRemovedAPIsOn1_25From(bundle *manifests.Bundle) (map[string][]string, ma
 		}
 	}
 
-	warnIfDeprecated := func(res string, msg string) {
-		switch res {
-		case "cronjobs":
-			warnDeprecatedAPIs[res] = append(warnDeprecatedAPIs[res], msg)
-		case "endpointslices":
-			warnDeprecatedAPIs[res] = append(warnDeprecatedAPIs[res], msg)
-		case "events":
-			warnDeprecatedAPIs[res] = append(warnDeprecatedAPIs[res], msg)
-		case "horizontalpodautoscalers":
-			warnDeprecatedAPIs[res] = append(warnDeprecatedAPIs[res], msg)
-		case "poddisruptionbudgets":
-			warnDeprecatedAPIs[res] = append(warnDeprecatedAPIs[res], msg)
-		case "podsecuritypolicies":
-			warnDeprecatedAPIs[res] = append(warnDeprecatedAPIs[res], msg)
-		case "runtimeclasses":
-			warnDeprecatedAPIs[res] = append(warnDeprecatedAPIs[res], msg)
+	warnIfDeprecated := func(gr schema.GroupResource, msg string) {
+		switch gr.Group {
+		case "batch":
+			if gr.Resource == "cronjobs" {
+				warnDeprecatedAPIs[gr.Resource] = append(warnDeprecatedAPIs[gr.Resource], msg)
+			}
+		case "discovery.k8s.io":
+			if gr.Resource == "endpointslices" {
+				warnDeprecatedAPIs[gr.Resource] = append(warnDeprecatedAPIs[gr.Resource], msg)
+			}
+		case "events.k8s.io":
+			if gr.Resource == "events" {
+				warnDeprecatedAPIs[gr.Resource] = append(warnDeprecatedAPIs[gr.Resource], msg)
+			}
+		case "autoscaling":
+			if gr.Resource == "horizontalpodautoscalers" {
+				warnDeprecatedAPIs[gr.Resource] = append(warnDeprecatedAPIs[gr.Resource], msg)
+			}
+		case "policy":
+			if gr.Resource == "poddisruptionbudgets" || gr.Resource == "podsecuritypolicies" {
+				warnDeprecatedAPIs[gr.Resource] = append(warnDeprecatedAPIs[gr.Resource], msg)
+			}
+		case "node.k8s.io":
+			if gr.Resource == "runtimeclasses" {
+				warnDeprecatedAPIs[gr.Resource] = append(warnDeprecatedAPIs[gr.Resource], msg)
+			}
 		}
+	}
+
+	apiGroupHasDeprecation := func(group string) bool {
+		deprecated := false
+
+		switch group {
+		case "batch":
+			deprecated = true
+		case "discovery.k8s.io":
+			deprecated = true
+		case "events.k8s.io":
+			deprecated = true
+		case "autoscaling":
+			deprecated = true
+		case "policy":
+			deprecated = true
+		case "node.k8s.io":
+			deprecated = true
+		}
+
+		return deprecated
 	}
 
 	for _, obj := range bundle.Objects {
@@ -403,11 +435,19 @@ func getRemovedAPIsOn1_25From(bundle *manifests.Bundle) (map[string][]string, ma
 					permCheck := func(permField string, perms []v1alpha1.StrategyDeploymentPermissions) {
 						for i, perm := range perms {
 							for j, rule := range perm.Rules {
-								for _, res := range rule.Resources {
-									if _, ok := resInCsvCrds[res]; ok {
-										continue
+								for _, apiGroup := range rule.APIGroups {
+									// if the API Group being used has a potential deprecation
+									// lets check if it is using a deprecated resource as well
+									if apiGroupHasDeprecation(apiGroup) {
+										// check a combination of apiGroup/resource for all
+										// the resources to see if any match the deprecated apis
+										for _, res := range rule.Resources {
+											if _, ok := resInCsvCrds[res]; ok {
+												continue
+											}
+											warnIfDeprecated(schema.GroupResource{Group: apiGroup, Resource: res}, fmt.Sprintf("ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.%s[%d].Rules[%d]", permField, i, j))
+										}
 									}
-									warnIfDeprecated(res, fmt.Sprintf("ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.%s[%d].Rules[%d]", permField, i, j))
 								}
 							}
 						}
