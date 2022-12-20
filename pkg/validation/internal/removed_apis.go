@@ -307,83 +307,36 @@ func getRemovedAPIsOn1_25From(bundle *manifests.Bundle) (map[string][]string, ma
 	deprecatedAPIs := make(map[string][]string)
 	warnDeprecatedAPIs := make(map[string][]string)
 
+	deprecatedGvk := map[schema.GroupVersionKind]struct{}{
+		{Group: "batch", Version: "v1beta1", Kind: "CronJob"}:                       {},
+		{Group: "discovery.k8s.io", Version: "v1beta1", Kind: "EndpointSlice"}:      {},
+		{Group: "events.k8s.io", Version: "v1beta1", Kind: "Event"}:                 {},
+		{Group: "autoscaling", Version: "v2beta1", Kind: "HorizontalPodAutoscaler"}: {},
+		{Group: "policy", Version: "v1beta1", Kind: "PodDisruptionBudget"}:          {},
+		{Group: "policy", Version: "v1beta1", Kind: "PodSecurityPolicy"}:            {},
+		{Group: "node.k8s.io", Version: "v1beta1", Kind: "RuntimeClass"}:            {},
+	}
+
 	addIfDeprecated := func(u *unstructured.Unstructured) {
-		switch u.GetAPIVersion() {
-		case "batch/v1beta1":
-			if u.GetKind() == "CronJob" {
-				deprecatedAPIs[u.GetKind()] = append(deprecatedAPIs[u.GetKind()], u.GetName())
-			}
-		case "discovery.k8s.io/v1beta1":
-			if u.GetKind() == "EndpointSlice" {
-				deprecatedAPIs[u.GetKind()] = append(deprecatedAPIs[u.GetKind()], u.GetName())
-			}
-		case "events.k8s.io/v1beta1":
-			if u.GetKind() == "Event" {
-				deprecatedAPIs[u.GetKind()] = append(deprecatedAPIs[u.GetKind()], u.GetName())
-			}
-		case "autoscaling/v2beta1":
-			if u.GetKind() == "HorizontalPodAutoscaler" {
-				deprecatedAPIs[u.GetKind()] = append(deprecatedAPIs[u.GetKind()], u.GetName())
-			}
-		case "policy/v1beta1":
-			if u.GetKind() == "PodDisruptionBudget" || u.GetKind() == "PodSecurityPolicy" {
-				deprecatedAPIs[u.GetKind()] = append(deprecatedAPIs[u.GetKind()], u.GetName())
-			}
-		case "node.k8s.io/v1beta1":
-			if u.GetKind() == "RuntimeClass" {
-				deprecatedAPIs[u.GetKind()] = append(deprecatedAPIs[u.GetKind()], u.GetName())
-			}
+		if _, ok := deprecatedGvk[u.GetObjectKind().GroupVersionKind()]; ok {
+			deprecatedAPIs[u.GetKind()] = append(deprecatedAPIs[u.GetKind()], u.GetName())
 		}
+	}
+
+	deprecatedGroupResource := map[schema.GroupResource]struct{}{
+		{Group: "batch", Resource: "cronjobs"}:                       {},
+		{Group: "discovery.k8s.io", Resource: "endpointslices"}:      {},
+		{Group: "events.k8s.io", Resource: "events"}:                 {},
+		{Group: "autoscaling", Resource: "horizontalpodautoscalers"}: {},
+		{Group: "policy", Resource: "poddisruptionbudgets"}:          {},
+		{Group: "policy", Resource: "podsecuritypolicies"}:           {},
+		{Group: "node.k8s.io", Resource: "runtimeclasses"}:           {},
 	}
 
 	warnIfDeprecated := func(gr schema.GroupResource, msg string) {
-		switch gr.Group {
-		case "batch":
-			if gr.Resource == "cronjobs" {
-				warnDeprecatedAPIs[gr.Resource] = append(warnDeprecatedAPIs[gr.Resource], msg)
-			}
-		case "discovery.k8s.io":
-			if gr.Resource == "endpointslices" {
-				warnDeprecatedAPIs[gr.Resource] = append(warnDeprecatedAPIs[gr.Resource], msg)
-			}
-		case "events.k8s.io":
-			if gr.Resource == "events" {
-				warnDeprecatedAPIs[gr.Resource] = append(warnDeprecatedAPIs[gr.Resource], msg)
-			}
-		case "autoscaling":
-			if gr.Resource == "horizontalpodautoscalers" {
-				warnDeprecatedAPIs[gr.Resource] = append(warnDeprecatedAPIs[gr.Resource], msg)
-			}
-		case "policy":
-			if gr.Resource == "poddisruptionbudgets" || gr.Resource == "podsecuritypolicies" {
-				warnDeprecatedAPIs[gr.Resource] = append(warnDeprecatedAPIs[gr.Resource], msg)
-			}
-		case "node.k8s.io":
-			if gr.Resource == "runtimeclasses" {
-				warnDeprecatedAPIs[gr.Resource] = append(warnDeprecatedAPIs[gr.Resource], msg)
-			}
+		if _, ok := deprecatedGroupResource[gr]; ok {
+			warnDeprecatedAPIs[gr.Resource] = append(warnDeprecatedAPIs[gr.Resource], msg)
 		}
-	}
-
-	apiGroupHasDeprecation := func(group string) bool {
-		deprecated := false
-
-		switch group {
-		case "batch":
-			deprecated = true
-		case "discovery.k8s.io":
-			deprecated = true
-		case "events.k8s.io":
-			deprecated = true
-		case "autoscaling":
-			deprecated = true
-		case "policy":
-			deprecated = true
-		case "node.k8s.io":
-			deprecated = true
-		}
-
-		return deprecated
 	}
 
 	for _, obj := range bundle.Objects {
@@ -436,17 +389,11 @@ func getRemovedAPIsOn1_25From(bundle *manifests.Bundle) (map[string][]string, ma
 						for i, perm := range perms {
 							for j, rule := range perm.Rules {
 								for _, apiGroup := range rule.APIGroups {
-									// if the API Group being used has a potential deprecation
-									// lets check if it is using a deprecated resource as well
-									if apiGroupHasDeprecation(apiGroup) {
-										// check a combination of apiGroup/resource for all
-										// the resources to see if any match the deprecated apis
-										for _, res := range rule.Resources {
-											if _, ok := resInCsvCrds[res]; ok {
-												continue
-											}
-											warnIfDeprecated(schema.GroupResource{Group: apiGroup, Resource: res}, fmt.Sprintf("ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.%s[%d].Rules[%d]", permField, i, j))
+									for _, res := range rule.Resources {
+										if _, ok := resInCsvCrds[res]; ok {
+											continue
 										}
+										warnIfDeprecated(schema.GroupResource{Group: apiGroup, Resource: res}, fmt.Sprintf("ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.%s[%d].Rules[%d]", permField, i, j))
 									}
 								}
 							}
