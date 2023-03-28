@@ -119,7 +119,7 @@ spec:
                           resources:
                             type: array
                             items:
-                              description: APIResourceReference is a Kubernetes resource type used by a custom resource
+                              description: APIResourceReference is a reference to a Kubernetes resource type that the referrer utilizes.
                               type: object
                               required:
                                 - kind
@@ -127,10 +127,13 @@ spec:
                                 - version
                               properties:
                                 kind:
+                                  description: Kind of the referenced resource type.
                                   type: string
                                 name:
+                                  description: Plural name of the referenced resource type (CustomResourceDefinition.Spec.Names[].Plural). Empty string if the referenced resource type is not a custom resource.
                                   type: string
                                 version:
+                                  description: API Version of the referenced resource type.
                                   type: string
                           specDescriptors:
                             type: array
@@ -229,7 +232,7 @@ spec:
                           resources:
                             type: array
                             items:
-                              description: APIResourceReference is a Kubernetes resource type used by a custom resource
+                              description: APIResourceReference is a reference to a Kubernetes resource type that the referrer utilizes.
                               type: object
                               required:
                                 - kind
@@ -237,10 +240,13 @@ spec:
                                 - version
                               properties:
                                 kind:
+                                  description: Kind of the referenced resource type.
                                   type: string
                                 name:
+                                  description: Plural name of the referenced resource type (CustomResourceDefinition.Spec.Names[].Plural). Empty string if the referenced resource type is not a custom resource.
                                   type: string
                                 version:
+                                  description: API Version of the referenced resource type.
                                   type: string
                           specDescriptors:
                             type: array
@@ -343,7 +349,7 @@ spec:
                           resources:
                             type: array
                             items:
-                              description: APIResourceReference is a Kubernetes resource type used by a custom resource
+                              description: APIResourceReference is a reference to a Kubernetes resource type that the referrer utilizes.
                               type: object
                               required:
                                 - kind
@@ -351,10 +357,13 @@ spec:
                                 - version
                               properties:
                                 kind:
+                                  description: Kind of the referenced resource type.
                                   type: string
                                 name:
+                                  description: Plural name of the referenced resource type (CustomResourceDefinition.Spec.Names[].Plural). Empty string if the referenced resource type is not a custom resource.
                                   type: string
                                 version:
+                                  description: API Version of the referenced resource type.
                                   type: string
                           specDescriptors:
                             type: array
@@ -445,7 +454,7 @@ spec:
                           resources:
                             type: array
                             items:
-                              description: APIResourceReference is a Kubernetes resource type used by a custom resource
+                              description: APIResourceReference is a reference to a Kubernetes resource type that the referrer utilizes.
                               type: object
                               required:
                                 - kind
@@ -453,10 +462,13 @@ spec:
                                 - version
                               properties:
                                 kind:
+                                  description: Kind of the referenced resource type.
                                   type: string
                                 name:
+                                  description: Plural name of the referenced resource type (CustomResourceDefinition.Spec.Names[].Plural). Empty string if the referenced resource type is not a custom resource.
                                   type: string
                                 version:
+                                  description: API Version of the referenced resource type.
                                   type: string
                           specDescriptors:
                             type: array
@@ -505,10 +517,13 @@ spec:
                           version:
                             type: string
                 description:
+                  description: Description of the operator. Can include the features, limitations or use-cases of the operator.
                   type: string
                 displayName:
+                  description: The name of the operator in display format.
                   type: string
                 icon:
+                  description: The icon for this operator.
                   type: array
                   items:
                     type: object
@@ -4908,6 +4923,7 @@ spec:
                         description: InstallModeType is a supported type of install mode for CSV installation
                         type: string
                 keywords:
+                  description: A list of keywords describing the operator.
                   type: array
                   items:
                     type: string
@@ -4917,6 +4933,7 @@ spec:
                   additionalProperties:
                     type: string
                 links:
+                  description: A list of links related to the operator.
                   type: array
                   items:
                     type: object
@@ -4926,6 +4943,7 @@ spec:
                       url:
                         type: string
                 maintainers:
+                  description: A list of organizational entities maintaining the operator.
                   type: array
                   items:
                     type: object
@@ -4955,6 +4973,7 @@ spec:
                       version:
                         type: string
                 provider:
+                  description: The publishing entity behind the operator.
                   type: object
                   properties:
                     name:
