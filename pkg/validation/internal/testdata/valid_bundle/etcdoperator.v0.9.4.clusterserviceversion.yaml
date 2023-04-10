@@ -192,6 +192,22 @@ spec:
                 name: etcd-operator-alm-owned
               name: etcd-operator-alm-owned
             spec:
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                      - matchExpressions:
+                          - key: kubernetes.io/arch
+                            operator: In
+                            values:
+                              - amd64
+                              - arm64
+                              - ppc64le
+                              - s390x
+                          - key: kubernetes.io/os
+                            operator: In
+                            values:
+                              - linux
               containers:
               - command:
                 - etcd-operator
@@ -205,8 +221,8 @@ spec:
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.name
-                image: quay.io/coreos/etcd-operator@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b
-                name: etcd-operator
+                image: quay.io/coreos/etcd-operator2@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b
+                name: manager
                 resources:
                   limits:
                     cpu: 500m

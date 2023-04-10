@@ -1,11 +1,12 @@
 package internal
 
 import (
+	"reflect"
+	"testing"
+
 	"github.com/operator-framework/api/pkg/manifests"
 	"github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/stretchr/testify/require"
-	"reflect"
-	"testing"
 )
 
 const opm_test_image = "quay.io/operator-framework/opm:latest"
@@ -82,6 +83,9 @@ func Test_ValidateMultiArchFrom(t *testing.T) {
 			}
 
 			results := validateMultiArchWith(tt.args.bundle, "")
+			t.Log(results.Warnings)
+			t.Log(results.Errors)
+
 			require.Equal(t, tt.wantWarning, len(results.Warnings) > 0)
 			if tt.wantWarning {
 				require.Equal(t, len(tt.warnStrings), len(results.Warnings))
@@ -127,8 +131,10 @@ func Test_LoadImagesFromCSV(t *testing.T) {
 			}
 			mb.loadImagesFromCSV()
 			require.Equal(t, len(mb.managerImages), 1)
-			require.Greater(t, len(mb.managerImages["quay.io/coreos/etcd-operator@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b"]), 0)
-			require.Equal(t, 0, len(mb.allOtherImages))
+			require.Equal(t, len(mb.managerImages["quay.io/coreos/etcd-operator2@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b"]), 0)
+			require.Equal(t, 1, len(mb.otherCSVDeploymentImages))
+			require.Equal(t, len(mb.otherCSVDeploymentImages["quay.io/coreos/etcd-operator2@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b"]), 0)
+			require.Equal(t, 0, len(mb.relatedImages))
 		})
 	}
 }
@@ -160,10 +166,12 @@ func Test_LoadImagesFromCSVWithRelatedImage(t *testing.T) {
 				bundle: tt.fields.Bundle,
 			}
 			mb.loadImagesFromCSV()
-			require.Equal(t, 1, len(mb.managerImages))
-			require.Greater(t, len(mb.managerImages["quay.io/coreos/etcd-operator@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b"]), 0)
-			require.Equal(t, 1, len(mb.allOtherImages))
-			require.Greater(t, len(mb.allOtherImages["related-image-test"]), 0)
+			require.Equal(t, len(mb.managerImages), 1)
+			require.Equal(t, len(mb.managerImages["quay.io/coreos/etcd-operator2@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b"]), 0)
+			require.Equal(t, 1, len(mb.otherCSVDeploymentImages))
+			require.Equal(t, len(mb.otherCSVDeploymentImages["quay.io/coreos/etcd-operator2@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b"]), 0)
+			require.Equal(t, 1, len(mb.relatedImages))
+			require.Equal(t, len(mb.relatedImages["related-image-test"]), 0)
 		})
 	}
 }
@@ -317,20 +325,20 @@ func Test_LoadAllPossibleArchSupported(t *testing.T) {
 	}
 }
 
-func Test_LoadAllPossibleSoSupported(t *testing.T) {
+func Test_LoadAllPossibleOsSupported(t *testing.T) {
 	validBundle, _ := manifests.GetBundleFromDir("./testdata/valid_bundle")
-	managerSoLinux := map[string]string{}
-	managerSoLinux["linux"] = "linux"
+	managerOsLinux := map[string]string{}
+	managerOsLinux["linux"] = "linux"
 
 	validBundleWithInfraLabels, _ := manifests.GetBundleFromDir("./testdata/valid_bundle")
-	mockInfraLabelsSo := map[string]string{}
-	mockInfraLabelsSo["operatorframework.io/os.linux"] = "supported"
-	mockInfraLabelsSo["operatorframework.io/os.other"] = "supported"
-	validBundleWithInfraLabels.CSV.Labels = mockInfraLabelsSo
+	mockInfraLabelsOs := map[string]string{}
+	mockInfraLabelsOs["operatorframework.io/os.linux"] = "supported"
+	mockInfraLabelsOs["operatorframework.io/os.other"] = "supported"
+	validBundleWithInfraLabels.CSV.Labels = mockInfraLabelsOs
 
-	managerMultiSo := map[string]string{}
-	managerMultiSo["linux"] = "linux"
-	managerMultiSo["other"] = "other"
+	managerMultiOs := map[string]string{}
+	managerMultiOs["linux"] = "linux"
+	managerMultiOs["other"] = "other"
 
 	type fields struct {
 		bundle *manifests.Bundle
@@ -345,14 +353,14 @@ func Test_LoadAllPossibleSoSupported(t *testing.T) {
 			fields: fields{
 				bundle: validBundle,
 			},
-			want: managerSoLinux,
+			want: managerOsLinux,
 		},
 		{
 			name: "should return the infra labels when informed",
 			fields: fields{
 				bundle: validBundleWithInfraLabels,
 			},
-			want: managerMultiSo,
+			want: managerMultiOs,
 		},
 	}
 	for _, tt := range tests {
@@ -363,10 +371,10 @@ func Test_LoadAllPossibleSoSupported(t *testing.T) {
 
 			data.loadImagesFromCSV()
 			data.loadInfraLabelsFromCSV()
-			data.loadAllPossibleSoSupported()
+			data.loadAllPossibleOsSupported()
 
 			if !reflect.DeepEqual(data.managerOs, tt.want) {
-				t.Errorf("loadAllPossibleSoSupported() got = %v, want %v", data.managerOs, tt.want)
+				t.Errorf("loadAllPossibleOsSupported() got = %v, want %v", data.managerOs, tt.want)
 			}
 		})
 	}
@@ -405,8 +413,8 @@ func Test_multiArchValidator_checkSupportDefined(t *testing.T) {
 				bundle: validBundleWithLabels,
 			},
 			wantError: true,
-			errStrings: []string{"not all images specified are providing the support described via the CSV labels. Note that (SO.architecture): (linux.arm64) was not found for the image(s) [quay.io/coreos/etcd-operator@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b]",
-				"not all images specified are providing the support described via the CSV labels. Note that (SO.architecture): (other.arm64) was not found for the image(s) [quay.io/coreos/etcd-operator@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b]"},
+			errStrings: []string{"not all images specified are providing the support described via the CSV labels. Note that (OS.architecture): (linux.arm64) was not found for the image(s) [quay.io/coreos/etcd-operator2@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b quay.io/coreos/etcd-operator@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b]",
+				"not all images specified are providing the support described via the CSV labels. Note that (OS.architecture): (other.arm64) was not found for the image(s) [quay.io/coreos/etcd-operator2@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b quay.io/coreos/etcd-operator@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b]"},
 		},
 	}
 	for _, tt := range tests {
@@ -420,13 +428,19 @@ func Test_multiArchValidator_checkSupportDefined(t *testing.T) {
 
 			// Mock inspected platform
 			for key, _ := range data.managerImages {
-				data.managerImages[key] = []platform{{"amd64", "linux"}}
+				data.managerImages[key] = []platform{{"linux", "amd64"}}
+			}
+			for key, _ := range data.otherCSVDeploymentImages {
+				data.otherCSVDeploymentImages[key] = []platform{{"linux", "amd64"}}
 			}
 
 			data.loadAllPossibleArchSupported()
-			data.loadAllPossibleSoSupported()
+			data.loadAllPossibleOsSupported()
 
 			data.checkSupportDefined()
+
+			t.Log(data.warns)
+			t.Log(data.errors)
 
 			require.Equal(t, tt.wantWarning, len(data.warns) > 0)
 			if tt.wantWarning {
@@ -475,7 +489,7 @@ func Test_multiArchValidator_checkMissingLabels(t *testing.T) {
 			name: "should raise no error or warning when only supports linux.amd64 (no labels are required)",
 			fields: fields{
 				bundle:             validBundle,
-				supportedPlatforms: []platform{{"amd64", "linux"}},
+				supportedPlatforms: []platform{{"linux", "amd64"}},
 			},
 		},
 		{
@@ -483,10 +497,10 @@ func Test_multiArchValidator_checkMissingLabels(t *testing.T) {
 			fields: fields{
 				bundle: validBundleWithLabels,
 				supportedPlatforms: []platform{
-					{"amd64", "other"},
-					{"arm64", "other"},
-					{"amd64", "linux"},
-					{"arm64", "linux"},
+					{"other", "amd64"},
+					{"other", "arm64"},
+					{"linux", "amd64"},
+					{"linux", "arm64"},
 				},
 			},
 		},
@@ -495,16 +509,16 @@ func Test_multiArchValidator_checkMissingLabels(t *testing.T) {
 			fields: fields{
 				bundle: validBundleWithLabels,
 				supportedPlatforms: []platform{
-					{"amd64", "other"},
-					{"arm64", "other"},
-					{"missing", "other"},
-					{"amd64", "linux"},
-					{"arm64", "linux"},
-					{"missing", "linux"},
+					{"other", "amd64"},
+					{"other", "arm64"},
+					{"other", "missing"},
+					{"linux", "amd64"},
+					{"linux", "arm64"},
+					{"linux", "missing"},
 				},
 			},
 			wantWarning: true,
-			warnStrings: []string{"check if the CSV is missing the label (operatorframework.io/arch.<value>) for the Arch(s): [\"missing\"]. Be aware that your Operator manager image [\"quay.io/coreos/etcd-operator@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b\"] provides this support. Thus, it is very likely that you want to provide it and if you support more than amd64 architectures, you MUST,use the required labels for all which are supported.Otherwise, your solution cannot be listed on the cluster for these architectures"},
+			warnStrings: []string{"check if the CSV is missing the label (operatorframework.io/arch.<value>) for the Arch(s): [\"missing\"]. Be aware that your Operator manager image [\"quay.io/coreos/etcd-operator2@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b\"] provides this support. Thus, it is very likely that you want to provide it and if you support more than amd64 architectures, you MUST,use the required labels for all which are supported.Otherwise, your solution cannot be listed on the cluster for these architectures"},
 		},
 	}
 	for _, tt := range tests {
@@ -522,8 +536,11 @@ func Test_multiArchValidator_checkMissingLabels(t *testing.T) {
 			}
 
 			data.loadAllPossibleArchSupported()
-			data.loadAllPossibleSoSupported()
+			data.loadAllPossibleOsSupported()
 			data.checkMissingLabelsForArchs()
+
+			t.Log(data.warns)
+			t.Log(data.errors)
 
 			require.Equal(t, tt.wantWarning, len(data.warns) > 0)
 			if tt.wantWarning {
@@ -543,5 +560,120 @@ func Test_multiArchValidator_checkMissingLabels(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func Test_multiArchValidator_checkNodeAffinity(t *testing.T) {
+	validBundle, _ := manifests.GetBundleFromDir("./testdata/valid_bundle")
+
+	validBundleMissingNodeAffinity, _ := manifests.GetBundleFromDir("./testdata/valid_bundle")
+	for i := range validBundleMissingNodeAffinity.CSV.Spec.InstallStrategy.StrategySpec.DeploymentSpecs {
+		validBundleMissingNodeAffinity.CSV.Spec.InstallStrategy.StrategySpec.DeploymentSpecs[i].Spec.Template.Spec.Affinity = nil
+	}
+
+	type fields struct {
+		bundle             *manifests.Bundle
+		supportedPlatforms []platform
+	}
+	tests := []struct {
+		name        string
+		fields      fields
+		wantWarning bool
+		wantError   bool
+		warnStrings []string
+		errStrings  []string
+	}{
+		{
+			name: "should raise no error or warning when image data matches node affinity",
+			fields: fields{
+				bundle: validBundle,
+				supportedPlatforms: []platform{
+					{"linux", "amd64"},
+					{"linux", "arm64"},
+					{"linux", "ppc64le"},
+					{"linux", "s390x"},
+				},
+			},
+		},
+		{
+			name: "should raise warning when the node affinity information is missing or invalid",
+			fields: fields{
+				bundle: validBundleMissingNodeAffinity,
+				supportedPlatforms: []platform{
+					{"linux", "amd64"},
+					{"linux", "arm64"},
+					{"linux", "ppc64le"},
+					{"linux", "s390x"},
+				},
+			},
+			wantWarning: true,
+			warnStrings: []string{"check if the CSV has a missing or invalid node affinity configuration for the image: \"quay.io/coreos/etcd-operator2@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b\". The image data suggests the following platforms are supported: [\"linux/amd64\" \"linux/arm64\" \"linux/ppc64le\" \"linux/s390x\"]"},
+		},
+		{
+			name: "should raise a warning if node affinity supports more arches than the image data",
+			fields: fields{
+				bundle: validBundle,
+				supportedPlatforms: []platform{
+					{"linux", "amd64"},
+					{"linux", "arm64"},
+				},
+			},
+			wantWarning: true,
+			warnStrings: []string{"the CSV includes [\"linux/ppc64le\" \"linux/s390x\"] in the node affinity configuration for the image: \"quay.io/coreos/etcd-operator2@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b\", but the image data suggests the following platforms are supported: [\"linux/amd64\" \"linux/arm64\"]"},
+		},
+		{
+			name: "should raise a warning if the image data supports more arches than the node affinity",
+			fields: fields{
+				bundle: validBundle,
+				supportedPlatforms: []platform{
+					{"other", "amd64"},
+					{"other", "arm64"},
+					{"linux", "amd64"},
+					{"linux", "arm64"},
+					{"linux", "ppc64le"},
+					{"linux", "s390x"},
+				},
+			},
+			wantWarning: true,
+			warnStrings: []string{"the image data indicates [\"other/amd64\" \"other/arm64\"] is supported for the image: \"quay.io/coreos/etcd-operator2@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b\", but the node affinity configuration for the image only specifies [\"linux/amd64\" \"linux/arm64\" \"linux/ppc64le\" \"linux/s390x\"]"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			data := &multiArchValidator{
+				bundle: tt.fields.bundle,
+			}
+
+			data.loadImagesFromCSV()
+
+			// Mock inspected platform
+			for key, _ := range data.managerImages {
+				data.managerImages[key] = tt.fields.supportedPlatforms
+			}
+
+			data.checkNodeAffinity(data.managerImages)
+
+			t.Log(data.warns)
+			t.Log(data.errors)
+
+			require.Equal(t, tt.wantWarning, len(data.warns) > 0)
+			if tt.wantWarning {
+				require.Equal(t, len(tt.warnStrings), len(data.warns))
+				for _, w := range data.warns {
+					wString := w.Error()
+					require.Contains(t, tt.warnStrings, wString)
+				}
+			}
+
+			require.Equal(t, tt.wantError, len(data.errors) > 0)
+			if tt.wantError {
+				require.Equal(t, len(tt.errStrings), len(data.errors))
+				for _, w := range data.errors {
+					wString := w.Error()
+					require.Contains(t, tt.errStrings, wString)
+				}
+			}
+		})
+
 	}
 }
