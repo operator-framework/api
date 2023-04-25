@@ -146,6 +146,7 @@ type APIServiceDescription struct {
 }
 
 // APIResourceReference is a reference to a Kubernetes resource type that the referrer utilizes.
+// +k8s:openapi-gen=true
 type APIResourceReference struct {
 	// Plural name of the referenced resource type (CustomResourceDefinition.Spec.Names[].Plural). Empty string if the referenced resource type is not a custom resource.
 	Name string `json:"name"`
