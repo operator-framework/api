@@ -29,7 +29,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
     - name: unit-test
-      run: go test -v ./...
+      run: go test -v ./... -coverprofile cover.out
+    - uses: codecov/codecov-action@v3
+      with:
+        files: cover.out
+        fail_ci_if_error: true
+        functionalities: fixes
 
   go-apidiff:
     name: go-apidiff
