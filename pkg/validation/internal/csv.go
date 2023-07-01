@@ -44,7 +44,7 @@ func validateCSV(csv *v1alpha1.ClusterServiceVersion) errors.ManifestResult {
 	}
 	// validate example annotations ("alm-examples", "olm.examples").
 	result.Add(validateExamplesAnnotations(csv)...)
-	// validate spec
+	// validate installModes
 	result.Add(validateInstallModes(csv)...)
 	// validate min Kubernetes version
 	result.Add(validateMinKubeVersion(*csv)...)
