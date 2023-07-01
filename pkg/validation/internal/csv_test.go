@@ -2,12 +2,12 @@ package internal
 
 import (
 	"fmt"
+	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"io/ioutil"
 	"path/filepath"
 	"testing"
 
 	"github.com/ghodss/yaml"
-	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/api/pkg/validation/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -106,6 +106,16 @@ func TestValidateCSV(t *testing.T) {
 				},
 			},
 			filepath.Join("testdata", "correct.csv.olm.properties.annotation.yaml"),
+		},
+		{
+			validatorFuncTest{
+				description: "should fail when spec.minKubeVersion is not in semantic version format",
+				wantErr:     true,
+				errors: []errors.Error{
+					errors.ErrInvalidCSV(`csv.Spec.MinKubeVersion has an invalid value: 1.21`, "test-operator.v0.0.1"),
+				},
+			},
+			filepath.Join("testdata", "invalid_min_kube_version.csv.yaml"),
 		},
 	}
 
