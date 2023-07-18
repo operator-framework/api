@@ -2,10 +2,11 @@ package internal
 
 import (
 	"fmt"
-	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"io/ioutil"
 	"path/filepath"
 	"testing"
+
+	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 
 	"github.com/ghodss/yaml"
 	"github.com/operator-framework/api/pkg/validation/errors"
