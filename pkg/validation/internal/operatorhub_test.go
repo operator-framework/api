@@ -218,7 +218,7 @@ func TestCheckSpecMinKubeVersion(t *testing.T) {
 	}{
 		{
 			name: "should work with a valid value",
-			args: args{minKubeVersion: "1.16"},
+			args: args{minKubeVersion: "1.16.0"},
 		},
 		{
 			name:        "should return a warning when the minKubeVersion is not informed ",
