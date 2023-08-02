@@ -430,3 +430,68 @@ func helperNewConditions(count int) []ClusterServiceVersionCondition {
 
 	return conditions
 }
+
+func TestIsCopied(t *testing.T) {
+	var testCases = []struct {
+		name     string
+		input    metav1.Object
+		expected bool
+	}{
+		{
+			name:     "no labels or annotations",
+			input:    &metav1.ObjectMeta{},
+			expected: false,
+		},
+		{
+			name: "no labels, has annotations but missing operatorgroup namespace annotation",
+			input: &metav1.ObjectMeta{
+				Annotations: map[string]string{},
+			},
+			expected: false,
+		},
+		{
+			name: "no labels, has operatorgroup namespace annotation matching self",
+			input: &metav1.ObjectMeta{
+				Namespace: "whatever",
+				Annotations: map[string]string{
+					"olm.operatorNamespace": "whatever",
+				},
+			},
+			expected: false,
+		},
+		{
+			name: "no labels, has operatorgroup namespace annotation not matching self",
+			input: &metav1.ObjectMeta{
+				Namespace: "whatever",
+				Annotations: map[string]string{
+					"olm.operatorNamespace": "other",
+				},
+			},
+			expected: true,
+		},
+		{
+			name: "no annotations, labels missing copied key",
+			input: &metav1.ObjectMeta{
+				Labels: map[string]string{},
+			},
+			expected: false,
+		},
+		{
+			name: "no annotations, labels has copied key",
+			input: &metav1.ObjectMeta{
+				Labels: map[string]string{
+					"olm.copiedFrom": "whatever",
+				},
+			},
+			expected: true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if got, expected := IsCopied(testCase.input), testCase.expected; got != expected {
+				t.Errorf("got %v, expected %v", got, expected)
+			}
+		})
+	}
+}
