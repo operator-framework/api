@@ -147,7 +147,6 @@ type GrpcPodConfig struct {
 	// will have the following modifications made to the container running the server:
 	// - the $GOMEMLIMIT environment variable will be set to this value in bytes
 	// - the memory request will be set to this value
-	// - the memory limit will be set to 200% of this value
 	//
 	// This field should be set if it's desired to reduce the footprint of a catalog server as much as possible, or if
 	// a catalog being served is very large and needs more than the default allocation. If your index image has a file-
