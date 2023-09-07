@@ -168,8 +168,8 @@ type GrpcPodConfig struct {
 type ExtractContentConfig struct {
 	// CacheDir is the directory storing the pre-calculated API cache.
 	CacheDir string `json:"cacheDir,omitempty"`
-	// ConfigDir is the directory storing the file-based catalog contents.
-	ConfigDir string `json:"configDir,omitempty	"`
+	// CatalogDir is the directory storing the file-based catalog contents.
+	CatalogDir string `json:"catalogDir,omitempty"`
 }
 
 // UpdateStrategy holds all the different types of catalog source update strategies
