@@ -9,7 +9,7 @@ require (
 	github.com/google/cel-go v0.15.3
 	github.com/sirupsen/logrus v1.9.2
 	github.com/spf13/cobra v1.7.0
-	github.com/stretchr/testify v1.8.3
+	github.com/stretchr/testify v1.8.4
 	google.golang.org/genproto v0.0.0-20230525154841-bd750badd5c6
 	k8s.io/api v0.27.2
 	k8s.io/apiextensions-apiserver v0.27.2
@@ -58,14 +58,14 @@ require (
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stoewer/go-strcase v1.2.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.35.1 // indirect
-	go.opentelemetry.io/otel v1.10.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.44.0 // indirect
+	go.opentelemetry.io/otel v1.18.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.10.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.10.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.10.0 // indirect
-	go.opentelemetry.io/otel/metric v0.31.0 // indirect
+	go.opentelemetry.io/otel/metric v1.18.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.10.0 // indirect
-	go.opentelemetry.io/otel/trace v1.10.0 // indirect
+	go.opentelemetry.io/otel/trace v1.18.0 // indirect
 	go.opentelemetry.io/proto/otlp v0.19.0 // indirect
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
