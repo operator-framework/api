@@ -151,6 +151,7 @@ var validCategories = map[string]struct{}{
 	"Security":                  {},
 	"Storage":                   {},
 	"Streaming & Messaging":     {},
+	"Observability":             {},
 }
 
 const minKubeVersionWarnMessage = "csv.Spec.minKubeVersion is not informed. It is recommended you provide this information. " +
