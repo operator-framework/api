@@ -117,6 +117,9 @@ const (
 
 	// SubscriptionBundleUnpackFailed indicates that the unpack job failed
 	SubscriptionBundleUnpackFailed SubscriptionConditionType = "BundleUnpackFailed"
+
+	// SubscriptionOperatorDeprecated indicates that the Operator currently installed with this Subscription has been deprecated.
+	SubscriptionOperatorDeprecated SubscriptionConditionType = "OperatorDeprecated"
 )
 
 const (
