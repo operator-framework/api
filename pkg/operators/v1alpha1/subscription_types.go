@@ -118,8 +118,18 @@ const (
 	// SubscriptionBundleUnpackFailed indicates that the unpack job failed
 	SubscriptionBundleUnpackFailed SubscriptionConditionType = "BundleUnpackFailed"
 
-	// SubscriptionOperatorDeprecated indicates that the Operator currently installed with this Subscription has been deprecated.
-	SubscriptionOperatorDeprecated SubscriptionConditionType = "OperatorDeprecated"
+	// SubscriptionDeprecated is a roll-up condition which indicates that the Operator currently installed with this Subscription
+	//has been deprecated. It will be present when any of the three deprecation types (Package, Channel, Bundle) are present.
+	SubscriptionDeprecated SubscriptionConditionType = "Deprecated"
+
+	// SubscriptionOperatorDeprecated indicates that the Package currently installed with this Subscription has been deprecated.
+	SubscriptionPackageDeprecated SubscriptionConditionType = "PackageDeprecated"
+
+	// SubscriptionOperatorDeprecated indicates that the Channel used with this Subscription has been deprecated.
+	SubscriptionChannelDeprecated SubscriptionConditionType = "ChannelDeprecated"
+
+	// SubscriptionOperatorDeprecated indicates that the Bundle currently installed with this Subscription has been deprecated.
+	SubscriptionBundleDeprecated SubscriptionConditionType = "BundleDeprecated"
 )
 
 const (
