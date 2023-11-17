@@ -1,10 +1,11 @@
 package internal
 
 import (
-	"github.com/ghodss/yaml"
 	"io/ioutil"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"sigs.k8s.io/yaml"
 )
 
 func TestValidateObject(t *testing.T) {
