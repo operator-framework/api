@@ -8,9 +8,9 @@ import (
 
 	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 
-	"github.com/ghodss/yaml"
 	"github.com/operator-framework/api/pkg/validation/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"sigs.k8s.io/yaml"
 )
 
 func TestValidateCSV(t *testing.T) {

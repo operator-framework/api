@@ -4,7 +4,6 @@ go 1.19
 
 require (
 	github.com/blang/semver/v4 v4.0.0
-	github.com/ghodss/yaml v1.0.0
 	github.com/go-bindata/go-bindata/v3 v3.1.3
 	github.com/google/cel-go v0.15.3
 	github.com/sirupsen/logrus v1.9.2
@@ -16,6 +15,7 @@ require (
 	k8s.io/apimachinery v0.27.7
 	k8s.io/client-go v0.27.7
 	sigs.k8s.io/controller-runtime v0.15.0
+	sigs.k8s.io/yaml v1.3.0
 )
 
 require (
@@ -91,5 +91,4 @@ require (
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.1.2 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
-	sigs.k8s.io/yaml v1.3.0 // indirect
 )
