@@ -90,6 +90,11 @@ type SubscriptionConfig struct {
 	// Use empty object ({}) to erase original sub-attribute values.
 	// +optional
 	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,18,opt,name=affinity"`
+
+	// DeploymentAnnotations is an unstructured key value map stored with a resource that may be
+	// set by external tools to store and retrieve arbitrary metadata.
+	// +optional
+	DeploymentAnnotations map[string]string `json:"deployment_annotations,omitempty" protobuf:"bytes,12,rep,name=deployment_annotations"`
 }
 
 // SubscriptionConditionType indicates an explicit state condition about a Subscription in "abnormal-true"
