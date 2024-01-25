@@ -91,8 +91,9 @@ type SubscriptionConfig struct {
 	// +optional
 	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,18,opt,name=affinity"`
 
-	// DeploymentAnnotations is an unstructured key value map stored with a resource that may be
-	// set by external tools to store and retrieve arbitrary metadata.
+	// DeploymentAnnotations is an unstructured key value map stored with each Deployment in the Operator.
+	// Typically, annotations may be set by external tools to store and retrieve arbitrary metadata.
+	// Use this field to pre-define annotations that OLM should add to each of the Subscription's deployments.
 	// +optional
 	DeploymentAnnotations map[string]string `json:"deploymentAnnotations,omitempty" protobuf:"bytes,12,rep,name=deploymentAnnotations"`
 }
