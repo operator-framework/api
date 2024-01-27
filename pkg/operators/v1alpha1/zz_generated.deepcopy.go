@@ -1429,8 +1429,8 @@ func (in *SubscriptionConfig) DeepCopyInto(out *SubscriptionConfig) {
 		*out = new(v1.Affinity)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.DeploymentAnnotations != nil {
-		in, out := &in.DeploymentAnnotations, &out.DeploymentAnnotations
+	if in.Annotations != nil {
+		in, out := &in.Annotations, &out.Annotations
 		*out = make(map[string]string, len(*in))
 		for key, val := range *in {
 			(*out)[key] = val

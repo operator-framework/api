@@ -91,11 +91,12 @@ type SubscriptionConfig struct {
 	// +optional
 	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,18,opt,name=affinity"`
 
-	// DeploymentAnnotations is an unstructured key value map stored with each Deployment in the Operator.
+	// Annotations is an unstructured key value map stored with each Deployment, Pod, APIService in the Operator.
 	// Typically, annotations may be set by external tools to store and retrieve arbitrary metadata.
-	// Use this field to pre-define annotations that OLM should add to each of the Subscription's deployments.
+	// Use this field to pre-define annotations that OLM should add to each of the Subscription's
+	// deployments, pods, and apiservices.
 	// +optional
-	DeploymentAnnotations map[string]string `json:"deploymentAnnotations,omitempty" protobuf:"bytes,12,rep,name=deploymentAnnotations"`
+	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,12,rep,name=annotations"`
 }
 
 // SubscriptionConditionType indicates an explicit state condition about a Subscription in "abnormal-true"
