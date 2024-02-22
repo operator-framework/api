@@ -30,10 +30,11 @@ jobs:
           ${{ runner.os }}-go-
     - name: unit-test
       run: go test -v ./... -coverprofile cover.out
-    - uses: codecov/codecov-action@v3
+    - uses: codecov/codecov-action@v4
       with:
         files: cover.out
         functionalities: fixes
+        token: ${{ secrets.CODECOV_TOKEN }}
 
   go-apidiff:
     name: go-apidiff
