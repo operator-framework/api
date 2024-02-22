@@ -3,6 +3,9 @@ Api
 
 Contains the API definitions used by [Operator Lifecycle Manager][olm] (OLM) and [Marketplace Operator][marketplace]
 
+## Certificate of Origin
+By contributing to this project you agree to the Developer Certificat of Origin (DCO).  This document was created by the Linux Kernel community and is a simple statement that you, as a contributor, have the legal right to make the contribution.  See the [DCO][DCO] file for details.
+
 ## `pkg/validation`: Operator Manifest Validation
 
 `pkg/validation` exposes a convenient set of interfaces to validate Kubernetes object manifests, primarily for use in an Operator project.
