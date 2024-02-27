@@ -7,6 +7,7 @@ on:
     paths:
       - '**'
   workflow_dispatch:
+  merge_group:
 jobs:
   verify:
     runs-on: ubuntu-latest
