@@ -101,7 +101,7 @@ CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 YQ ?= $(LOCALBIN)/yq
 
 ## Tool Versions
-CONTROLLER_TOOLS_VERSION ?= v0.9.0
+CONTROLLER_TOOLS_VERSION ?= v0.14.0
 YQ_VERSION ?= v4.28.1
 
 .PHONY: controller-gen
