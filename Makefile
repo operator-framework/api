@@ -60,6 +60,8 @@ manifests: yq controller-gen ## Generate manifests e.g. CRD, RBAC etc
 	@# Add missing defaults in embedded core API schemas
 	$(YQ) --inplace '.spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.spec.properties.containers.items.properties.ports.items.properties.protocol.default="TCP"' ./crds/operators.coreos.com_clusterserviceversions.yaml
 	$(Q)$(YQ) --inplace '.spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.spec.properties.initContainers.items.properties.ports.items.properties.protocol.default="TCP"' ./crds/operators.coreos.com_clusterserviceversions.yaml
+	$(YQ) --inplace '.spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.spec.properties.imagePullSecrets.items.properties.name.default=""' ./crds/operators.coreos.com_clusterserviceversions.yaml
+	$(Q)$(YQ) --inplace '.spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.spec.properties.hostAliases.items.properties.ip.default=""' ./crds/operators.coreos.com_clusterserviceversions.yaml
 
 	@# Preserve fields for embedded metadata fields
 	$(Q)$(YQ) --inplace '.spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.install.properties.spec.properties.deployments.items.properties.spec.properties.template.properties.metadata.x-kubernetes-preserve-unknown-fields=true' ./crds/operators.coreos.com_clusterserviceversions.yaml
