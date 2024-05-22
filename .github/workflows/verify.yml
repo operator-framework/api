@@ -20,3 +20,23 @@ jobs:
         run: |
           export GOPATH=$(go env GOPATH)
           make verify
+
+  kind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+      - name: Deploy Kind
+        # Not guaranteed to have patch releases available and node image tags are full versions (i.e v1.28.0 - no v1.28, v1.29, etc.)
+        # The KIND_NODE_VERSION is set by getting the version of the k8s.io/client-go dependency from the go.mod
+        # and sets major version to "1" and the patch version to "0". For example, a client-go version of v0.28.5
+        # will map to a KIND_NODE_VERSION of 1.28.0
+        run: make kind-cluster
+      - name: Apply CRDs
+        run: |
+          set -e
+          for crd in $(ls crds/*.yaml); do
+            kubectl create -f $crd
+          done

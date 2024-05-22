@@ -101,10 +101,18 @@ $(LOCALBIN):
 ## Tool Binaries
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 YQ ?= $(LOCALBIN)/yq
+KIND ?= $(LOCALBIN)/kind
 
 ## Tool Versions
 CONTROLLER_TOOLS_VERSION ?= v0.15.0
 YQ_VERSION ?= v4.28.1
+
+# Not guaranteed to have patch releases available and node image tags are full versions (i.e v1.28.0 - no v1.28, v1.29, etc.)
+# The KIND_NODE_VERSION is set by getting the version of the k8s.io/client-go dependency from the go.mod
+# and sets major version to "1" and the patch version to "0". For example, a client-go version of v0.28.5
+# will map to a KIND_NODE_VERSION of 1.28.0
+KIND_NODE_VERSION := $(shell go list -m k8s.io/client-go | cut -d" " -f2 | sed 's/^v0\.\([[:digit:]]\{1,\}\)\.[[:digit:]]\{1,\}$$/1.\1.0/')
+KIND_CLUSTER_IMAGE := kindest/node:v$(KIND_NODE_VERSION)
 
 .PHONY: controller-gen
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
@@ -115,3 +123,13 @@ $(CONTROLLER_GEN): $(LOCALBIN)
 yq: $(YQ) ## Download yq locally if necessary.
 $(YQ): $(LOCALBIN)
 	GOBIN=$(LOCALBIN) go install $(GO_INSTALL_OPTS) github.com/mikefarah/yq/v4@$(YQ_VERSION)
+
+.PHONY: kind
+kind: $(KIND) ## Download yq locally if necessary.
+$(KIND): $(LOCALBIN)
+	GOBIN=$(LOCALBIN) go install $(GO_INSTALL_OPTS) sigs.k8s.io/kind@latest
+
+.PHONY: kind-cluster
+kind-cluster: kind ## Create a kind cluster
+	$(KIND) create cluster --name olmv0 --image $(KIND_CLUSTER_IMAGE)
+	$(KIND) export kubeconfig --name olmv0
