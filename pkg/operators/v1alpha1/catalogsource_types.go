@@ -196,17 +196,20 @@ func (u *UpdateStrategy) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &us); err != nil {
 		return err
 	}
-	registryPoll := &RegistryPoll{
-		RawInterval: us.RegistryPoll.RawInterval,
+	if us.RegistryPoll != nil && us.RegistryPoll.Interval != nil {
+		registryPoll := &RegistryPoll{
+			RawInterval: us.RegistryPoll.RawInterval,
+		}
+
+		duration, err := time.ParseDuration(registryPoll.RawInterval)
+		if err != nil {
+			registryPoll.ParsingError = fmt.Sprintf("error parsing spec.updateStrategy.registryPoll.interval. Using the default value of %s instead. Error: %s", DefaultRegistryPollDuration, err)
+			registryPoll.Interval = &metav1.Duration{Duration: DefaultRegistryPollDuration}
+		} else {
+			registryPoll.Interval = &metav1.Duration{Duration: duration}
+		}
+		u.RegistryPoll = registryPoll
 	}
-	duration, err := time.ParseDuration(registryPoll.RawInterval)
-	if err != nil {
-		registryPoll.ParsingError = fmt.Sprintf("error parsing spec.updateStrategy.registryPoll.interval. Using the default value of %s instead. Error: %s", DefaultRegistryPollDuration, err)
-		registryPoll.Interval = &metav1.Duration{Duration: DefaultRegistryPollDuration}
-	} else {
-		registryPoll.Interval = &metav1.Duration{Duration: duration}
-	}
-	u.RegistryPoll = registryPoll
 	return nil
 }
 
@@ -313,23 +316,26 @@ func (c *CatalogSource) Update() bool {
 	if !c.Poll() {
 		return false
 	}
-	interval := c.Spec.UpdateStrategy.Interval.Duration
-	latest := c.Status.LatestImageRegistryPoll
-	if latest == nil {
-		logrus.WithField("CatalogSource", c.Name).Debugf("latest poll %v", latest)
-	} else {
-		logrus.WithField("CatalogSource", c.Name).Debugf("latest poll %v", *c.Status.LatestImageRegistryPoll)
-	}
 
-	if c.Status.LatestImageRegistryPoll.IsZero() {
-		logrus.WithField("CatalogSource", c.Name).Debugf("creation timestamp plus interval before now %t", c.CreationTimestamp.Add(interval).Before(time.Now()))
-		if c.CreationTimestamp.Add(interval).Before(time.Now()) {
-			return true
+	if c.Spec.UpdateStrategy != nil && c.Spec.UpdateStrategy.RegistryPoll != nil && c.Spec.UpdateStrategy.Interval != nil {
+		interval := c.Spec.UpdateStrategy.Interval.Duration
+		latest := c.Status.LatestImageRegistryPoll
+		if latest == nil {
+			logrus.WithField("CatalogSource", c.Name).Debugf("latest poll %v", latest)
+		} else {
+			logrus.WithField("CatalogSource", c.Name).Debugf("latest poll %v", *c.Status.LatestImageRegistryPoll)
 		}
-	} else {
-		logrus.WithField("CatalogSource", c.Name).Debugf("latest poll plus interval before now %t", c.Status.LatestImageRegistryPoll.Add(interval).Before(time.Now()))
-		if c.Status.LatestImageRegistryPoll.Add(interval).Before(time.Now()) {
-			return true
+
+		if c.Status.LatestImageRegistryPoll.IsZero() {
+			logrus.WithField("CatalogSource", c.Name).Debugf("creation timestamp plus interval before now %t", c.CreationTimestamp.Add(interval).Before(time.Now()))
+			if c.CreationTimestamp.Add(interval).Before(time.Now()) {
+				return true
+			}
+		} else {
+			logrus.WithField("CatalogSource", c.Name).Debugf("latest poll plus interval before now %t", c.Status.LatestImageRegistryPoll.Add(interval).Before(time.Now()))
+			if c.Status.LatestImageRegistryPoll.Add(interval).Before(time.Now()) {
+				return true
+			}
 		}
 	}
 
@@ -343,6 +349,11 @@ func (c *CatalogSource) Poll() bool {
 	}
 	// if polling interval is zero polling will not be done
 	if c.Spec.UpdateStrategy.RegistryPoll == nil {
+		return false
+	}
+
+	// if polling interval is nil, polling will not be done
+	if c.Spec.UpdateStrategy.RegistryPoll.Interval == nil {
 		return false
 	}
 	// if catalog source is not backed by an image polling will not be done
