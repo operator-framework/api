@@ -317,24 +317,26 @@ func (c *CatalogSource) Update() bool {
 		return false
 	}
 
-	if c.Spec.UpdateStrategy != nil && c.Spec.UpdateStrategy.RegistryPoll != nil && c.Spec.UpdateStrategy.Interval != nil {
-		interval := c.Spec.UpdateStrategy.Interval.Duration
-		latest := c.Status.LatestImageRegistryPoll
-		if latest == nil {
-			logrus.WithField("CatalogSource", c.Name).Debugf("latest poll %v", latest)
-		} else {
-			logrus.WithField("CatalogSource", c.Name).Debugf("latest poll %v", *c.Status.LatestImageRegistryPoll)
-		}
-
-		if c.Status.LatestImageRegistryPoll.IsZero() {
-			logrus.WithField("CatalogSource", c.Name).Debugf("creation timestamp plus interval before now %t", c.CreationTimestamp.Add(interval).Before(time.Now()))
-			if c.CreationTimestamp.Add(interval).Before(time.Now()) {
-				return true
+	if c.Spec.UpdateStrategy != nil && c.Spec.UpdateStrategy.RegistryPoll != nil {
+		if c.Spec.UpdateStrategy.Interval != nil {
+			interval := c.Spec.UpdateStrategy.Interval.Duration
+			latest := c.Status.LatestImageRegistryPoll
+			if latest == nil {
+				logrus.WithField("CatalogSource", c.Name).Debugf("latest poll %v", latest)
+			} else {
+				logrus.WithField("CatalogSource", c.Name).Debugf("latest poll %v", *c.Status.LatestImageRegistryPoll)
 			}
-		} else {
-			logrus.WithField("CatalogSource", c.Name).Debugf("latest poll plus interval before now %t", c.Status.LatestImageRegistryPoll.Add(interval).Before(time.Now()))
-			if c.Status.LatestImageRegistryPoll.Add(interval).Before(time.Now()) {
-				return true
+
+			if c.Status.LatestImageRegistryPoll.IsZero() {
+				logrus.WithField("CatalogSource", c.Name).Debugf("creation timestamp plus interval before now %t", c.CreationTimestamp.Add(interval).Before(time.Now()))
+				if c.CreationTimestamp.Add(interval).Before(time.Now()) {
+					return true
+				}
+			} else {
+				logrus.WithField("CatalogSource", c.Name).Debugf("latest poll plus interval before now %t", c.Status.LatestImageRegistryPoll.Add(interval).Before(time.Now()))
+				if c.Status.LatestImageRegistryPoll.Add(interval).Before(time.Now()) {
+					return true
+				}
 			}
 		}
 	}
