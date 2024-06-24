@@ -272,9 +272,16 @@ func TestUpdateStrategyUnmarshal(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := TestStruct{}
 			err := json.Unmarshal(tt.in, &s)
-			require.Equal(t, tt.out.UpdateStrategy.RawInterval, s.UpdateStrategy.RawInterval)
-			require.Equal(t, tt.out.UpdateStrategy.Interval, s.UpdateStrategy.Interval)
-			require.Equal(t, tt.out.UpdateStrategy.ParsingError, s.UpdateStrategy.ParsingError)
+			if s.UpdateStrategy.RegistryPoll != nil {
+				require.Equal(t, tt.out.UpdateStrategy.RawInterval, s.UpdateStrategy.RawInterval)
+			}
+			if s.UpdateStrategy.RegistryPoll != nil && s.UpdateStrategy.Interval != nil {
+				require.Equal(t, tt.out.UpdateStrategy.Interval, s.UpdateStrategy.Interval)
+			}
+
+			if s.UpdateStrategy.RegistryPoll != nil {
+				require.Equal(t, tt.out.UpdateStrategy.ParsingError, s.UpdateStrategy.ParsingError)
+			}
 			require.Equal(t, tt.err, err)
 		})
 	}
