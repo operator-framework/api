@@ -33,8 +33,8 @@ jobs:
       run: go test -v ./... -coverprofile cover.out
     - uses: codecov/codecov-action@v4
       with:
+        disable_search: true
         files: cover.out
-        functionalities: fixes
         token: ${{ secrets.CODECOV_TOKEN }}
 
   go-apidiff:
