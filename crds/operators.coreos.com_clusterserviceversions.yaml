@@ -667,12 +667,21 @@ spec:
                         deployments:
                           type: array
                           items:
-                            description: StrategyDeploymentSpec contains the name, spec and labels for the deployment ALM should create
+                            description: StrategyDeploymentSpec contains the name, spec, annotations and labels for the deployment ALM should create
                             type: object
                             required:
                               - name
                               - spec
                             properties:
+                              annotations:
+                                description: |-
+                                  Annotations is an unstructured key value map stored with a resource that may
+                                  be set by external tools to store and retrieve arbitrary metadata. They are
+                                  not queryable and should be preserved when modifying objects. More info:
+                                  https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
+                                type: object
+                                additionalProperties:
+                                  type: string
                               label:
                                 description: Set is a map of label:value. It implements Labels.
                                 type: object
