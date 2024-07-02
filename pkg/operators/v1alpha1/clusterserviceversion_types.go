@@ -63,12 +63,13 @@ type StrategyDeploymentPermissions struct {
 	Rules              []rbac.PolicyRule `json:"rules"`
 }
 
-// StrategyDeploymentSpec contains the name, spec and labels for the deployment ALM should create
+// StrategyDeploymentSpec contains the name, spec, annotations and labels for the deployment ALM should create
 // +k8s:openapi-gen=true
 type StrategyDeploymentSpec struct {
-	Name  string                `json:"name"`
-	Spec  appsv1.DeploymentSpec `json:"spec"`
-	Label labels.Set            `json:"label,omitempty"`
+	Name        string                `json:"name"`
+	Spec        appsv1.DeploymentSpec `json:"spec"`
+	Label       labels.Set            `json:"label,omitempty"`
+	Annotations map[string]string     `json:"annotations,omitempty"`
 }
 
 // StrategyDetailsDeployment represents the parsed details of a Deployment
