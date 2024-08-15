@@ -104,7 +104,7 @@ YQ ?= $(LOCALBIN)/yq
 KIND ?= $(LOCALBIN)/kind
 
 ## Tool Versions
-CONTROLLER_TOOLS_VERSION ?= v0.15.0
+CONTROLLER_TOOLS_VERSION ?= v0.16.1
 YQ_VERSION ?= v4.28.1
 
 # Not guaranteed to have patch releases available and node image tags are full versions (i.e v1.28.0 - no v1.28, v1.29, etc.)
