@@ -31,7 +31,7 @@ jobs:
           ${{ runner.os }}-go-
     - name: unit-test
       run: go test -v ./... -coverprofile cover.out
-    - uses: codecov/codecov-action@v4
+    - uses: codecov/codecov-action@v5
       with:
         disable_search: true
         files: cover.out
