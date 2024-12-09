@@ -78,6 +78,9 @@ var GoodPracticesValidator = internal.GoodPracticesValidator
 // information check: https://olm.operatorframework.io/docs/advanced-tasks/ship-operator-supporting-multiarch/
 var MultipleArchitecturesValidator = internal.MultipleArchitecturesValidator
 
+// ImageDeprecateValidator implements Validator to validate Images Deprecated found in the CSV configuration.
+var ImageDeprecateValidator = internal.ImageDeprecateValidator
+
 // AllValidators implements Validator to validate all Operator manifest types.
 var AllValidators = interfaces.Validators{
 	PackageManifestValidator,
@@ -93,6 +96,7 @@ var AllValidators = interfaces.Validators{
 	AlphaDeprecatedAPIsValidator,
 	GoodPracticesValidator,
 	MultipleArchitecturesValidator,
+	ImageDeprecateValidator,
 }
 
 var DefaultBundleValidators = interfaces.Validators{
