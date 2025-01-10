@@ -2,8 +2,6 @@ module github.com/operator-framework/api
 
 go 1.23.0
 
-toolchain go1.23.4
-
 require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/go-bindata/go-bindata/v3 v3.1.3
