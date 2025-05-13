@@ -1,29 +1,17 @@
 # approval == this is a good idea /approve
 approvers:
-  - ecordell
-  - njhale
-  - dinhxuanvu
   - kevinrizza
-  - benluddy
-  - awgreene
   - joelanford
-  - jmrodri
   - perdasilva
   - grokspawn
+
 # review == this code is good /lgtm
 reviewers:
-  - ecordell
-  - njhale
-  - dinhxuanvu
   - kevinrizza
-  - gallettilance
   - anik120
   - exdx
-  - awgreene
   - joelanford
-  - benluddy
   - ankitathomas
-  - jmrodri
   - perdasilva
   - grokspawn
   - oceanc80
