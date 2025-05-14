@@ -2,13 +2,13 @@ package manifests
 
 import (
 	"fmt"
-	"io/ioutil"
+	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"os"
 	"path/filepath"
 	"strings"
 
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apimachinery/pkg/util/yaml"
@@ -180,9 +180,20 @@ func (b *bundleLoader) LoadBundleWalkFunc(path string, f os.FileInfo, err error)
 // loadBundle takes the directory that a CSV is in and assumes the rest of the objects in that directory
 // are part of the bundle.
 func loadBundle(csvName string, dir string) (*Bundle, error) {
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
+	}
+
+	scheme := runtime.NewScheme()
+	if err := apiextensionsv1beta1.AddToScheme(scheme); err != nil {
+		return nil, fmt.Errorf("error loading api extensions v1beta1 scheme: %s", err)
+	}
+	if err := apiextensionsv1.AddToScheme(scheme); err != nil {
+		return nil, fmt.Errorf("error loading api extensions v1 scheme: %s", err)
+	}
+	if err := operatorsv1alpha1.AddToScheme(scheme); err != nil {
+		return nil, fmt.Errorf("error loading operators v1alpha1 scheme: %s", err)
 	}
 
 	var errs []error
@@ -218,39 +229,30 @@ func loadBundle(csvName string, dir string) (*Bundle, error) {
 
 		bundle.Objects = append(bundle.Objects, obj)
 
-		// Reset the reader so we can decode it into a typed object.
-		if err = resetFile(fileReader); err != nil {
-			errs = append(errs, err)
-			continue
-		}
-
 		switch kind := obj.GetKind(); kind {
 		case "ClusterServiceVersion":
 			if bundle.CSV != nil {
 				return nil, fmt.Errorf("invalid bundle: contains multiple CSVs")
 			}
-			csv := operatorsv1alpha1.ClusterServiceVersion{}
-			err := decoder.Decode(&csv)
-			if err != nil {
-				return nil, fmt.Errorf("unable to parse CSV %s: %s", f.Name(), err.Error())
+			csv := &operatorsv1alpha1.ClusterServiceVersion{}
+			if err := scheme.Convert(obj, csv, nil); err != nil {
+				return nil, fmt.Errorf("unable to convert custom resource definition to CRD %s: %v", f.Name(), err)
 			}
-			bundle.CSV = &csv
+			bundle.CSV = csv
 		case "CustomResourceDefinition":
 			version := obj.GetAPIVersion()
 			if version == apiextensionsv1beta1.SchemeGroupVersion.String() {
-				crd := apiextensionsv1beta1.CustomResourceDefinition{}
-				err := decoder.Decode(&crd)
-				if err != nil {
-					return nil, fmt.Errorf("unable to parse CRD %s: %s", f.Name(), err.Error())
+				crd := &apiextensionsv1beta1.CustomResourceDefinition{}
+				if err := scheme.Convert(obj, crd, nil); err != nil {
+					return nil, fmt.Errorf("unable to convert custom resource definition to CRD %s: %v", f.Name(), err)
 				}
-				bundle.V1beta1CRDs = append(bundle.V1beta1CRDs, &crd)
+				bundle.V1beta1CRDs = append(bundle.V1beta1CRDs, crd)
 			} else if version == apiextensionsv1.SchemeGroupVersion.String() {
-				crd := apiextensionsv1.CustomResourceDefinition{}
-				err := decoder.Decode(&crd)
-				if err != nil {
-					return nil, fmt.Errorf("unable to parse CRD %s: %s", f.Name(), err.Error())
+				crd := &apiextensionsv1.CustomResourceDefinition{}
+				if err := scheme.Convert(obj, crd, nil); err != nil {
+					return nil, fmt.Errorf("unable to convert custom resource definition to CRD %s: %v", f.Name(), err)
 				}
-				bundle.V1CRDs = append(bundle.V1CRDs, &crd)
+				bundle.V1CRDs = append(bundle.V1CRDs, crd)
 			} else {
 				return nil, fmt.Errorf("unsupported CRD version %s for %s", version, f.Name())
 			}
