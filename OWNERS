@@ -1,12 +1,15 @@
 # approval == this is a good idea /approve
 approvers:
+  - camilamacedo86
   - kevinrizza
   - joelanford
   - perdasilva
   - grokspawn
+  - tmshort
 
 # review == this code is good /lgtm
 reviewers:
+  - camilamacedo86
   - kevinrizza
   - anik120
   - exdx
@@ -15,3 +18,4 @@ reviewers:
   - perdasilva
   - grokspawn
   - oceanc80
+  - tmshort
