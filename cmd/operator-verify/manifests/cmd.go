@@ -64,10 +64,10 @@ func manifestsFunc(cmd *cobra.Command, args []string) {
 
 	for _, result := range nonEmptyResults {
 		for _, err := range result.Errors {
-			log.Errorf(err.Error())
+			log.Error(err.Error())
 		}
 		for _, err := range result.Warnings {
-			log.Warnf(err.Error())
+			log.Warn(err.Error())
 		}
 	}
 
