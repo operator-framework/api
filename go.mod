@@ -8,7 +8,7 @@ require (
 	github.com/google/cel-go v0.26.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250603155806-513f23925822
 	k8s.io/api v0.33.4
 	k8s.io/apiextensions-apiserver v0.33.4
