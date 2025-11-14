@@ -129,7 +129,7 @@ $(YQ): $(LOCALBIN)
 	GOBIN=$(LOCALBIN) go install $(GO_INSTALL_OPTS) github.com/mikefarah/yq/v4@$(YQ_VERSION)
 
 .PHONY: kind
-kind: $(KIND) ## Download yq locally if necessary.
+kind: $(KIND) ## Download kind locally if necessary.
 $(KIND): $(LOCALBIN)
 	GOBIN=$(LOCALBIN) go install $(GO_INSTALL_OPTS) sigs.k8s.io/kind@latest
 

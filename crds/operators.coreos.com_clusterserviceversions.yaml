@@ -27,6 +27,10 @@ spec:
           jsonPath: .spec.version
           name: Version
           type: string
+        - description: The release version of the CSV
+          jsonPath: .spec.release
+          name: Release
+          type: string
         - description: The name of a CSV that this one replaces
           jsonPath: .spec.replaces
           name: Replaces
@@ -8988,6 +8992,8 @@ spec:
                         type: string
                       name:
                         type: string
+                release:
+                  type: string
                 replaces:
                   description: The name of a CSV this one replaces. Should match the `metadata.Name` field of the old CSV.
                   type: string
