@@ -2,6 +2,7 @@ package release
 
 import (
 	"encoding/json"
+	"slices"
 	"strings"
 
 	semver "github.com/blang/semver/v4"
@@ -11,14 +12,16 @@ import (
 // OperatorRelease is a wrapper around a slice of semver.PRVersion which supports correct
 // marshaling to YAML and JSON.
 // +kubebuilder:validation:Type=string
+// +kubebuilder:validation:MaxLength=20
+// +kubebuilder:validation:XValidation:rule="self.matches('^[0-9A-Za-z-]+(\\\\.[0-9A-Za-z-]+)*$')",message="release version must be composed of dot-separated identifiers containing only alphanumerics and hyphens"
+// +kubebuilder:validation:XValidation:rule="!self.split('.').exists(x, x.matches('^0[0-9]+$'))",message="numeric identifiers in release version must not have leading zeros"
 type OperatorRelease struct {
 	Release []semver.PRVersion `json:"-"`
 }
 
 // DeepCopyInto creates a deep-copy of the Version value.
 func (v *OperatorRelease) DeepCopyInto(out *OperatorRelease) {
-	out.Release = make([]semver.PRVersion, len(v.Release))
-	copy(out.Release, v.Release)
+	out.Release = slices.Clone(v.Release)
 }
 
 // MarshalJSON implements the encoding/json.Marshaler interface.
@@ -60,3 +63,11 @@ func (_ OperatorRelease) OpenAPISchemaType() []string { return []string{"string"
 // the OpenAPI spec of this type.
 // "semver" is not a standard openapi format but tooling may use the value regardless
 func (_ OperatorRelease) OpenAPISchemaFormat() string { return "semver" }
+
+func (r OperatorRelease) String() string {
+	segments := []string{}
+	for _, segment := range r.Release {
+		segments = append(segments, segment.String())
+	}
+	return strings.Join(segments, ".")
+}

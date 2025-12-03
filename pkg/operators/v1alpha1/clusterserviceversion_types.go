@@ -277,6 +277,21 @@ type APIServiceDefinitions struct {
 type ClusterServiceVersionSpec struct {
 	InstallStrategy NamedInstallStrategy    `json:"install"`
 	Version         version.OperatorVersion `json:"version,omitempty"`
+	// release specifies the packaging version of the operator, defaulting to empty
+	// release is optional
+	//
+	// A ClusterServiceVersion's release field is used to distinguish between different builds of the same operator version
+	// This is useful for operators that need to make changes to the CSV which don't affect their functionality,
+	// for example:
+	// - to fix a typo in their description
+	// - to add/amend annotations or labels
+	// - to amend examples or documentation
+	// - to produce different builds for different environments
+	//
+	// It is up to operator authors to determine the semantics of release versions they use
+	// for their operator.  All release versions must conform to the semver prerelease format
+	// (dot-separated identifiers containing only alphanumerics and hyphens) and are limited
+	// to a maximum length of 20 characters.
 	// +optional
 	Release                   release.OperatorRelease   `json:"release,omitzero"`
 	Maturity                  string                    `json:"maturity,omitempty"`
@@ -598,7 +613,7 @@ type ResourceInstance struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Display",type=string,JSONPath=`.spec.displayName`,description="The name of the CSV"
 // +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.spec.version`,description="The version of the CSV"
-// +kubebuilder:printcolumn:name="Release",type=string,JSONPath=`.spec.release`,description="The release version of the CSV"
+// +kubebuilder:printcolumn:name="Release",type=string,JSONPath=`.spec.release`,description="The release of this version of the CSV"
 // +kubebuilder:printcolumn:name="Replaces",type=string,JSONPath=`.spec.replaces`,description="The name of a CSV that this one replaces"
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`
 

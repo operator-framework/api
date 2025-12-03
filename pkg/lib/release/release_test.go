@@ -42,6 +42,32 @@ func TestOperatorReleaseMarshal(t *testing.T) {
 			}},
 			out: []byte(`"20240101.12345"`),
 		},
+		{
+			name: "alphanumeric-segments",
+			in: OperatorRelease{Release: []semver.PRVersion{
+				mustNewPRVersion("alpha"),
+				mustNewPRVersion("beta"),
+				mustNewPRVersion("1"),
+			}},
+			out: []byte(`"alpha.beta.1"`),
+		},
+		{
+			name: "alphanumeric-with-hyphens",
+			in: OperatorRelease{Release: []semver.PRVersion{
+				mustNewPRVersion("rc-1"),
+				mustNewPRVersion("build-123"),
+			}},
+			out: []byte(`"rc-1.build-123"`),
+		},
+		{
+			name: "mixed-alphanumeric",
+			in: OperatorRelease{Release: []semver.PRVersion{
+				mustNewPRVersion("1"),
+				mustNewPRVersion("2-beta"),
+				mustNewPRVersion("x86-64"),
+			}},
+			out: []byte(`"1.2-beta.x86-64"`),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -87,6 +113,32 @@ func TestOperatorReleaseUnmarshal(t *testing.T) {
 			out: TestStruct{Release: OperatorRelease{Release: []semver.PRVersion{
 				mustNewPRVersion("20240101"),
 				mustNewPRVersion("12345"),
+			}}},
+		},
+		{
+			name: "alphanumeric-segments",
+			in:   []byte(`{"r": "alpha.beta.1"}`),
+			out: TestStruct{Release: OperatorRelease{Release: []semver.PRVersion{
+				mustNewPRVersion("alpha"),
+				mustNewPRVersion("beta"),
+				mustNewPRVersion("1"),
+			}}},
+		},
+		{
+			name: "alphanumeric-with-hyphens",
+			in:   []byte(`{"r": "rc-1.build-123"}`),
+			out: TestStruct{Release: OperatorRelease{Release: []semver.PRVersion{
+				mustNewPRVersion("rc-1"),
+				mustNewPRVersion("build-123"),
+			}}},
+		},
+		{
+			name: "mixed-alphanumeric",
+			in:   []byte(`{"r": "1.2-beta.x86-64"}`),
+			out: TestStruct{Release: OperatorRelease{Release: []semver.PRVersion{
+				mustNewPRVersion("1"),
+				mustNewPRVersion("2-beta"),
+				mustNewPRVersion("x86-64"),
 			}}},
 		},
 	}
