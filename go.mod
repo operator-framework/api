@@ -7,7 +7,7 @@ require (
 	github.com/go-bindata/go-bindata/v3 v3.1.3
 	github.com/google/cel-go v0.26.1
 	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20250603155806-513f23925822
 	k8s.io/api v0.34.2
