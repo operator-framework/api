@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -66,7 +66,7 @@ func TestValidateObject(t *testing.T) {
 
 	for _, tt := range table {
 		u := unstructured.Unstructured{}
-		o, err := ioutil.ReadFile(tt.path)
+		o, err := os.ReadFile(tt.path)
 		if err != nil {
 			t.Fatalf("reading yaml object file: %s", err)
 		}
