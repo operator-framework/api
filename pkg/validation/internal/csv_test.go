@@ -68,7 +68,7 @@ func TestValidateCSV(t *testing.T) {
 				description: "csv with name over 63 characters limit",
 				wantErr:     true,
 				errors: []errors.Error{
-					errors.ErrInvalidCSV(`metadata.name "someoperatorwithanextremelylongnamethatmakenosensewhatsoever.v999.999.999" is invalid: must be no more than 63 characters`, "someoperatorwithanextremelylongnamethatmakenosensewhatsoever.v999.999.999"),
+					errors.ErrInvalidCSV(`metadata.name "someoperatorwithanextremelylongnamethatmakenosensewhatsoever.v999.999.999" is invalid: must be no more than 63 bytes`, "someoperatorwithanextremelylongnamethatmakenosensewhatsoever.v999.999.999"),
 				},
 			},
 			filepath.Join("testdata", "badName.csv.yaml"),
