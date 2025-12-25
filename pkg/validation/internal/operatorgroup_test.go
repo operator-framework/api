@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -33,7 +33,7 @@ func TestValidateOperatorGroup(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		b, err := ioutil.ReadFile(c.operatorGroupPath)
+		b, err := os.ReadFile(c.operatorGroupPath)
 		if err != nil {
 			t.Fatalf("Error reading OperatorGroup path %s: %v", c.operatorGroupPath, err)
 		}

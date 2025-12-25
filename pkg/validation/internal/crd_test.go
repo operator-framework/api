@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/operator-framework/api/pkg/validation/errors"
@@ -57,7 +57,7 @@ func TestValidateCRD(t *testing.T) {
 		},
 	}
 	for _, tt := range table {
-		b, err := ioutil.ReadFile(tt.filePath)
+		b, err := os.ReadFile(tt.filePath)
 		if err != nil {
 			t.Fatalf("Error reading CRD path %s: %v", tt.filePath, err)
 		}

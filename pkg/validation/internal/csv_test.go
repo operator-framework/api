@@ -2,7 +2,7 @@ package internal
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -121,7 +121,7 @@ func TestValidateCSV(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		b, err := ioutil.ReadFile(c.csvPath)
+		b, err := os.ReadFile(c.csvPath)
 		if err != nil {
 			t.Fatalf("Error reading CSV path %s: %v", c.csvPath, err)
 		}
