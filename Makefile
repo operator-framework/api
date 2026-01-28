@@ -55,7 +55,7 @@ tidy: ## Update dependencies
 clean: ## Clean up the build artifacts
 	$(Q)rm -rf build
 
-generate: ## Generate code
+generate: $(CONTROLLER_GEN) ## Generate code
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths=./...
 
 manifests: $(CONTROLLER_GEN) $(YQ) ## Generate manifests e.g. CRD, RBAC etc
