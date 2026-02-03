@@ -1,6 +1,6 @@
 module github.com/operator-framework/api
 
-go 1.25.3
+go 1.25.7
 
 require (
 	github.com/blang/semver/v4 v4.0.0
