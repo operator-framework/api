@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/distribution/reference"
 	"github.com/operator-framework/api/pkg/manifests"
 	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/operator-framework/api/pkg/validation/errors"
@@ -46,6 +47,10 @@ func validateBundle(bundle *manifests.Bundle) (result errors.ManifestResult) {
 	if nameErrors != nil {
 		result.Add(nameErrors...)
 	}
+	relatedImagesErrors := validateRelatedImages(bundle)
+	if relatedImagesErrors != nil {
+		result.Add(relatedImagesErrors...)
+	}
 	return result
 }
 
@@ -59,6 +64,30 @@ func validateBundleName(bundle *manifests.Bundle) []errors.Error {
 			errs = append(errs, errors.ErrInvalidBundle(fmt.Sprintf("bundle name with release versioning %q does not match expected name %q", bundle.Name, expectedName), bundle.Name))
 		}
 	}
+	return errs
+}
+
+// validateRelatedImages checks that all relatedImages[].image pullspecs are valid
+// using github.com/distribution/reference.ParseNormalizedNamed
+func validateRelatedImages(bundle *manifests.Bundle) []errors.Error {
+	var errs []errors.Error
+
+	for i, relatedImage := range bundle.CSV.Spec.RelatedImages {
+		if relatedImage.Image == "" {
+			errs = append(errs, errors.ErrInvalidBundle(
+				fmt.Sprintf("relatedImages[%d] has an empty image field", i),
+				fmt.Sprintf("spec.relatedImages[%d].image", i)))
+			continue
+		}
+
+		// Parse and validate the image reference
+		if _, err := reference.ParseNormalizedNamed(relatedImage.Image); err != nil {
+			errs = append(errs, errors.ErrInvalidBundle(
+				fmt.Sprintf("relatedImages[%d] has an invalid image pullspec %q: %v", i, relatedImage.Image, err),
+				fmt.Sprintf("spec.relatedImages[%d].image", i)))
+		}
+	}
+
 	return errs
 }
 
