@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -298,6 +299,155 @@ func Test_EnsureGetBundleSizeValue(t *testing.T) {
 					wString := w.Error()
 					require.Contains(t, tt.warnStrings, wString)
 				}
+			}
+		})
+	}
+}
+
+func TestValidateRelatedImages(t *testing.T) {
+	tests := []struct {
+		name          string
+		relatedImages []v1alpha1.RelatedImage
+		wantError     bool
+		errCount      int
+		errContains   []string
+	}{
+		{
+			name:          "no related images should pass",
+			relatedImages: []v1alpha1.RelatedImage{},
+			wantError:     false,
+		},
+		{
+			name: "valid image with tag should pass",
+			relatedImages: []v1alpha1.RelatedImage{
+				{Name: "operator", Image: "quay.io/operator-framework/my-operator:v1.0.0"},
+			},
+			wantError: false,
+		},
+		{
+			name: "valid image with digest should pass",
+			relatedImages: []v1alpha1.RelatedImage{
+				{Name: "operator", Image: "quay.io/operator-framework/my-operator@sha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234"},
+			},
+			wantError: false,
+		},
+		{
+			name: "valid image with tag and digest should pass",
+			relatedImages: []v1alpha1.RelatedImage{
+				{Name: "operator", Image: "quay.io/operator-framework/my-operator:v1.0.0@sha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234"},
+			},
+			wantError: false,
+		},
+		{
+			name: "valid image without tag (latest implied) should pass",
+			relatedImages: []v1alpha1.RelatedImage{
+				{Name: "operator", Image: "quay.io/operator-framework/my-operator"},
+			},
+			wantError: false,
+		},
+		{
+			name: "multiple valid images should pass",
+			relatedImages: []v1alpha1.RelatedImage{
+				{Name: "operator", Image: "quay.io/operator-framework/my-operator:v1.0.0"},
+				{Name: "operand", Image: "gcr.io/my-project/my-operand@sha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234"},
+				{Name: "init", Image: "docker.io/library/busybox:latest"},
+			},
+			wantError: false,
+		},
+		{
+			name: "empty image field should error",
+			relatedImages: []v1alpha1.RelatedImage{
+				{Name: "operator", Image: ""},
+			},
+			wantError:   true,
+			errCount:    1,
+			errContains: []string{"empty image field"},
+		},
+		{
+			name: "invalid image with spaces should error",
+			relatedImages: []v1alpha1.RelatedImage{
+				{Name: "operator", Image: "invalid image name"},
+			},
+			wantError:   true,
+			errCount:    1,
+			errContains: []string{"invalid image pullspec"},
+		},
+		{
+			name: "invalid image with uppercase should error",
+			relatedImages: []v1alpha1.RelatedImage{
+				{Name: "operator", Image: "quay.io/Operator-Framework/my-operator:v1.0.0"},
+			},
+			wantError:   true,
+			errCount:    1,
+			errContains: []string{"invalid image pullspec", "Operator-Framework"},
+		},
+		{
+			name: "invalid image with special characters should error",
+			relatedImages: []v1alpha1.RelatedImage{
+				{Name: "operator", Image: "quay.io/operator-framework/my-operator:v1.0.0!"},
+			},
+			wantError:   true,
+			errCount:    1,
+			errContains: []string{"invalid image pullspec"},
+		},
+		{
+			name: "invalid digest algorithm should error",
+			relatedImages: []v1alpha1.RelatedImage{
+				{Name: "operator", Image: "quay.io/operator-framework/my-operator@ssha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234"},
+			},
+			wantError:   true,
+			errCount:    1,
+			errContains: []string{"invalid image pullspec"},
+		},
+		{
+			name: "multiple errors should all be reported",
+			relatedImages: []v1alpha1.RelatedImage{
+				{Name: "operator", Image: ""},
+				{Name: "operand", Image: "invalid image"},
+			},
+			wantError:   true,
+			errCount:    2,
+			errContains: []string{"relatedImages[0]", "relatedImages[1]"},
+		},
+		{
+			name: "mixed valid and invalid images should error",
+			relatedImages: []v1alpha1.RelatedImage{
+				{Name: "operator", Image: "quay.io/operator-framework/my-operator:v1.0.0"},
+				{Name: "bad", Image: "invalid image"},
+			},
+			wantError:   true,
+			errCount:    1,
+			errContains: []string{"relatedImages[1]", "invalid image pullspec"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bundle := &manifests.Bundle{
+				CSV: &v1alpha1.ClusterServiceVersion{
+					Spec: v1alpha1.ClusterServiceVersionSpec{
+						RelatedImages: tt.relatedImages,
+					},
+				},
+			}
+
+			errs := validateRelatedImages(bundle)
+
+			if tt.wantError {
+				require.Equal(t, tt.errCount, len(errs), "expected %d errors but got %d", tt.errCount, len(errs))
+				// Check that each expected string appears in at least one error
+				for _, expectedStr := range tt.errContains {
+					found := false
+					for _, err := range errs {
+						if strings.Contains(err.Error(), expectedStr) {
+							found = true
+							break
+						}
+					}
+					require.True(t, found, "expected to find %q in error messages", expectedStr)
+				}
+			} else {
+				require.Equal(t, 0, len(errs), "expected no errors but got: %v", errs)
 			}
 		})
 	}
