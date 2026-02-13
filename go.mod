@@ -14,6 +14,7 @@ require (
 	k8s.io/apiextensions-apiserver v0.35.1
 	k8s.io/apimachinery v0.35.1
 	k8s.io/client-go v0.35.1
+	k8s.io/kube-openapi v0.0.0-20260127142750-a19766b6e2d4
 	sigs.k8s.io/controller-runtime v0.23.1
 	sigs.k8s.io/yaml v1.6.0
 )
@@ -25,6 +26,7 @@ require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/emicklei/go-restful/v3 v3.12.2 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
@@ -89,7 +91,6 @@ require (
 	k8s.io/apiserver v0.35.1 // indirect
 	k8s.io/component-base v0.35.1 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
-	k8s.io/kube-openapi v0.0.0-20260127142750-a19766b6e2d4 // indirect
 	k8s.io/utils v0.0.0-20260108192941-914a6e750570 // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.34.0 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect

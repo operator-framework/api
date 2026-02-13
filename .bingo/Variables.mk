@@ -29,6 +29,12 @@ $(KIND): $(BINGO_DIR)/kind.mod
 	@echo "(re)installing $(GOBIN)/kind-v0.31.0"
 	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=kind.mod -o=$(GOBIN)/kind-v0.31.0 "sigs.k8s.io/kind"
 
+OPENAPI_GEN := $(GOBIN)/openapi-gen-v0.0.0-20260127142750-a19766b6e2d4
+$(OPENAPI_GEN): $(BINGO_DIR)/openapi-gen.mod
+	@# Install binary/ries using Go 1.14+ build command. This is using bwplotka/bingo-controlled, separate go module with pinned dependencies.
+	@echo "(re)installing $(GOBIN)/openapi-gen-v0.0.0-20260127142750-a19766b6e2d4"
+	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=openapi-gen.mod -o=$(GOBIN)/openapi-gen-v0.0.0-20260127142750-a19766b6e2d4 "k8s.io/kube-openapi/cmd/openapi-gen"
+
 YQ := $(GOBIN)/yq-v4.45.1
 $(YQ): $(BINGO_DIR)/yq.mod
 	@# Install binary/ries using Go 1.14+ build command. This is using bwplotka/bingo-controlled, separate go module with pinned dependencies.
