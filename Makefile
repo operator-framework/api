@@ -43,7 +43,7 @@ install: ## Build & install operator-verify
 ###
 # Code management.
 ###
-.PHONY: format tidy clean generate manifests
+.PHONY: format tidy clean generate generate-openapi manifests
 
 format: ## Format the source code
 	$(Q)go fmt $(PKGS)
@@ -55,8 +55,23 @@ tidy: ## Update dependencies
 clean: ## Clean up the build artifacts
 	$(Q)rm -rf build
 
-generate: $(CONTROLLER_GEN) ## Generate code
+generate: $(CONTROLLER_GEN) generate-openapi ## Generate code
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths=./...
+
+generate-openapi: $(OPENAPI_GEN) ## Generate OpenAPIModelName() functions and OpenAPI definitions
+	@# Generate OpenAPIModelName() functions (zz_generated.model_name.go) in each input package.
+	@# Also produces a consolidated OpenAPI definitions file in pkg/generated/openapi/ (required by openapi-gen).
+	@# API rule violations are written to api_violations.report instead of failing the build.
+	@# New violations in api_violations.report will cause `make verify` to fail.
+	$(OPENAPI_GEN) \
+		--go-header-file ./hack/boilerplate.go.txt \
+		--output-file zz_generated.openapi.go \
+		--output-dir ./pkg/generated/openapi \
+		--output-pkg $(REPO)/pkg/generated/openapi \
+		--output-model-name-file zz_generated.model_name.go \
+		--report-filename ./api_violations.report \
+		./pkg/operators/v1alpha1 \
+		./pkg/lib/version
 
 manifests: $(CONTROLLER_GEN) $(YQ) ## Generate manifests e.g. CRD, RBAC etc
 	@# Create CRDs for new APIs
