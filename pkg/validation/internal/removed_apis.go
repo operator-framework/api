@@ -323,7 +323,7 @@ func getRemovedAPIsOn1_25From(bundle *manifests.Bundle) (map[string][]string, ma
 		}
 	}
 
-	// deprecatedGroupResource maps resources that were entirely removed from
+	// removedGroupResource maps resources that were entirely removed from
 	// their API group in v1.25 with no stable replacement in the same group.
 	// RBAC PolicyRules only specify apiGroups and resources (no version), so
 	// we cannot distinguish "batch/v1beta1 CronJob" from "batch/v1 CronJob"
@@ -338,13 +338,13 @@ func getRemovedAPIsOn1_25From(bundle *manifests.Bundle) (map[string][]string, ma
 	//   - node.k8s.io/runtimeclasses -> node.k8s.io/v1 (stable since v1.20)
 	//
 	// See: https://github.com/operator-framework/api/issues/378
-	deprecatedGroupResource := map[schema.GroupResource]struct{}{
+	removedGroupResource := map[schema.GroupResource]struct{}{
 		// PodSecurityPolicy was entirely removed in v1.25 with no in-group replacement.
 		{Group: "policy", Resource: "podsecuritypolicies"}: {},
 	}
 
-	warnIfDeprecated := func(gr schema.GroupResource, msg string) {
-		if _, ok := deprecatedGroupResource[gr]; ok {
+	warnIfRemoved := func(gr schema.GroupResource, msg string) {
+		if _, ok := removedGroupResource[gr]; ok {
 			warnDeprecatedAPIs[gr.Resource] = append(warnDeprecatedAPIs[gr.Resource], msg)
 		}
 	}
@@ -403,7 +403,7 @@ func getRemovedAPIsOn1_25From(bundle *manifests.Bundle) (map[string][]string, ma
 										if _, ok := resInCsvCrds[res]; ok {
 											continue
 										}
-										warnIfDeprecated(schema.GroupResource{Group: apiGroup, Resource: res}, fmt.Sprintf("ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.%s[%d].Rules[%d]", permField, i, j))
+										warnIfRemoved(schema.GroupResource{Group: apiGroup, Resource: res}, fmt.Sprintf("ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.%s[%d].Rules[%d]", permField, i, j))
 									}
 								}
 							}
