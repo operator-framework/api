@@ -71,14 +71,15 @@ func Test_GetRemovedAPIsOn1_25From(t *testing.T) {
 	mock["HorizontalPodAutoscaler"] = []string{"memcached-operator-hpa"}
 	mock["PodDisruptionBudget"] = []string{"memcached-operator-policy-manager"}
 
+	// Only PodSecurityPolicy should produce an RBAC warning because it was
+	// entirely removed in v1.25 with no stable replacement in the same API
+	// group. The other resources (cronjobs, endpointslices, events,
+	// horizontalpodautoscalers, poddisruptionbudgets, runtimeclasses) still
+	// exist under stable versions in their respective groups, so RBAC rules
+	// referencing them are not deprecated.
+	// See: https://github.com/operator-framework/api/issues/378
 	warnMock := make(map[string][]string)
-	warnMock["cronjobs"] = []string{"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.ClusterPermissions[0].Rules[7]"}
-	warnMock["endpointslices"] = []string{"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[3]"}
-	warnMock["events"] = []string{"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[2]"}
-	warnMock["horizontalpodautoscalers"] = []string{"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[4]"}
-	warnMock["poddisruptionbudgets"] = []string{"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[5]"}
 	warnMock["podsecuritypolicies"] = []string{"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[5]"}
-	warnMock["runtimeclasses"] = []string{"ClusterServiceVersion.Spec.InstallStrategy.StrategySpec.Permissions[0].Rules[6]"}
 
 	type args struct {
 		bundleDir string
