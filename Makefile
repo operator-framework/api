@@ -118,11 +118,9 @@ verify: manifests generate format tidy
 
 GO_INSTALL_OPTS ?= "-mod=mod"
 
-# Not guaranteed to have patch releases available and node image tags are full versions (i.e v1.28.0 - no v1.28, v1.29, etc.)
-# The KIND_NODE_VERSION is set by getting the version of the k8s.io/client-go dependency from the go.mod
-# and sets major version to "1" and the patch version to "0". For example, a client-go version of v0.28.5
-# will map to a KIND_NODE_VERSION of 1.28.0
-KIND_NODE_VERSION := $(shell go list -m k8s.io/client-go | cut -d" " -f2 | sed 's/^v0\.\([[:digit:]]\{1,\}\)\.[[:digit:]]\{1,\}$$/1.\1.0/')
+# Determine the latest available kindest/node image for the Kubernetes minor version
+# matching the k8s.io/client-go dependency (e.g., client-go v0.36.1 → kindest/node:v1.36.1)
+KIND_NODE_VERSION := $(shell ./hack/get-kind-node-version.sh)
 KIND_CLUSTER_IMAGE := kindest/node:v$(KIND_NODE_VERSION)
 
 .PHONY: kind-cluster
