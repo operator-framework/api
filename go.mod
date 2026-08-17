@@ -9,7 +9,7 @@ require (
 	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
-	go.podman.io/image/v5 v5.41.0
+	go.podman.io/image/v5 v5.41.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20260526163538-3dc84a4a5aaa
 	k8s.io/api v0.36.3
 	k8s.io/apiextensions-apiserver v0.36.3
