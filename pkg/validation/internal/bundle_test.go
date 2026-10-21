@@ -355,6 +355,20 @@ func TestValidateRelatedImages(t *testing.T) {
 			wantError: false,
 		},
 		{
+			name: "valid Kubernetes labels should pass",
+			relatedImages: []v1alpha1.RelatedImage{
+				{
+					Name:  "operator",
+					Image: "quay.io/operator-framework/my-operator:v1.0.0",
+					Labels: map[string]string{
+						"app.kubernetes.io/name": "my-operator",
+						"feature":                "",
+					},
+				},
+			},
+			wantError: false,
+		},
+		{
 			name: "empty image field should error",
 			relatedImages: []v1alpha1.RelatedImage{
 				{Name: "operator", Image: ""},
@@ -398,6 +412,24 @@ func TestValidateRelatedImages(t *testing.T) {
 			wantError:   true,
 			errCount:    1,
 			errContains: []string{"invalid image pullspec"},
+		},
+		{
+			name: "invalid label key should error",
+			relatedImages: []v1alpha1.RelatedImage{
+				{Name: "operator", Image: "quay.io/operator-framework/my-operator:v1.0.0", Labels: map[string]string{"invalid key": "value"}},
+			},
+			wantError:   true,
+			errCount:    1,
+			errContains: []string{"invalid label key", "invalid key"},
+		},
+		{
+			name: "invalid label value should error",
+			relatedImages: []v1alpha1.RelatedImage{
+				{Name: "operator", Image: "quay.io/operator-framework/my-operator:v1.0.0", Labels: map[string]string{"feature": "invalid value"}},
+			},
+			wantError:   true,
+			errCount:    1,
+			errContains: []string{"invalid label value", "invalid value"},
 		},
 		{
 			name: "multiple errors should all be reported",
