@@ -110,15 +110,15 @@ func validateRelatedImageLabels(relatedImageIndex int, labels map[string]string)
 	for _, key := range keys {
 		path := fmt.Sprintf("spec.relatedImages[%d].labels[%q]", relatedImageIndex, key)
 		if messages := content.IsLabelKey(key); len(messages) > 0 {
-			errs = append(errs, errors.ErrInvalidBundle(
+			errs = append(errs, errors.NewError(errors.ErrorInvalidBundle,
 				fmt.Sprintf("relatedImages[%d] has an invalid label key %q: %s", relatedImageIndex, key, strings.Join(messages, ", ")),
-				path))
+				path, key))
 		}
 
 		if messages := content.IsLabelValue(labels[key]); len(messages) > 0 {
-			errs = append(errs, errors.ErrInvalidBundle(
+			errs = append(errs, errors.NewError(errors.ErrorInvalidBundle,
 				fmt.Sprintf("relatedImages[%d] has an invalid label value %q for key %q: %s", relatedImageIndex, labels[key], key, strings.Join(messages, ", ")),
-				path))
+				path, labels[key]))
 		}
 	}
 
