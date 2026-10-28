@@ -29,11 +29,11 @@ $(CONTROLLER_GEN): $(BINGO_DIR)/controller-gen.mod
 	@echo "(re)installing $(GOBIN)/controller-gen-v0.20.0"
 	@cd $(BINGO_DIR) && GOWORK=off GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) GOARM=$(GOHOSTARM) $(GO) build -mod=mod -modfile=controller-gen.mod -o=$(GOBIN)/controller-gen-v0.20.0 "sigs.k8s.io/controller-tools/cmd/controller-gen"
 
-KIND := $(GOBIN)/kind-v0.32.0
+KIND := $(GOBIN)/kind-v0.33.0
 $(KIND): $(BINGO_DIR)/kind.mod
 	@# Install binary/ries using Go 1.14+ build command. This is using bwplotka/bingo-controlled, separate go module with pinned dependencies.
-	@echo "(re)installing $(GOBIN)/kind-v0.32.0"
-	@cd $(BINGO_DIR) && GOWORK=off GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) GOARM=$(GOHOSTARM) $(GO) build -mod=mod -modfile=kind.mod -o=$(GOBIN)/kind-v0.32.0 "sigs.k8s.io/kind"
+	@echo "(re)installing $(GOBIN)/kind-v0.33.0"
+	@cd $(BINGO_DIR) && GOWORK=off GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) GOARM=$(GOHOSTARM) $(GO) build -mod=mod -modfile=kind.mod -o=$(GOBIN)/kind-v0.33.0 "sigs.k8s.io/kind"
 
 OPENAPI_GEN := $(GOBIN)/openapi-gen-v0.0.0-20260127142750-a19766b6e2d4
 $(OPENAPI_GEN): $(BINGO_DIR)/openapi-gen.mod
