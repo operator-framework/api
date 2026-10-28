@@ -119,7 +119,7 @@ verify: manifests generate format tidy
 GO_INSTALL_OPTS ?= "-mod=mod"
 
 # Determine the latest available kindest/node image for the Kubernetes minor version
-# matching the k8s.io/client-go dependency (e.g., client-go v0.36.1 → kindest/node:v1.36.1)
+# matching the k8s.io/client-go dependency (e.g., client-go v0.37.1 → kindest/node:v1.37.0)
 KIND_NODE_VERSION := $(shell ./hack/get-kind-node-version.sh)
 KIND_CLUSTER_IMAGE := kindest/node:v$(KIND_NODE_VERSION)
 
