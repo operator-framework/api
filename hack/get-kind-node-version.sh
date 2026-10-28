@@ -5,7 +5,7 @@ set -euo pipefail
 # Determines the latest available kindest/node image tag for the Kubernetes
 # minor version that matches the k8s.io/client-go dependency in go.mod.
 #
-# client-go v0.36.1 → look for kindest/node:v1.36.* → print "1.36.1"
+# client-go v0.37.1 → look for kindest/node:v1.37.* → print "1.37.0"
 
 MINOR=$(go list -m k8s.io/client-go | cut -d" " -f2 | sed 's/^v0\.\([0-9]\{1,\}\)\.[0-9]\{1,\}$/\1/')
 
