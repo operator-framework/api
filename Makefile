@@ -20,8 +20,8 @@ SPECIFIC_SKIP_UNIT_TEST := $(if $(SKIP),-skip $(SKIP),)
 # Bingo manages the remaining binary dependencies independently of the main module.
 include .bingo/Variables.mk
 
-# Build controller-gen from the version pinned by go.mod.
-CONTROLLER_GEN := go tool controller-gen
+# Build controller-gen from the version pinned by go.mod for the host platform.
+CONTROLLER_GEN := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) GOARM=$(GOHOSTARM) go tool controller-gen
 
 .PHONY: help
 help: ## Show this help screen
