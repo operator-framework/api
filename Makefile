@@ -17,9 +17,11 @@ SPECIFIC_SKIP_UNIT_TEST := $(if $(SKIP),-skip $(SKIP),)
 
 .DEFAULT_GOAL := help
 
-# bingo manages consistent tooling versions for binary dependencies in a way 
-# which isn't sensitive to user environments
+# Bingo manages the remaining binary dependencies independently of the main module.
 include .bingo/Variables.mk
+
+# Build controller-gen from the version pinned by go.mod for the host platform.
+CONTROLLER_GEN := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) GOARM=$(GOHOSTARM) go tool controller-gen
 
 .PHONY: help
 help: ## Show this help screen
@@ -55,7 +57,7 @@ tidy: ## Update dependencies
 clean: ## Clean up the build artifacts
 	$(Q)rm -rf build
 
-generate: $(CONTROLLER_GEN) generate-openapi ## Generate code
+generate: generate-openapi ## Generate code
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths=./...
 
 generate-openapi: $(OPENAPI_GEN) ## Generate OpenAPIModelName() functions and OpenAPI definitions
@@ -73,7 +75,7 @@ generate-openapi: $(OPENAPI_GEN) ## Generate OpenAPIModelName() functions and Op
 		./pkg/operators/v1alpha1 \
 		./pkg/lib/version
 
-manifests: $(CONTROLLER_GEN) $(YQ) ## Generate manifests e.g. CRD, RBAC etc
+manifests: $(YQ) ## Generate manifests e.g. CRD, RBAC etc
 	@# Create CRDs for new APIs
 	$(CONTROLLER_GEN) crd:crdVersions=v1 output:crd:dir=./crds paths=./pkg/operators/...
 
