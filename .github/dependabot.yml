@@ -16,3 +16,15 @@ updates:
       golang-x-deps:
         patterns:
           - "golang.org/x/*"
+  - package-ecosystem: "gomod"
+    directory: "/tools/openapi"
+    schedule:
+      interval: "weekly"
+    groups:
+      k8s-dependencies:
+        patterns:
+          - "k8s.io/*"
+          - "sigs.k8s.io/*"
+      golang-x-deps:
+        patterns:
+          - "golang.org/x/*"
