@@ -283,7 +283,7 @@ make format tidy         # Format and tidy code
 ```
 
 ### Tool Management
-Tools are managed via Makefile and installed to `./bin/`:
+Tools are pinned in `go.mod` and run via `go tool` from the Makefile:
 - `controller-gen` - Kubernetes code generator
 - `yq` - YAML processor for CRD patching
 - `kind` - Local Kubernetes clusters
