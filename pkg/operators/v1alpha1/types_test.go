@@ -211,6 +211,66 @@ func TestCatalogSource_Poll(t *testing.T) {
 	}
 }
 
+func TestRelatedImageLabelsRoundTrip(t *testing.T) {
+	tests := []struct {
+		name string
+		in   []byte
+		out  RelatedImage
+	}{
+		{
+			name: "no labels",
+			in:   []byte(`{"name":"operator","image":"quay.io/example-com/foo-operator@sha256:abc"}`),
+			out: RelatedImage{
+				Name:  "operator",
+				Image: "quay.io/example-com/foo-operator@sha256:abc",
+			},
+		},
+		{
+			name: "empty labels",
+			in:   []byte(`{"name":"operator","image":"quay.io/example-com/foo-operator@sha256:abc","labels":{}}`),
+			out: RelatedImage{
+				Name:   "operator",
+				Image:  "quay.io/example-com/foo-operator@sha256:abc",
+				Labels: map[string]string{},
+			},
+		},
+		{
+			name: "several labels",
+			in:   []byte(`{"name":"operator","image":"quay.io/example-com/foo-operator@sha256:abc","labels":{"CoolFeatureA":"true","GreatFeatureB":"true"}}`),
+			out: RelatedImage{
+				Name:  "operator",
+				Image: "quay.io/example-com/foo-operator@sha256:abc",
+				Labels: map[string]string{
+					"CoolFeatureA":  "true",
+					"GreatFeatureB": "true",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ri := RelatedImage{}
+			require.NoError(t, json.Unmarshal(tt.in, &ri))
+			require.Equal(t, tt.out, ri)
+
+			marshalled, err := json.Marshal(ri)
+			require.NoError(t, err)
+			// labels is omitempty: an empty map is not serialized back.
+			if len(tt.out.Labels) > 0 {
+				require.JSONEq(t, string(tt.in), string(marshalled))
+			}
+
+			// DeepCopy must not alias the labels of the original.
+			cp := ri.DeepCopy()
+			require.Equal(t, ri, *cp)
+			if cp.Labels != nil {
+				cp.Labels["added-by-the-copy"] = "true"
+				require.Equal(t, tt.out.Labels, ri.Labels)
+			}
+		})
+	}
+}
+
 func TestUpdateStrategyUnmarshal(t *testing.T) {
 	type TestStruct struct {
 		UpdateStrategy UpdateStrategy `json:"updateStrategy,omitempty"`

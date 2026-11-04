@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/operator-framework/api/pkg/manifests"
@@ -10,6 +11,7 @@ import (
 	interfaces "github.com/operator-framework/api/pkg/validation/interfaces"
 	"go.podman.io/image/v5/docker/reference"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/validate/content"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -85,6 +87,38 @@ func validateRelatedImages(bundle *manifests.Bundle) []errors.Error {
 			errs = append(errs, errors.ErrInvalidBundle(
 				fmt.Sprintf("relatedImages[%d] has an invalid image pullspec %q: %v", i, relatedImage.Image, err),
 				fmt.Sprintf("spec.relatedImages[%d].image", i)))
+		}
+
+		errs = append(errs, validateRelatedImageLabels(i, relatedImage.Labels)...)
+	}
+
+	return errs
+}
+
+// validateRelatedImageLabels checks that related image labels conform to the
+// Kubernetes label syntax.
+func validateRelatedImageLabels(relatedImageIndex int, labels map[string]string) []errors.Error {
+	var errs []errors.Error
+
+	keys := make([]string, 0, len(labels))
+	for key := range labels {
+		keys = append(keys, key)
+	}
+	// Sort keys to produce stable validation errors.
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		path := fmt.Sprintf("spec.relatedImages[%d].labels[%q]", relatedImageIndex, key)
+		if messages := content.IsLabelKey(key); len(messages) > 0 {
+			errs = append(errs, errors.NewError(errors.ErrorInvalidBundle,
+				fmt.Sprintf("relatedImages[%d] has an invalid label key %q: %s", relatedImageIndex, key, strings.Join(messages, ", ")),
+				path, key))
+		}
+
+		if messages := content.IsLabelValue(labels[key]); len(messages) > 0 {
+			errs = append(errs, errors.NewError(errors.ErrorInvalidBundle,
+				fmt.Sprintf("relatedImages[%d] has an invalid label value %q for key %q: %s", relatedImageIndex, labels[key], key, strings.Join(messages, ", ")),
+				path, labels[key]))
 		}
 	}
 
