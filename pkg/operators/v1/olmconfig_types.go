@@ -25,6 +25,12 @@ type Features struct {
 	// When reenabled, OLM will recreate the "Copied CSVs" for each
 	// cluster scoped operator.
 	DisableCopiedCSVs *bool `json:"disableCopiedCSVs,omitempty"`
+	// RoleAggregation configures OLM's automatic aggregation of access
+	// to provided APIs into the default user-facing admin, edit and
+	// view ClusterRoles. When unset, aggregation is enabled for every
+	// provided API (the legacy behavior).
+	// +optional
+	RoleAggregation *OLMConfigRoleAggregation `json:"roleAggregation,omitempty"`
 	// PackageServerSyncInterval is used to define the sync interval for
 	// packagerserver pods. Packageserver pods periodically check the
 	// status of CatalogSources; this specifies the period using duration
@@ -35,6 +41,34 @@ type Features struct {
 	// +kubebuilder:validation:Type=string
 	// +kubebuilder:validation:Pattern="^([0-9]+(\\.[0-9]+)?(s|m|h))+$"
 	PackageServerSyncInterval *metav1.Duration `json:"packageServerSyncInterval,omitempty"`
+}
+
+// OLMConfigRoleAggregation configures OLM's automatic aggregation of access
+// to provided APIs into the default user-facing admin, edit and view
+// ClusterRoles.
+type OLMConfigRoleAggregation struct {
+	// Disable is used to disable OLM's automatic role aggregation
+	// of access to provided APIs into the default
+	// user-facing admin, edit and view ClusterRoles, except for the
+	// APIs listed in enableAPIs. When true, the generated
+	// ClusterRoles for provided APIs are maintained without
+	// the aggregation labels, so the aggregated roles drop their rules;
+	// when unset or false, the labels are restored.
+	// +optional
+	Disable *bool `json:"disable,omitempty"`
+
+	// EnableAPIs lists the provided APIs that remain aggregated into
+	// the default user-facing admin, edit and view ClusterRoles while
+	// role aggregation is otherwise disabled by disable: aggregation is
+	// performed only for provided APIs matching one of the entries
+	// (group, version and kind must all match; entries for other
+	// versions of the same kind do not match). Provided APIs that do
+	// not match are still granted their generated ClusterRoles, but
+	// without the aggregation labels. May only be set when disable is
+	// true.
+	// +optional
+	// +kubebuilder:validation:XValidation:rule="!has(self) || self.size() == 0 || (has(root.spec.features.roleAggregation.disable) && root.spec.features.roleAggregation.disable)",message="enableAPIs may only be set when disable is true"
+	EnableAPIs []metav1.GroupVersionKind `json:"enableAPIs,omitempty"`
 }
 
 // OLMConfigStatus is the status for an OLMConfig resource.
